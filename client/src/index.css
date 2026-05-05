@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 * {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 @keyframes fadeInUp {
@@ -29,11 +29,14 @@
   opacity: 0;
 }
 
-
-
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
 .animate-float {
@@ -49,14 +52,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #EEF2FF;
+  background: #eef2ff;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #818CF8;
+  background: #818cf8;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4338CA;
+  background: #4338ca;
 }

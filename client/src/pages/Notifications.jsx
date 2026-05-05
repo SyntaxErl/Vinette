@@ -1,3 +1,3 @@
 export default function TaskCard() {
-  return <div>TaskCard</div>
+  return <div>Notifications</div>
 }
