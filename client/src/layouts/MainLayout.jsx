@@ -8,7 +8,7 @@ export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen bg-white" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="flex h-[100dvh] bg-white" style={{ fontFamily: 'Inter, sans-serif' }}>
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
