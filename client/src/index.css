@@ -60,3 +60,11 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #4338CA;
 }
+
+body {
+  background-color: #f3e8ff;
+}
+
+input {
+  font-size: 16px;
+}
