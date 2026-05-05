@@ -45,7 +45,7 @@ export default function Login() {
         {/* Logo */}
         <div className="flex items-center gap-2 relative z-10">
           <img
-            src="/src/assets/images/logo.png"
+            src="/logo.png"
             alt="Logo"
             className="w-8 h-8 rounded-lg object-contain"
           />
@@ -55,7 +55,7 @@ export default function Login() {
         {/* Hero Image */}
         <div className="flex relative z-10 animate-fadeInUp">
           <img
-            src="/src/assets/images/login.png"
+            src="/login.png"
             alt="TaskFlow"
             className="w-130 object-contain"
           />
@@ -100,7 +100,7 @@ export default function Login() {
         {/* Mobile logo */}
         <div className="fixed top-4 left-4 flex items-center gap-2 md:hidden z-50">
           <img
-            src="/src/assets/images/logo.png"
+            src="/logo.png"
             alt="Logo"
             className="w-8 h-8 rounded-lg object-contain"
           />

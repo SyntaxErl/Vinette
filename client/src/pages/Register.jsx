@@ -81,7 +81,7 @@ export default function Register() {
         {/* Logo */}
         <div className="flex items-center gap-2">
            <img
-            src="/src/assets/images/logo.png"
+            src="/logo.png"
             alt="Logo"
             className="w-8 h-8 rounded-lg object-contain"
           />
@@ -91,7 +91,7 @@ export default function Register() {
         {/* Hero Image */}
         <div className="flex animate-fadeInUp">
           <img
-            src="/src/assets/images/register.png"
+            src="/register.png"
             alt="TaskFlow"
             className="w-130 object-contain"
           />

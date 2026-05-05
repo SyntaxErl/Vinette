@@ -70,7 +70,7 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <img
-              src="/src/assets/images/logo.png"
+              src="/logo.png"
               alt="Logo"
               className="w-8 h-8 rounded-lg object-contain"
             />
