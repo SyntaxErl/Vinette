@@ -158,7 +158,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400"
+                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400"
                 />
               </div>
             </div>
@@ -176,7 +176,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400 w-full"
+                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400 w-full"
                 />
                 <button
                   type="button"

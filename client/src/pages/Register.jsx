@@ -178,7 +178,7 @@ export default function Register() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400"
+                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400"
                 />
               </div>
             </div>
@@ -197,7 +197,7 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400"
+                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400"
                 />
               </div>
             </div>
@@ -216,7 +216,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400 w-full"
+                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400 w-full"
                 />
                 <button
                   type="button"
@@ -269,7 +269,7 @@ export default function Register() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400 w-full"
+                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400 w-full"
                 />
                 <button
                   type="button"
