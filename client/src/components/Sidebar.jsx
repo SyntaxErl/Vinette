@@ -52,7 +52,7 @@ export default function Sidebar({ isOpen, onClose }) {
       {isOpen && (
         <div
           className="fixed inset-0 z-20 md:hidden"
-          style={{ backgroundColor: "transparent" }}
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.25)" }}
           onClick={onClose}
         />
       )}
