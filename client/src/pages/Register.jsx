@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import useAuthStore from '../store/authStore'
+import logo from '../assets/images/logo.png'
 import registerImg from '../assets/images/register.png'
 
 export default function Register() {
@@ -79,6 +80,15 @@ export default function Register() {
         <div className="absolute bottom-40 left-6 w-14 h-14 rounded-full opacity-20 animate-float-delay bg-violet-600" />
         <div className="absolute top-1/2 right-6 w-6 h-6 rounded-full opacity-25 animate-float bg-indigo-600" />
 
+        {/* Logo */}
+        <div className="flex items-center gap-2">
+           <img
+            src={logo}
+            alt="Logo"
+            className="w-8 h-8 rounded-lg object-contain"
+          />
+          <span className="font-bold text-lg" style={{ color: '#5b4fcf' }}>TaskFlow</span>
+        </div>
 
         {/* Hero Image */}
         <div className="flex animate-fadeInUp">
@@ -178,7 +188,7 @@ export default function Register() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400"
+                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400"
                 />
               </div>
             </div>
@@ -197,7 +207,7 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400"
+                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400"
                 />
               </div>
             </div>
@@ -216,7 +226,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400 w-full"
+                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400 w-full"
                 />
                 <button
                   type="button"
@@ -269,7 +279,7 @@ export default function Register() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="flex-1 outline-none text-base text-gray-700 bg-transparent placeholder-gray-400 w-full"
+                  className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400 w-full"
                 />
                 <button
                   type="button"
