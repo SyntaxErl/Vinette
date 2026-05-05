@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import useAuthStore from '../store/authStore'
-import logo from '../assets/images/logo.png'
 import registerImg from '../assets/images/register.png'
 
 export default function Register() {
@@ -80,15 +79,6 @@ export default function Register() {
         <div className="absolute bottom-40 left-6 w-14 h-14 rounded-full opacity-20 animate-float-delay bg-violet-600" />
         <div className="absolute top-1/2 right-6 w-6 h-6 rounded-full opacity-25 animate-float bg-indigo-600" />
 
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-           <img
-            src={logo}
-            alt="Logo"
-            className="w-full h-8 rounded-lg object-contain"
-          />
-          <span className="font-bold text-lg" style={{ color: '#5b4fcf' }}>TaskFlow</span>
-        </div>
 
         {/* Hero Image */}
         <div className="flex animate-fadeInUp">
