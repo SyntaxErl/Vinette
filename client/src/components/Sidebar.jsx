@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import useAuthStore from "../store/authStore";
+import logo from '../assets/images/logo.png'
 import api from "../api/axios";
 
 const navItems = [
@@ -70,7 +71,7 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <img
-              src="/logo.png"
+              src={logo}
               alt="Logo"
               className="w-8 h-8 rounded-lg object-contain"
             />

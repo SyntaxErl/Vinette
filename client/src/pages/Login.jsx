@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import useAuthStore from '../store/authStore'
+import logo from '../assets/images/logo.png'
+import loginImg from '../assets/images/login.png'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -45,7 +47,7 @@ export default function Login() {
         {/* Logo */}
         <div className="flex items-center gap-2 relative z-10">
           <img
-            src="/logo.png"
+            src={logo}
             alt="Logo"
             className="w-8 h-8 rounded-lg object-contain"
           />
@@ -55,7 +57,7 @@ export default function Login() {
         {/* Hero Image */}
         <div className="flex relative z-10 animate-fadeInUp">
           <img
-            src="/login.png"
+            src={loginImg}
             alt="TaskFlow"
             className="w-130 object-contain"
           />

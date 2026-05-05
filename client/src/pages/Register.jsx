@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import useAuthStore from '../store/authStore'
+import logo from '../assets/images/logo.png'
+import registerImg from '../assets/images/register.png'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -81,7 +83,7 @@ export default function Register() {
         {/* Logo */}
         <div className="flex items-center gap-2">
            <img
-            src="/logo.png"
+            src={logo}
             alt="Logo"
             className="w-8 h-8 rounded-lg object-contain"
           />
@@ -91,7 +93,7 @@ export default function Register() {
         {/* Hero Image */}
         <div className="flex animate-fadeInUp">
           <img
-            src="/register.png"
+            src={registerImg}
             alt="TaskFlow"
             className="w-130 object-contain"
           />
