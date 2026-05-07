@@ -68,7 +68,7 @@ export default function Navbar({ onMenuClick }) {
   return (
     <header
       key={location.pathname}
-      className="bg-white border-b border-gray-100 shadow-sm animate-fadeIn "
+      className="bg-white border-b border-gray-100 shadow-sm animate-fadeIn relative z-50"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
       {/* ── Main row ── */}
