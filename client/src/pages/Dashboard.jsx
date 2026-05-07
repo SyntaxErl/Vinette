@@ -86,7 +86,7 @@ export default function Dashboard() {
       return true;
     }) || [];
   return (
-    <div className="p-6" style={{ fontFamily: "Inter, sans-serif" }}>
+    <div className="max-w-7xl mx-auto w-full px-1 sm:px-6 lg:px-8" style={{ fontFamily: "Inter, sans-serif" }}>
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 animate-fadeInUp">
         {/* Total Tasks */}
