@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import useAuthStore from "../store/authStore";
-import logo from '../assets/images/logo.png'
+import logo from "../assets/images/logo.png";
 import api from "../api/axios";
 
 const navItems = [
@@ -59,12 +59,15 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <div
-className={`
-  fixed md:static inset-y-0 left-0 z-30
-  flex flex-col h-[100dvh] w-64 border-r border-gray-100 bg-white
-  transform transition-transform duration-300 ease-in-out z-[60]
-  ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-`}
+        className={`
+    fixed md:static inset-y-0 left-0
+    flex flex-col h-[100dvh] w-64 bg-white
+    border-r border-gray-100
+    transform transition-transform duration-300 ease-in-out
+    shadow-xl md:shadow-none
+    z-[60] md:z-auto
+    ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+  `}
         style={{ fontFamily: "Inter, sans-serif" }}
       >
         {/* Logo */}
