@@ -303,7 +303,7 @@ export default function MyTasks() {
   // ── JSX ───────────────────────────────────────────────────────────────────
   return (
     <div style={{ fontFamily: "Inter, sans-serif" }}>
-      <div className="max-w-7xl mx-auto w-full space-y-4 px-1 sm:px-6 py-4 animate-fadeInUp">
+      <div className="max-w-7xl mx-auto w-full space-y-4 px-1 sm:px-6 py-4">
 
         {/* ── Toolbar ── */}
         {(() => {
@@ -335,11 +335,11 @@ export default function MyTasks() {
           ];
 
           return (
-            <div className="bg-gray-50 rounded-2xl px-4 py-3">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3">
               <div className="flex items-center gap-2 flex-wrap">
 
                 {/* Search */}
-                <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 bg-white flex-1 min-w-[180px]"
+                <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 bg-gray-50/50 flex-1 min-w-[180px]"
                   style={{ maxWidth: "320px" }}>
                   <span className="material-icons text-gray-400" style={{ fontSize: "16px" }}>search</span>
                   <input type="text" placeholder="Search tasks..." value={search}
@@ -646,7 +646,7 @@ export default function MyTasks() {
         )}
 
         {/* ── CARD VIEW — mobile + tablet + small desktop (below xl / 1280px) ── */}
-        <div className="xl:hidden space-y-3">
+        <div className="min-[1400px]:hidden space-y-3">
 
           {/* Select All bar */}
           {tasks.length > 0 && !loading && (
@@ -710,13 +710,21 @@ export default function MyTasks() {
                     {getStatusLabel(task.status)}
                   </span>
                 </div>
-                {task.due_date && (
-                  <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-gray-100">
-                    <span className="material-icons" style={{ fontSize: "14px", color: daysLeft?.color || "#9ca3af" }}>calendar_today</span>
-                    <span className="text-xs text-gray-500">{formatDate(task.due_date)}</span>
-                    {daysLeft && <span className="text-xs font-medium" style={{ color: daysLeft.color }}>· {daysLeft.label}</span>}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  {task.due_date ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-icons" style={{ fontSize: "14px", color: daysLeft?.color || "#9ca3af" }}>calendar_today</span>
+                      <span className="text-xs text-gray-500">{formatDate(task.due_date)}</span>
+                      {daysLeft && <span className="text-xs font-medium" style={{ color: daysLeft.color }}>· {daysLeft.label}</span>}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-300">No due date</span>
+                  )}
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
+                    <span className="material-icons" style={{ fontSize: "12px" }}>schedule</span>
+                    {formatDate(task.created_at)}
                   </div>
-                )}
+                </div>
               </div>
             );
           })}
@@ -729,11 +737,11 @@ export default function MyTasks() {
         </div>
 
         {/* ── TABLE VIEW — large desktop only (xl+) ── */}
-        <div className="hidden xl:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="hidden min-[1400px]:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div>
             {/* Header */}
             <div className="grid items-center px-5 py-3 border-b border-gray-100 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide gap-3"
-              style={{ gridTemplateColumns: "40px minmax(200px,1fr) 120px 120px 160px 130px 40px" }}>
+              style={{ gridTemplateColumns: "40px minmax(200px,1fr) 120px 120px 160px 130px 110px 40px" }}>
               <div>
                 <input type="checkbox" checked={allSelected} onChange={toggleAll}
                   className="w-4 h-4 rounded accent-purple-600 cursor-pointer" />
@@ -749,6 +757,7 @@ export default function MyTasks() {
                 </span>
               </div>
               <div>Status</div>
+              <div>Created On</div>
               <div className="flex justify-center">
                 <span className="material-icons text-gray-400" style={{ fontSize: "18px" }}>settings</span>
               </div>
@@ -774,7 +783,7 @@ export default function MyTasks() {
               return (
                 <div key={task.id}
                   className={`grid items-center px-5 py-3.5 border-b border-gray-50 transition cursor-pointer gap-3 ${isSelected ? "bg-purple-50/50" : "hover:bg-gray-50"}`}
-                  style={{ gridTemplateColumns: "40px minmax(200px,1fr) 120px 120px 160px 130px 40px" }}>
+                  style={{ gridTemplateColumns: "40px minmax(200px,1fr) 120px 120px 160px 130px 110px 40px" }}>
                   <div>
                     <input type="checkbox" checked={isSelected} onChange={() => toggleOne(task.id)}
                       className="w-4 h-4 rounded accent-purple-600 cursor-pointer" />
@@ -806,6 +815,9 @@ export default function MyTasks() {
                     <span className="text-xs px-3 py-1 rounded-lg font-medium border" style={{ backgroundColor: statusStyle.bg, color: statusStyle.text, borderColor: statusStyle.border }}>
                       {getStatusLabel(task.status)}
                     </span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">{formatDate(task.created_at)}</p>
                   </div>
                   <div className="flex justify-center">
                     <button onClick={(e) => openDropdown(e, task.id)}
