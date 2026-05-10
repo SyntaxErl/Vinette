@@ -43,8 +43,26 @@ const getTasks = async (req, res) => {
 
     // 4. Determine Sort Order
     let orderBy = "ORDER BY created_at DESC";
-    if (sort === "due_date") orderBy = "ORDER BY due_date ASC";
-    if (sort === "priority") orderBy = "ORDER BY priority DESC";
+
+    if (sort === "due_earliest") {
+      orderBy = "ORDER BY due_date IS NULL, due_date ASC";
+    }
+
+    if (sort === "due_latest") {
+      orderBy = "ORDER BY due_date IS NULL, due_date DESC";
+    }
+
+    if (sort === "priority") {
+      orderBy = `
+    ORDER BY 
+      CASE 
+        WHEN priority = 'high' THEN 3
+        WHEN priority = 'medium' THEN 2
+        WHEN priority = 'low' THEN 1
+        ELSE 0
+      END DESC
+  `;
+    }
 
     // 5. Execute main query with pagination
     const [tasks] = await db.query(
