@@ -1,5 +1,5 @@
-import TaskDropdown from './TaskDropdown'
-import { getCategoryColor, getPriorityColor, getStatusStyle, getStatusLabel, formatDate, getDaysLeft } from '../../utils/taskHelpers'
+import TaskDropdown from '@/components/tasks/TaskDropdown'
+import { getCategoryColor, getPriorityColor, getStatusStyle, getStatusLabel, formatDate, getDaysLeft } from '@/utils/taskHelpers'
 
 const COL = '40px minmax(200px,1fr) 120px 120px 160px 130px 110px 40px'
 

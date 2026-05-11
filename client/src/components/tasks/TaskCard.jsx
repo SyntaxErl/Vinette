@@ -1,5 +1,5 @@
-import TaskDropdown from './TaskDropdown'
-import { getCategoryColor, getPriorityColor, getStatusStyle, getStatusLabel, formatDate, getDaysLeft } from '../../utils/taskHelpers'
+import TaskDropdown from '@/components/tasks/TaskDropdown'
+import { getCategoryColor, getPriorityColor, getStatusStyle, getStatusLabel, formatDate, getDaysLeft } from '@/utils/taskHelpers'
 
 export default function TaskCard({
   task, isSelected, toggleOne,

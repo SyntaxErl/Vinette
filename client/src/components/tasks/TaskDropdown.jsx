@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom'
-import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '../../constants/taskOptions'
+import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '@/constants/taskOptions'
 
 export default function TaskDropdown({ task, dropdownPos, dropdownRef, onStatusChange, onPriorityChange, onDelete }) {
   return createPortal(

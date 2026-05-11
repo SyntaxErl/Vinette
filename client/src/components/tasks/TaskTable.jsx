@@ -1,7 +1,7 @@
-import TaskTableRow from './TaskTableRow'
-import EmptyState from './EmptyState'
-import LoadingState from './LoadingState'
-import Pagination from './Pagination'
+import TaskTableRow from '@/components/tasks/TaskTableRow'
+import EmptyState from '@/components/tasks/EmptyState'
+import LoadingState from '@/components/tasks/LoadingState'
+import Pagination from '@/components/tasks/Pagination'
 
 const COL = '40px minmax(200px,1fr) 120px 120px 160px 130px 110px 40px'
 

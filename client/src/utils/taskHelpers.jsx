@@ -1,4 +1,4 @@
-import { CATEGORY_COLORS, PRIORITY_COLORS, STATUS_STYLES } from '../constants/taskOptions'
+import { CATEGORY_COLORS, PRIORITY_COLORS, STATUS_STYLES } from '@/constants/taskOptions'
 
 export const getCategoryColor = (category) =>
   CATEGORY_COLORS[category] || CATEGORY_COLORS.others

@@ -1,4 +1,4 @@
-import { BRAND_COLOR } from '../../constants/taskOptions'
+import { BRAND_COLOR } from '@/constants/taskOptions'
 
 export default function BulkActionBar({ selected, onMarkDone, onDelete, onClear }) {
   return (

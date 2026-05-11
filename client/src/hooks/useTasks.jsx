@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { getTasks, bulkAction as bulkActionService, updateTask, deleteTask } from '../services/taskService'
-import useTaskStore from '../store/taskStore'
-import { PER_PAGE } from '../constants/taskOptions'
+import { getTasks, bulkAction as bulkActionService, updateTask, deleteTask } from '@/services/taskService'
+import useTaskStore from '@/store/taskStore'
+import { PER_PAGE } from '@/constants/taskOptions'
 
 export default function useTasks() {
   const taskVersion         = useTaskStore((s) => s.taskVersion)

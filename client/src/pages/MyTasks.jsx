@@ -1,18 +1,18 @@
-import useTasks from '../hooks/useTasks'
-import TaskFilters from '../components/tasks/TaskFilters'
-import TaskTable from '../components/tasks/TaskTable'
-import TaskCard from '../components/tasks/TaskCard'
-import BulkActionBar from '../components/tasks/BulkActionBar'
-import Pagination from '../components/tasks/Pagination'
-import EmptyState from '../components/tasks/EmptyState'
-import LoadingState from '../components/tasks/LoadingState'
+import useTasks from '@/hooks/useTasks'
+import TaskFilters from '@/components/tasks/TaskFilters'
+import TaskTable from '@/components/tasks/TaskTable'
+import TaskCard from '@/components/tasks/TaskCard'
+import BulkActionBar from '@/components/tasks/BulkActionBar'
+import Pagination from '@/components/tasks/Pagination'
+import EmptyState from '@/components/tasks/EmptyState'
+import LoadingState from '@/components/tasks/LoadingState'
 
 export default function MyTasks() {
   const t = useTasks()
 
   return (
     <div style={{ fontFamily: 'Inter, sans-serif' }}>
-      <div className="max-w-7xl mx-auto w-full space-y-4 px-1 sm:px-6 py-4 animate-fadeInUp">
+      <div className="max-w-7xl mx-auto w-full space-y-4 px-1 sm:px-6 py-4">
 
         {/* Filter Toolbar */}
         <TaskFilters

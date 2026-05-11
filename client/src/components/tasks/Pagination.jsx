@@ -1,4 +1,4 @@
-import { PER_PAGE, BRAND_COLOR } from '../../constants/taskOptions'
+import { PER_PAGE, BRAND_COLOR } from '@/constants/taskOptions'
 
 export default function Pagination({ page, setPage, total, totalPages, compact = false }) {
   const start = total === 0 ? 0 : (page - 1) * PER_PAGE + 1
