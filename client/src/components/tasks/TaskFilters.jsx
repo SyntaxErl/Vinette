@@ -21,7 +21,7 @@ export default function TaskFilters({
   const currentSort = SORT_OPTIONS.find((o) => o.value === sort) || SORT_OPTIONS[0]
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3">
+    <div className="bg-gray-50 px-4 py-3">
       <div className="flex items-center gap-2 flex-wrap">
 
         {/* Search */}

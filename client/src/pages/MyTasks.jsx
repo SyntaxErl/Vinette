@@ -12,7 +12,7 @@ export default function MyTasks() {
 
   return (
     <div style={{ fontFamily: 'Inter, sans-serif' }}>
-      <div className="max-w-7xl mx-auto w-full space-y-4 px-1 sm:px-6 py-4">
+      <div className="max-w-7xl mx-auto w-full space-y-4 px-1 sm:px-6 py-4 animate-fadeInUp">
 
         {/* Filter Toolbar */}
         <TaskFilters
