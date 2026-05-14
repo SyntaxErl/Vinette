@@ -141,7 +141,7 @@ export default function Dashboard() {
     >
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 animate-fadeInUp">
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+        <div className="bg-purple-50 rounded-2xl p-5 border border-purple-100 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-500 font-medium">Total Tasks</p>
@@ -158,7 +158,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+        <div className="bg-green-50 rounded-2xl p-5 border border-green-100 shadow-sm">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <p className="text-sm text-gray-500 font-medium">Completed</p>
@@ -183,7 +183,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+        <div className="bg-yellow-50 rounded-2xl p-5 border border-yellow-100 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-500 font-medium">Pending</p>
@@ -198,7 +198,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+        <div className="bg-red-50 rounded-2xl p-5 border border-red-100 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-500 font-medium">Overdue</p>
