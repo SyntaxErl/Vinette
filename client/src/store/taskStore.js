@@ -33,6 +33,13 @@ const useTaskStore = create((set, get) => ({
   openNewTaskModal: () => set({ isNewTaskModalOpen: true }),
   closeNewTaskModal: () => set({ isNewTaskModalOpen: false }),
 
+  // ── Task Detail Modal ──────────────────────────────────────────────────────
+  // selectedTaskId — the task whose details are shown
+  // When Task Details modal is built, it reads this ID and fetches the task
+  selectedTaskId: null,
+  openTaskDetail: (id) => set({ selectedTaskId: id }),
+  closeTaskDetail: () => set({ selectedTaskId: null }),
+
 }))
 
 export default useTaskStore
