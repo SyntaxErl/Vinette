@@ -59,8 +59,8 @@ export default function Login() {
             alt="Logo"
             className="w-8 h-8 rounded-lg object-contain"
           />
-          <span className="font-bold text-lg" style={{ color: "#5b4fcf" }}>
-            TaskFlow
+          <span className="font-bold text-lg" style={{ color: "#5b4fcf", fontSize: "22px" }}>
+            Vinette
           </span>
         </div>
 
@@ -78,7 +78,7 @@ export default function Login() {
             Boost Your Productivity
           </h2>
           <p className="text-gray-500 mt-3 text-sm leading-relaxed">
-            TaskFlow helps you manage your tasks, stay organized, and get more
+            Vinette helps you manage your tasks, stay organized, and get more
             done every day.
           </p>
         </div>
@@ -120,7 +120,7 @@ export default function Login() {
             className="w-8 h-8 rounded-lg object-contain"
           />
           <span className="font-bold text-xl" style={{ color: "#5b4fcf" }}>
-            TaskFlow
+            Vinette
           </span>
         </div>
 

@@ -79,7 +79,7 @@ export default function Sidebar({ isOpen, onClose }) {
               className="w-8 h-8 rounded-lg object-contain"
             />
             <span className="font-bold text-lg" style={{ color: "#5b4fcf" }}>
-              TaskFlow
+              Vinette
             </span>
           </div>
 
