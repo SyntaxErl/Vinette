@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { getTasks, bulkAction as bulkActionService, updateTask, deleteTask } from '@/services/taskService'
 import useTaskStore from '@/store/taskStore'
 import { PER_PAGE } from '@/constants/taskOptions'
@@ -7,13 +8,18 @@ export default function useTasks() {
   const taskVersion         = useTaskStore((s) => s.taskVersion)
   const clearDashboardStats = useTaskStore((s) => s.clearDashboardStats)
 
+  const location = useLocation()
+
   // ── Data ─────────────────────────────────────────────────────────────────────
   const [tasks,   setTasks]   = useState([])
   const [loading, setLoading] = useState(true)
   const [total,   setTotal]   = useState(0)
 
   // ── Filters ───────────────────────────────────────────────────────────────────
-  const [search,   setSearch]   = useState('')
+  const [search,   setSearch]   = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('search') || ''
+  })
   const [status,   setStatus]   = useState('')
   const [priority, setPriority] = useState('')
   const [category, setCategory] = useState('')
@@ -81,6 +87,13 @@ export default function useTasks() {
 
   useEffect(() => { fetchTasks() }, [fetchTasks])
   useEffect(() => { setPage(1); setSelected([]) }, [search, status, priority, category, sort])
+
+  // Sync search from URL when navbar search navigates to /tasks
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const urlSearch = params.get('search') || ''
+    setSearch(urlSearch)
+  }, [location.search])
 
   // ── Selection helpers ─────────────────────────────────────────────────────────
   const allSelected  = tasks.length > 0 && selected.length === tasks.length
