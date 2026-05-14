@@ -96,8 +96,8 @@ export default function Register() {
             alt="Logo"
             className="w-8 h-8 rounded-lg object-contain"
           />
-          <span className="font-bold text-lg" style={{ color: "#5b4fcf" }}>
-            TaskFlow
+          <span className="font-bold text-lg" style={{ color: "#5b4fcf", fontSize: "22px" }}>
+            Vinette
           </span>
         </div>
 
@@ -117,7 +117,7 @@ export default function Register() {
           </h2>
           <h2 className="text-4xl font-bold text-purple-600">Achieve more.</h2>
           <p className="text-gray-500 mt-3 text-sm leading-relaxed">
-            TaskFlow helps teams and individuals stay organized, collaborate,
+            Vinette helps teams and individuals stay organized, collaborate,
             and get things done efficiently.
           </p>
         </div>
@@ -174,7 +174,7 @@ export default function Register() {
             Create your account
           </h1>
           <p className="text-sm text-gray-500 mb-2">
-            Join TaskFlow and start managing your tasks the smart way.
+            Join Vinette and start managing your tasks the smart way.
           </p>
 
           {/* Tabs */}
