@@ -131,4 +131,15 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe };
+const getUsers = async (req, res) => {
+  try {
+    const [users] = await db.query(
+      "SELECT id, name, email, avatar FROM users ORDER BY name ASC",
+    );
+    res.json({ success: true, users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+module.exports = { register, login, getMe, getUsers };

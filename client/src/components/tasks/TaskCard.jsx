@@ -1,5 +1,6 @@
 import TaskDropdown from '@/components/tasks/TaskDropdown'
 import { getCategoryColor, getPriorityColor, getStatusStyle, getStatusLabel, formatDate, getDaysLeft } from '@/utils/taskHelpers'
+import useTaskStore from '@/store/taskStore'
 
 export default function TaskCard({
   task, isSelected, toggleOne,
@@ -7,25 +8,30 @@ export default function TaskCard({
   dropdownPos, dropdownRef,
   onStatusChange, onPriorityChange, onDelete,
 }) {
-  const catColor    = getCategoryColor(task.category)
-  const priColor    = getPriorityColor(task.priority)
-  const statusStyle = getStatusStyle(task.status)
-  const daysLeft    = getDaysLeft(task.due_date, task.status)
+  const catColor      = getCategoryColor(task.category)
+  const priColor      = getPriorityColor(task.priority)
+  const statusStyle   = getStatusStyle(task.status)
+  const daysLeft      = getDaysLeft(task.due_date, task.status)
+  const openTaskDetail = useTaskStore((s) => s.openTaskDetail)
 
   return (
-    <div className={`bg-white rounded-2xl border p-4 transition ${isSelected ? 'border-purple-300 bg-purple-50/30' : 'border-gray-100'}`}>
+    <div
+      className={`bg-white rounded-2xl border p-4 transition cursor-pointer ${isSelected ? 'border-purple-300 bg-purple-50/30' : 'border-gray-100 hover:border-purple-200'}`}
+      onClick={() => openTaskDetail(task.id)}
+    >
 
       {/* Top row: checkbox + title + ⋯ */}
       <div className="flex items-start gap-3">
         <input type="checkbox" checked={isSelected} onChange={() => toggleOne(task.id)}
+          onClick={(e) => e.stopPropagation()}
           className="w-4 h-4 mt-0.5 rounded accent-purple-600 cursor-pointer flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-800 truncate">{task.title}</p>
+          <p className="text-sm font-semibold text-gray-800 truncate hover:text-purple-700 transition">{task.title}</p>
           {task.description && (
             <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{task.description}</p>
           )}
         </div>
-        <button onClick={(e) => openDropdown(e, task.id)}
+        <button onClick={(e) => { e.stopPropagation(); openDropdown(e, task.id); }}
           className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 flex-shrink-0">
           <span className="material-icons" style={{ fontSize: '18px' }}>more_horiz</span>
         </button>

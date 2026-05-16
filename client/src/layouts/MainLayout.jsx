@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/navbar/Navbar'
 import NewTaskModal from '../components/NewTaskModal'
+import TaskDetailModal from '../components/TaskDetailModal'
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -17,8 +18,9 @@ export default function MainLayout() {
         </main>
       </div>
 
-      {/* Global modal — available on every page */}
+      {/* Global modals — available on every page */}
       <NewTaskModal />
+      <TaskDetailModal />
     </div>
   )
 }

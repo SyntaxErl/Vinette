@@ -1,5 +1,6 @@
 import TaskDropdown from '@/components/tasks/TaskDropdown'
 import { getCategoryColor, getPriorityColor, getStatusStyle, getStatusLabel, formatDate, getDaysLeft } from '@/utils/taskHelpers'
+import useTaskStore from '@/store/taskStore'
 
 const COL = '40px minmax(200px,1fr) 120px 120px 160px 130px 110px 40px'
 
@@ -9,25 +10,28 @@ export default function TaskTableRow({
   dropdownPos, dropdownRef,
   onStatusChange, onPriorityChange, onDelete,
 }) {
-  const catColor    = getCategoryColor(task.category)
-  const priColor    = getPriorityColor(task.priority)
-  const statusStyle = getStatusStyle(task.status)
-  const daysLeft    = getDaysLeft(task.due_date, task.status)
+  const catColor       = getCategoryColor(task.category)
+  const priColor       = getPriorityColor(task.priority)
+  const statusStyle    = getStatusStyle(task.status)
+  const daysLeft       = getDaysLeft(task.due_date, task.status)
+  const openTaskDetail = useTaskStore((s) => s.openTaskDetail)
 
   return (
     <div
       className={`grid items-center px-5 py-3.5 border-b border-gray-50 transition cursor-pointer gap-3 ${isSelected ? 'bg-purple-50/50' : 'hover:bg-gray-50'}`}
       style={{ gridTemplateColumns: COL }}
+      onClick={() => openTaskDetail(task.id)}
     >
       {/* Checkbox */}
       <div>
         <input type="checkbox" checked={isSelected} onChange={() => toggleOne(task.id)}
+          onClick={(e) => e.stopPropagation()}
           className="w-4 h-4 rounded accent-purple-600 cursor-pointer" />
       </div>
 
       {/* Title + description */}
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-gray-800 truncate">{task.title}</p>
+        <p className="text-sm font-semibold text-gray-800 truncate hover:text-purple-700 transition">{task.title}</p>
         {task.description && <p className="text-xs text-gray-400 truncate mt-0.5">{task.description}</p>}
       </div>
 
@@ -73,7 +77,7 @@ export default function TaskTableRow({
 
       {/* Actions */}
       <div className="flex justify-center">
-        <button onClick={(e) => openDropdown(e, task.id)}
+        <button onClick={(e) => { e.stopPropagation(); openDropdown(e, task.id); }}
           className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100">
           <span className="material-icons" style={{ fontSize: '18px' }}>more_horiz</span>
         </button>
