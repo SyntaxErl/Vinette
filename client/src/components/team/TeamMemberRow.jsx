@@ -16,7 +16,7 @@ export default function TeamMemberRow({ member, isSelected, onSelect }) {
           <div className="min-w-0">
             <p className="text-sm font-semibold text-gray-800 truncate flex items-center gap-1.5">
               {member.name || '—'}
-              {member.isOwner && <span className="text-[10px] font-medium text-gray-400">(You)</span>}
+              {member.isYou && <span className="text-[10px] font-medium text-gray-400">(You)</span>}
             </p>
             <p className="text-xs text-gray-400 truncate">{member.email}</p>
           </div>

@@ -4,7 +4,7 @@ const presence = require("../realtime/presence");
 const { sendInviteEmail, buildAcceptUrl } = require("../utils/email");
 
 // Shape an active membership row (or the synthesized owner) for the client.
-function shapeMember({ rowId, userId, name, email, avatar, role, joined_at, last_active, isOwner = false }) {
+function shapeMember({ rowId, userId, name, email, avatar, role, joined_at, last_active, isOwner = false, isYou = false }) {
   return {
     rowId,
     userId,
@@ -16,6 +16,7 @@ function shapeMember({ rowId, userId, name, email, avatar, role, joined_at, last
     joined_at,
     last_active: last_active || null,
     isOwner,
+    isYou,
     isPending: false,
   };
 }
@@ -24,9 +25,30 @@ const getTeam = async (req, res) => {
   const userId = req.user.userId;
 
   try {
+    // Whose team do we show? Your own if you've created one (invited anyone),
+    // otherwise a team you've joined as an active member. Members see the
+    // owner's roster read-only (viewerIsOwner = false).
+    const [[ownsTeam]] = await db.query(
+      "SELECT 1 AS x FROM team_members WHERE owner_id = ? LIMIT 1",
+      [userId],
+    );
+
+    let teamOwnerId = userId;
+    let viewerIsOwner = true;
+    if (!ownsTeam) {
+      const [[membership]] = await db.query(
+        "SELECT owner_id FROM team_members WHERE member_id = ? AND status = 'active' LIMIT 1",
+        [userId],
+      );
+      if (membership) {
+        teamOwnerId = membership.owner_id;
+        viewerIsOwner = false;
+      }
+    }
+
     const [[owner]] = await db.query(
       "SELECT id, name, email, avatar, created_at FROM users WHERE id = ?",
-      [userId],
+      [teamOwnerId],
     );
 
     const [rows] = await db.query(
@@ -37,7 +59,7 @@ const getTeam = async (req, res) => {
        LEFT JOIN users u ON tm.member_id = u.id
        WHERE tm.owner_id = ?
        ORDER BY tm.joined_at ASC`,
-      [userId],
+      [teamOwnerId],
     );
 
     // Owner is always the top admin row.
@@ -51,6 +73,7 @@ const getTeam = async (req, res) => {
         role: "admin",
         joined_at: owner.created_at,
         isOwner: true,
+        isYou: owner.id === userId,
       }),
     ];
     const pending = [];
@@ -67,6 +90,7 @@ const getTeam = async (req, res) => {
             role: r.role,
             joined_at: r.joined_at,
             last_active: r.last_active,
+            isYou: r.member_id === userId,
           }),
         );
       } else {
@@ -79,8 +103,10 @@ const getTeam = async (req, res) => {
           role: r.role,
           status: "pending",
           joined_at: r.joined_at,
-          inviteLink: r.invite_token ? buildAcceptUrl({ to: r.invite_email, token: r.invite_token }) : null,
+          // Only the owner gets the tokenized link (don't leak tokens to members).
+          inviteLink: viewerIsOwner && r.invite_token ? buildAcceptUrl({ to: r.invite_email, token: r.invite_token }) : null,
           isOwner: false,
+          isYou: false,
           isPending: true,
         });
       }
@@ -94,7 +120,7 @@ const getTeam = async (req, res) => {
       admins,
     };
 
-    res.json({ success: true, members, pending, stats });
+    res.json({ success: true, members, pending, stats, viewerIsOwner });
   } catch (error) {
     console.error("[getTeam]", error);
     res.status(500).json({ success: false, message: "Server error", error: error.message });
