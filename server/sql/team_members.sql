@@ -18,3 +18,6 @@ CREATE TABLE IF NOT EXISTS team_members (
 
 -- Used only for a "last seen" label; live presence is tracked over Socket.IO.
 ALTER TABLE users ADD COLUMN last_active DATETIME DEFAULT NULL;
+
+-- Reusable team invite link: one shareable token per team owner.
+ALTER TABLE users ADD COLUMN team_invite_token VARCHAR(64) DEFAULT NULL;

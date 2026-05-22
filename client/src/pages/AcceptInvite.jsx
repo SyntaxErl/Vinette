@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import useAuthStore from '@/store/authStore'
-import { acceptInvite } from '@/services/teamService'
+import { joinTeam } from '@/services/teamService'
 import { errMsg } from '@/components/taskDetail/utils'
 
 export default function AcceptInvite() {
@@ -18,7 +18,6 @@ export default function AcceptInvite() {
     ran.current = true
 
     const token = params.get('token')
-    const email = params.get('email') || ''
 
     if (!token) {
       setStatus('error')
@@ -26,21 +25,21 @@ export default function AcceptInvite() {
       return
     }
 
-    // Not logged in → stash the token and send them to register (prefilled).
+    // Not logged in → stash the token and send them to create an account.
     if (!isAuthenticated) {
       localStorage.setItem('pendingInviteToken', token)
-      navigate(`/register?email=${encodeURIComponent(email)}&invited=1`, { replace: true })
+      navigate('/register?invited=1', { replace: true })
       return
     }
 
-    acceptInvite(token)
+    joinTeam(token)
       .then((res) => {
-        toast.success(res.data.message || 'Invitation accepted')
+        toast.success(res.data.message || 'You joined the team')
         navigate('/team', { replace: true })
       })
       .catch((err) => {
         setStatus('error')
-        setMessage(errMsg(err, 'This invite is invalid or has expired.'))
+        setMessage(errMsg(err, 'This invite link is invalid.'))
       })
   }, [params, isAuthenticated, navigate])
 

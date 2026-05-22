@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const db = require("../config/db");
 const presence = require("../realtime/presence");
-const { sendInviteEmail, buildAcceptUrl } = require("../utils/email");
+const { sendInviteEmail, buildAcceptUrl, buildInviteUrl } = require("../utils/email");
 
 // Shape an active membership row (or the synthesized owner) for the client.
 function shapeMember({ rowId, userId, name, email, avatar, role, joined_at, last_active, isOwner = false, isYou = false }) {
@@ -357,6 +357,75 @@ const getMemberActivity = async (req, res) => {
   }
 };
 
+// Get (or lazily create) the current user's reusable team invite link.
+const getInviteLink = async (req, res) => {
+  const userId = req.user.userId;
+  try {
+    const [[user]] = await db.query("SELECT team_invite_token FROM users WHERE id = ?", [userId]);
+    let token = user && user.team_invite_token;
+    if (!token) {
+      token = crypto.randomBytes(20).toString("hex");
+      await db.query("UPDATE users SET team_invite_token = ? WHERE id = ?", [token, userId]);
+    }
+    res.json({ success: true, link: buildInviteUrl(token), token });
+  } catch (error) {
+    console.error("[getInviteLink]", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// Generate a fresh token, invalidating the previous link.
+const regenerateInviteLink = async (req, res) => {
+  const userId = req.user.userId;
+  try {
+    const token = crypto.randomBytes(20).toString("hex");
+    await db.query("UPDATE users SET team_invite_token = ? WHERE id = ?", [token, userId]);
+    res.json({ success: true, link: buildInviteUrl(token), token });
+  } catch (error) {
+    console.error("[regenerateInviteLink]", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// Join a team via its shareable invite link.
+const joinTeam = async (req, res) => {
+  const userId = req.user.userId;
+  const { token } = req.body;
+  try {
+    if (!token) {
+      return res.status(400).json({ success: false, message: "Missing invite token" });
+    }
+    const [[owner]] = await db.query("SELECT id, name FROM users WHERE team_invite_token = ?", [token]);
+    if (!owner) {
+      return res.status(400).json({ success: false, message: "This invite link is invalid" });
+    }
+    if (owner.id === userId) {
+      return res.status(400).json({ success: false, message: "This is your own team link" });
+    }
+
+    const [[me]] = await db.query("SELECT email FROM users WHERE id = ?", [userId]);
+    const [[existing]] = await db.query(
+      "SELECT id FROM team_members WHERE owner_id = ? AND (member_id = ? OR invite_email = ?)",
+      [owner.id, userId, me.email],
+    );
+    if (existing) {
+      await db.query(
+        "UPDATE team_members SET member_id = ?, status = 'active', invite_token = NULL, token_expires = NULL WHERE id = ?",
+        [userId, existing.id],
+      );
+    } else {
+      await db.query(
+        "INSERT INTO team_members (owner_id, member_id, role, status, invite_email) VALUES (?, ?, 'member', 'active', ?)",
+        [owner.id, userId, me.email],
+      );
+    }
+    res.json({ success: true, message: `You joined ${owner.name || "the"}'s team` });
+  } catch (error) {
+    console.error("[joinTeam]", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   getTeam,
   inviteMember,
@@ -366,4 +435,7 @@ module.exports = {
   updateMemberRole,
   getMemberTasks,
   getMemberActivity,
+  getInviteLink,
+  regenerateInviteLink,
+  joinTeam,
 };

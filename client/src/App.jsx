@@ -16,7 +16,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useAuthStore from "./store/authStore";
 import api from "./api/axios";
-import { acceptInvite } from "./services/teamService";
+import { joinTeam } from "./services/teamService";
 import usePresenceSocket from "./hooks/usePresenceSocket";
 
 export default function App() {
@@ -48,10 +48,12 @@ export default function App() {
     if (!isAuthenticated) return;
     const pending = localStorage.getItem("pendingInviteToken");
     if (!pending) return;
-    acceptInvite(pending)
-      .then((res) => toast.success(res.data?.message || "Invitation accepted"))
-      .catch(() => {})
-      .finally(() => localStorage.removeItem("pendingInviteToken"));
+    localStorage.removeItem("pendingInviteToken");
+    joinTeam(pending)
+      .then((res) => toast.success(res.data?.message || "You joined the team"))
+      .catch((err) =>
+        toast.error(err?.response?.data?.message || "Could not join the team — the link may be invalid"),
+      );
   }, [isAuthenticated]);
 
   return (
