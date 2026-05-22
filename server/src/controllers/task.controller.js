@@ -9,8 +9,8 @@ const getTaskById = async (req, res) => {
       `SELECT t.*, t.is_repeated AS \`repeat\`, u.name AS assignee_name, u.email AS assignee_email
        FROM tasks t
        LEFT JOIN users u ON t.assigned_to = u.id
-       WHERE t.id = ? AND t.user_id = ?`,
-      [taskId, userId]
+       WHERE t.id = ? AND (t.user_id = ? OR t.assigned_to = ?)`,
+      [taskId, userId, userId]
     );
     if (!task) {
       return res.status(404).json({ success: false, message: "Task not found" });
@@ -32,8 +32,9 @@ const getTasks = async (req, res) => {
 
   try {
     // 2. Build the shared WHERE clause and params
-    let baseWhere = "WHERE user_id = ?";
-    let params = [userId];
+    // Tasks you own OR tasks assigned to you (so assignees see their work).
+    let baseWhere = "WHERE (user_id = ? OR assigned_to = ?)";
+    let params = [userId, userId];
 
     if (status) {
       baseWhere += " AND status = ?";
@@ -198,8 +199,8 @@ const updateTask = async (req, res) => {
 
   try {
     const [existing] = await db.query(
-      "SELECT *, is_repeated AS `repeat` FROM tasks WHERE id = ? AND user_id = ?",
-      [taskId, userId],
+      "SELECT *, is_repeated AS `repeat` FROM tasks WHERE id = ? AND (user_id = ? OR assigned_to = ?)",
+      [taskId, userId, userId],
     );
 
     if (existing.length === 0) {
@@ -226,7 +227,7 @@ const updateTask = async (req, res) => {
         priority = ?, category = ?, due_date = ?,
         due_time = ?, assigned_to = ?, tags = ?,
         is_repeated = ?, reminder_at = ?
-       WHERE id = ? AND user_id = ?`,
+       WHERE id = ? AND (user_id = ? OR assigned_to = ?)`,
       [
         title || task.title,
         description || task.description,
@@ -240,6 +241,7 @@ const updateTask = async (req, res) => {
         repeat || task.repeat || "none",
         reminder_at !== undefined ? reminder_at : task.reminder_at,
         taskId,
+        userId,
         userId,
       ],
     );
@@ -375,51 +377,51 @@ const getDashboard = async (req, res) => {
     const today = new Date().toISOString().split("T")[0];
 
     const [[{ total }]] = await db.query(
-      `SELECT COUNT(*) as total FROM tasks WHERE user_id = ?`,
-      [userId],
+      `SELECT COUNT(*) as total FROM tasks WHERE (user_id = ? OR assigned_to = ?)`,
+      [userId, userId],
     );
 
     const [[{ completed }]] = await db.query(
-      `SELECT COUNT(*) as completed FROM tasks WHERE user_id = ? AND status = "done"`,
-      [userId],
+      `SELECT COUNT(*) as completed FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND status = "done"`,
+      [userId, userId],
     );
 
     const [[{ pending }]] = await db.query(
-      'SELECT COUNT(*) as pending FROM tasks WHERE user_id = ? AND status != "done"',
-      [userId],
+      'SELECT COUNT(*) as pending FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND status != "done"',
+      [userId, userId],
     );
 
     const [[{ overdue }]] = await db.query(
-      'SELECT COUNT(*) as overdue FROM tasks WHERE user_id = ? AND due_date < ? AND status != "done"',
-      [userId, today],
+      'SELECT COUNT(*) as overdue FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND due_date < ? AND status != "done"',
+      [userId, userId, today],
     );
 
     const [recentTasks] = await db.query(
-      "SELECT *, is_repeated AS `repeat` FROM tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT 5",
-      [userId],
+      "SELECT *, is_repeated AS `repeat` FROM tasks WHERE (user_id = ? OR assigned_to = ?) ORDER BY created_at DESC LIMIT 5",
+      [userId, userId],
     );
 
     const [byCategory] = await db.query(
-      "SELECT category, COUNT(*) as count FROM tasks WHERE user_id = ? GROUP BY category",
-      [userId],
+      "SELECT category, COUNT(*) as count FROM tasks WHERE (user_id = ? OR assigned_to = ?) GROUP BY category",
+      [userId, userId],
     );
 
     const [weeklyActivity] = await db.query(
-      `SELECT DAYNAME(created_at) as day, COUNT(*) as count 
-       FROM tasks 
-       WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      `SELECT DAYNAME(created_at) as day, COUNT(*) as count
+       FROM tasks
+       WHERE (user_id = ? OR assigned_to = ?) AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
        GROUP BY DAYNAME(created_at), DAYOFWEEK(created_at)
        ORDER BY DAYOFWEEK(created_at)`,
-      [userId],
+      [userId, userId],
     );
 
     // Last week total for growth comparison
     const [[{ lastWeekTotal }]] = await db.query(
       `SELECT COUNT(*) as lastWeekTotal FROM tasks
-       WHERE user_id = ?
+       WHERE (user_id = ? OR assigned_to = ?)
        AND created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
        AND created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)`,
-      [userId],
+      [userId, userId],
     );
 
     res.json({
