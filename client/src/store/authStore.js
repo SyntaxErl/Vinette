@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { disconnectSocket } from "../api/socket";
+
 const useAuthStore = create((set) => ({
   user: null,
   token: localStorage.getItem("token") || null,
@@ -11,6 +13,7 @@ const useAuthStore = create((set) => ({
 
   logout: () => {
     localStorage.removeItem("token");
+    disconnectSocket();
     set({ user: null, token: null, isAuthenticated: false });
   },
 }));
