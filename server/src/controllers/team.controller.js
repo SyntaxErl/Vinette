@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const db = require("../config/db");
 const presence = require("../realtime/presence");
-const { sendInviteEmail } = require("../utils/email");
+const { sendInviteEmail, buildAcceptUrl } = require("../utils/email");
 
 // Shape an active membership row (or the synthesized owner) for the client.
 function shapeMember({ rowId, userId, name, email, avatar, role, joined_at, last_active, isOwner = false }) {
@@ -30,7 +30,7 @@ const getTeam = async (req, res) => {
     );
 
     const [rows] = await db.query(
-      `SELECT tm.id, tm.member_id, tm.role, tm.status, tm.invite_email, tm.joined_at,
+      `SELECT tm.id, tm.member_id, tm.role, tm.status, tm.invite_email, tm.invite_token, tm.joined_at,
               u.name AS member_name, u.email AS member_email, u.avatar AS member_avatar,
               u.last_active AS last_active
        FROM team_members tm
@@ -79,6 +79,7 @@ const getTeam = async (req, res) => {
           role: r.role,
           status: "pending",
           joined_at: r.joined_at,
+          inviteLink: r.invite_token ? buildAcceptUrl({ to: r.invite_email, token: r.invite_token }) : null,
           isOwner: false,
           isPending: true,
         });
@@ -151,6 +152,7 @@ const inviteMember = async (req, res) => {
       message: emailSent ? "Invitation sent" : "Invite created, but the email failed to send",
       emailSent,
       previewUrl,
+      inviteLink: buildAcceptUrl({ to: email, token }),
       invite: {
         rowId: result.insertId,
         userId: memberId,
@@ -202,6 +204,7 @@ const resendInvite = async (req, res) => {
       message: emailSent ? "Invitation resent" : "Could not resend the email",
       emailSent,
       previewUrl,
+      inviteLink: buildAcceptUrl({ to: row.invite_email, token }),
     });
   } catch (error) {
     console.error("[resendInvite]", error);

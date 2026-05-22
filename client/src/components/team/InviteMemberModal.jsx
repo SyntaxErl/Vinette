@@ -10,6 +10,8 @@ export default function InviteMemberModal() {
   const [role, setRole] = useState('member')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [createdLink, setCreatedLink] = useState('')
+  const [emailSent, setEmailSent] = useState(true)
   const emailRef = useRef(null)
 
   useEffect(() => {
@@ -17,9 +19,17 @@ export default function InviteMemberModal() {
       setEmail('')
       setRole('member')
       setError('')
+      setCreatedLink('')
+      setEmailSent(true)
       setTimeout(() => emailRef.current?.focus(), 50)
     }
   }, [isInviteModalOpen])
+
+  const copyLink = () => {
+    navigator.clipboard?.writeText(createdLink)
+      .then(() => toast.success('Invite link copied'))
+      .catch(() => toast.error('Could not copy — select and copy manually'))
+  }
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') closeInviteModal() }
@@ -40,15 +50,12 @@ export default function InviteMemberModal() {
     try {
       const res = await inviteMember(email.trim(), role)
       incrementTeamVersion()
-      if (res.data.emailSent) {
-        toast.success('Invitation sent')
-      } else {
-        toast('Invite created, but the email failed to send')
-      }
-      if (res.data.previewUrl) {
-        console.log('[invite] email preview:', res.data.previewUrl)
-      }
-      closeInviteModal()
+      if (res.data.emailSent) toast.success('Invitation sent')
+      else toast('Invite created — share the link below')
+      if (res.data.previewUrl) console.log('[invite] email preview:', res.data.previewUrl)
+      setEmailSent(!!res.data.emailSent)
+      setCreatedLink(res.data.inviteLink || '')
+      if (!res.data.inviteLink) closeInviteModal()
     } catch (err) {
       setError(errMsg(err, 'Could not send the invitation.'))
     } finally {
@@ -74,81 +81,127 @@ export default function InviteMemberModal() {
           </button>
         </div>
 
-        {/* Body */}
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
-          {error && (
-            <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-2">
-              <span className="material-icons" style={{ fontSize: '16px' }}>error_outline</span>
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
-            <div className="relative">
-              <span className="material-icons absolute left-3 top-2.5 text-gray-400 pointer-events-none" style={{ fontSize: '18px' }}>mail</span>
-              <input
-                ref={emailRef}
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="teammate@example.com"
-                className="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Role</label>
-            <div className="flex gap-2">
-              {['member', 'admin'].map((r) => (
+        {createdLink ? (
+          <>
+            {/* Success — show the shareable link */}
+            <div className="px-6 py-5 space-y-4">
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-green-50 border border-green-100">
+                <span className="material-icons text-green-500" style={{ fontSize: '20px' }}>check_circle</span>
+                <p className="text-sm text-green-700">
+                  {emailSent
+                    ? 'Invitation email sent. You can also share this link directly:'
+                    : 'Invite created. Share this link so they can join:'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 bg-gray-50">
+                <input
+                  readOnly
+                  value={createdLink}
+                  onFocus={(e) => e.target.select()}
+                  className="flex-1 text-sm text-gray-600 bg-transparent outline-none truncate"
+                />
                 <button
-                  key={r}
-                  type="button"
-                  onClick={() => setRole(r)}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-medium border transition capitalize"
-                  style={{
-                    backgroundColor: role === r ? '#ede9fe' : 'white',
-                    color: role === r ? '#5b4fcf' : '#6b7280',
-                    borderColor: role === r ? '#c4b5fd' : '#e5e7eb',
-                  }}
+                  onClick={copyLink}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-xs font-semibold flex-shrink-0 transition hover:opacity-90"
+                  style={{ backgroundColor: '#5b4fcf' }}
                 >
-                  {r}
+                  <span className="material-icons" style={{ fontSize: '14px' }}>content_copy</span>
+                  Copy
                 </button>
-              ))}
+              </div>
+              <p className="text-xs text-gray-400">
+                The link expires in 7 days. They'll need to log in or register to join.
+              </p>
             </div>
-          </div>
-        </form>
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
+              <button
+                onClick={closeInviteModal}
+                className="px-5 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90"
+                style={{ backgroundColor: '#5b4fcf' }}
+              >
+                Done
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Body */}
+            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
+              {error && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-2">
+                  <span className="material-icons" style={{ fontSize: '16px' }}>error_outline</span>
+                  {error}
+                </div>
+              )}
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
-          <button
-            type="button"
-            onClick={closeInviteModal}
-            disabled={loading}
-            className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-100 transition disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90 disabled:opacity-60"
-            style={{ backgroundColor: '#5b4fcf' }}
-          >
-            {loading ? (
-              <>
-                <span className="material-icons animate-spin" style={{ fontSize: '16px' }}>refresh</span>
-                Sending...
-              </>
-            ) : (
-              <>
-                <span className="material-icons" style={{ fontSize: '16px' }}>send</span>
-                Send Invite
-              </>
-            )}
-          </button>
-        </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                <div className="relative">
+                  <span className="material-icons absolute left-3 top-2.5 text-gray-400 pointer-events-none" style={{ fontSize: '18px' }}>mail</span>
+                  <input
+                    ref={emailRef}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="teammate@example.com"
+                    className="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Role</label>
+                <div className="flex gap-2">
+                  {['member', 'admin'].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setRole(r)}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium border transition capitalize"
+                      style={{
+                        backgroundColor: role === r ? '#ede9fe' : 'white',
+                        color: role === r ? '#5b4fcf' : '#6b7280',
+                        borderColor: role === r ? '#c4b5fd' : '#e5e7eb',
+                      }}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </form>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
+              <button
+                type="button"
+                onClick={closeInviteModal}
+                disabled={loading}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-100 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex items-center gap-2 px-5 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90 disabled:opacity-60"
+                style={{ backgroundColor: '#5b4fcf' }}
+              >
+                {loading ? (
+                  <>
+                    <span className="material-icons animate-spin" style={{ fontSize: '16px' }}>refresh</span>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-icons" style={{ fontSize: '16px' }}>send</span>
+                    Send Invite
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
