@@ -10,10 +10,20 @@ const {
   updateMemberRole,
   getMemberTasks,
   getMemberActivity,
+  getInviteLink,
+  regenerateInviteLink,
+  joinTeam,
 } = require("../controllers/team.controller");
 
 // Specific routes before param routes.
 router.get("/members", authMiddleware, getTeam);
+
+// Shareable invite link flow
+router.get("/invite-link", authMiddleware, getInviteLink);
+router.post("/invite-link/regenerate", authMiddleware, regenerateInviteLink);
+router.post("/join", authMiddleware, joinTeam);
+
+// Legacy email-invite flow (kept for compatibility)
 router.post("/invite", authMiddleware, inviteMember);
 router.post("/accept", authMiddleware, acceptInvite);
 router.post("/resend/:id", authMiddleware, resendInvite);

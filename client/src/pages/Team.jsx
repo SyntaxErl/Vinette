@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import useTeamStore from '@/store/teamStore'
 import usePresenceStore from '@/store/presenceStore'
-import { getTeamMembers, resendInvite, removeMember, updateMemberRole } from '@/services/teamService'
+import { getTeamMembers, removeMember, updateMemberRole } from '@/services/teamService'
 import { errMsg } from '@/components/taskDetail/utils'
 import TeamStats from '@/components/team/TeamStats'
 import TeamFilters from '@/components/team/TeamFilters'
@@ -27,7 +27,6 @@ export default function Team() {
   const [roleFilter, setRoleFilter] = useState('')
   const [page, setPage] = useState(1)
   const [selectedKey, setSelectedKey] = useState(null)
-  const [resendingId, setResendingId] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -51,7 +50,6 @@ export default function Team() {
     () => data.members.map((m) => ({ ...m, status: presence[m.userId] || m.status })),
     [data.members, presence],
   )
-  const pending = data.pending
 
   // Filtering
   const s = search.trim().toLowerCase()
@@ -60,11 +58,8 @@ export default function Team() {
   const filteredMembers = members.filter(
     (m) => matchText(m) && (!roleFilter || m.role === roleFilter) && (!statusFilter || statusFilter === m.status),
   )
-  const filteredPending = pending.filter(
-    (p) => matchText(p) && (!roleFilter || p.role === roleFilter) && (!statusFilter || statusFilter === 'pending'),
-  )
 
-  const totalShown = filteredMembers.length + filteredPending.length
+  const totalShown = filteredMembers.length
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
   const pagedMembers = filteredMembers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
@@ -73,23 +68,10 @@ export default function Team() {
   // If it was removed, the lookup yields null and the sidebar simply unmounts.
   const selected = useMemo(() => {
     if (!selectedKey) return null
-    return [...members, ...pending].find((m) => memberKey(m) === selectedKey) || null
-  }, [selectedKey, members, pending])
+    return members.find((m) => memberKey(m) === selectedKey) || null
+  }, [selectedKey, members])
 
   // Actions
-  const handleResend = async (m) => {
-    setResendingId(m.rowId)
-    try {
-      const res = await resendInvite(m.rowId)
-      toast.success(res.data.emailSent ? 'Invitation resent' : 'Could not resend the email')
-      if (res.data.previewUrl) console.log('[invite] email preview:', res.data.previewUrl)
-    } catch (err) {
-      toast.error(errMsg(err, 'Could not resend the invite'))
-    } finally {
-      setResendingId(null)
-    }
-  }
-
   const handleRemove = async (m) => {
     const label = m.name || m.email
     if (!window.confirm(`Remove ${label} from your team?`)) return
@@ -154,14 +136,12 @@ export default function Team() {
           <>
             {/* ── Card view (below xl) ── */}
             <div className="xl:hidden space-y-3">
-              {[...pagedMembers, ...filteredPending].map((m) => (
+              {pagedMembers.map((m) => (
                 <TeamMemberCard
                   key={memberKey(m)}
                   member={m}
                   isSelected={selectedKey === memberKey(m)}
                   onSelect={(mm) => setSelectedKey(memberKey(mm))}
-                  onResend={handleResend}
-                  resending={resendingId === m.rowId}
                   canManage={canManage}
                 />
               ))}
@@ -171,11 +151,9 @@ export default function Team() {
             <div className="hidden xl:block">
               <TeamTable
                 members={pagedMembers}
-                pending={filteredPending}
+                pending={[]}
                 selectedKey={selectedKey}
                 onSelect={(m) => setSelectedKey(memberKey(m))}
-                onResend={handleResend}
-                resendingId={resendingId}
                 canManage={canManage}
               />
             </div>
@@ -220,8 +198,6 @@ export default function Team() {
           onClose={() => setSelectedKey(null)}
           onRemove={handleRemove}
           onRoleChange={handleRoleChange}
-          onResend={handleResend}
-          resending={resendingId === selected.rowId}
         />
       )}
     </div>

@@ -10,6 +10,12 @@ function buildAcceptUrl({ to, token }) {
   return `${base}/invite/accept?token=${token}&email=${encodeURIComponent(to)}`;
 }
 
+// Shareable team invite link (not tied to a specific email).
+function buildInviteUrl(token) {
+  const base = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/+$/, "");
+  return `${base}/invite/accept?token=${token}`;
+}
+
 function inviteHtml({ inviterName, acceptUrl }) {
   const who = inviterName || "Someone";
   return `
@@ -68,4 +74,4 @@ async function sendInviteEmail({ to, token, inviterName }) {
   return sendViaEthereal({ to, subject, html });
 }
 
-module.exports = { sendInviteEmail, buildAcceptUrl };
+module.exports = { sendInviteEmail, buildAcceptUrl, buildInviteUrl };
