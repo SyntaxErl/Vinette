@@ -310,6 +310,19 @@ function PendingBody({ member, onResend, resending, onRemove }) {
       <InfoRow icon="calendar_today" label="Invited">{formatDate(member.joined_at)}</InfoRow>
 
       <div className="mt-4 space-y-2">
+        {member.inviteLink && (
+          <button
+            onClick={() =>
+              navigator.clipboard?.writeText(member.inviteLink)
+                .then(() => toast.success('Invite link copied'))
+                .catch(() => toast.error('Could not copy'))
+            }
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+          >
+            <span className="material-icons" style={{ fontSize: '18px' }}>content_copy</span>
+            Copy Invite Link
+          </button>
+        )}
         <button
           onClick={() => onResend(member)}
           disabled={resending}
