@@ -10,13 +10,21 @@ import Calendar from "./pages/Calendar";
 import Analytics from "./pages/Analytics";
 import Profile from "./pages/Profile";
 import Team from "./pages/Team";
+import AcceptInvite from "./pages/AcceptInvite";
 import Notifications from "./pages/Notifications";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 import useAuthStore from "./store/authStore";
 import api from "./api/axios";
+import { acceptInvite } from "./services/teamService";
+import usePresenceSocket from "./hooks/usePresenceSocket";
 
 export default function App() {
   const { token, login, logout } = useAuthStore();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  // Real-time presence socket (connects while authenticated).
+  usePresenceSocket();
 
   useEffect(() => {
     const restoreUser = async () => {
@@ -27,7 +35,7 @@ export default function App() {
           headers: { Authorization: `Bearer ${token}` },
         });
         login(res.data.user, token);
-      } catch (error) {
+      } catch {
         logout();
       }
     };
@@ -35,12 +43,24 @@ export default function App() {
     restoreUser();
   }, []);
 
+  // Consume a pending invite once authenticated (after register or login).
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const pending = localStorage.getItem("pendingInviteToken");
+    if (!pending) return;
+    acceptInvite(pending)
+      .then((res) => toast.success(res.data?.message || "Invitation accepted"))
+      .catch(() => {})
+      .finally(() => localStorage.removeItem("pendingInviteToken"));
+  }, [isAuthenticated]);
+
   return (
     <BrowserRouter>
       <Routes>
         {/* Public routes — no login needed */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/invite/accept" element={<AcceptInvite />} />
 
         {/* Protected routes — login required */}
         <Route
