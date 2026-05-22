@@ -2,7 +2,7 @@ import TeamMemberRow from './TeamMemberRow'
 import PendingInviteRow from './PendingInviteRow'
 import { memberKey } from './teamUtils'
 
-export default function TeamTable({ members, pending, selectedKey, onSelect, onResend, resendingId }) {
+export default function TeamTable({ members, pending, selectedKey, onSelect, onResend, resendingId, canManage = true }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
       <div className="overflow-x-auto">
@@ -41,6 +41,7 @@ export default function TeamTable({ members, pending, selectedKey, onSelect, onR
                 onSelect={onSelect}
                 onResend={onResend}
                 resending={resendingId === p.rowId}
+                canManage={canManage}
               />
             ))}
           </tbody>

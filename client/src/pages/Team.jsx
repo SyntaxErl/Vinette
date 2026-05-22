@@ -17,9 +17,10 @@ export default function Team() {
   const teamVersion = useTeamStore((s) => s.teamVersion)
   const incrementTeamVersion = useTeamStore((s) => s.incrementTeamVersion)
   const openInviteModal = useTeamStore((s) => s.openInviteModal)
+  const setCanManage = useTeamStore((s) => s.setCanManage)
   const presence = usePresenceStore((s) => s.statuses)
 
-  const [data, setData] = useState({ members: [], pending: [], stats: null })
+  const [data, setData] = useState({ members: [], pending: [], stats: null, viewerIsOwner: true })
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -32,11 +33,18 @@ export default function Team() {
     let active = true
     setLoading(true)
     getTeamMembers()
-      .then((res) => { if (active) setData({ members: res.data.members || [], pending: res.data.pending || [], stats: res.data.stats }) })
+      .then((res) => {
+        if (!active) return
+        const viewerIsOwner = res.data.viewerIsOwner !== false
+        setData({ members: res.data.members || [], pending: res.data.pending || [], stats: res.data.stats, viewerIsOwner })
+        setCanManage(viewerIsOwner)
+      })
       .catch((err) => { if (active) toast.error(errMsg(err, 'Could not load your team')) })
       .finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [teamVersion])
+    return () => { active = false; setCanManage(true) }
+  }, [teamVersion, setCanManage])
+
+  const canManage = data.viewerIsOwner !== false
 
   // Overlay live presence onto the server-seeded status.
   const members = useMemo(
@@ -120,14 +128,16 @@ export default function Team() {
               roleFilter={roleFilter} setRoleFilter={setRoleFilter}
             />
           </div>
-          <button
-            onClick={openInviteModal}
-            className="flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-white text-sm font-medium transition hover:opacity-90 flex-shrink-0"
-            style={{ backgroundColor: '#5b4fcf' }}
-          >
-            <span className="material-icons" style={{ fontSize: '18px' }}>person_add</span>
-            Invite Member
-          </button>
+          {canManage && (
+            <button
+              onClick={openInviteModal}
+              className="flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-white text-sm font-medium transition hover:opacity-90 flex-shrink-0"
+              style={{ backgroundColor: '#5b4fcf' }}
+            >
+              <span className="material-icons" style={{ fontSize: '18px' }}>person_add</span>
+              Invite Member
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -152,6 +162,7 @@ export default function Team() {
                   onSelect={(mm) => setSelectedKey(memberKey(mm))}
                   onResend={handleResend}
                   resending={resendingId === m.rowId}
+                  canManage={canManage}
                 />
               ))}
             </div>
@@ -165,6 +176,7 @@ export default function Team() {
                 onSelect={(m) => setSelectedKey(memberKey(m))}
                 onResend={handleResend}
                 resendingId={resendingId}
+                canManage={canManage}
               />
             </div>
 
@@ -204,6 +216,7 @@ export default function Team() {
         <MemberSidebar
           key={memberKey(selected)}
           member={selected}
+          canManage={canManage}
           onClose={() => setSelectedKey(null)}
           onRemove={handleRemove}
           onRoleChange={handleRoleChange}

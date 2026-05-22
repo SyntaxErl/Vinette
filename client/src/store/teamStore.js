@@ -7,6 +7,11 @@ const useTeamStore = create((set) => ({
   openInviteModal: () => set({ isInviteModalOpen: true }),
   closeInviteModal: () => set({ isInviteModalOpen: false }),
 
+  // Whether the current user owns the team being viewed (gates invite/manage UI).
+  // Set by the Team page after it loads; read by the navbar invite button.
+  canManage: true,
+  setCanManage: (v) => set({ canManage: v }),
+
   teamVersion: 0,
   incrementTeamVersion: () => set((state) => ({ teamVersion: state.teamVersion + 1 })),
 }))
