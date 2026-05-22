@@ -95,6 +95,7 @@ Vinette/
 │   │   │   │                      #   Pagination, TaskCard, TaskDropdown,
 │   │   │   │                      #   TaskFilters, TaskTable, TaskTableRow
 │   │   │   ├── DashboardSkeleton.jsx
+│   │   │   ├── CalendarSkeleton.jsx # Loading placeholder for Calendar (toolbar + month grid)
 │   │   │   ├── NewTaskModal.jsx
 │   │   │   ├── NotificationModal.jsx
 │   │   │   ├── ProtectedRoute.jsx # Redirects unauthenticated users to /login
@@ -198,8 +199,8 @@ Vinette/
 - **taskStore** — holds:
   - `dashboardStats` — cached; cleared (`clearDashboardStats`) after any task mutation so Dashboard re-fetches on next visit.
   - `taskVersion` — integer counter; `MyTasks` **and** `BoardView` watch it and re-fetch when incremented. Call `incrementTaskVersion()` after **any** task mutation (create, edit, delete, bulk, **and Kanban drag**) — it is the single cross-view invalidation signal.
-  - `boardCache` / `tasksCache` — last fetched result for `BoardView` / `MyTasks`, tagged `{ key, version }` (`key` = JSON of filter/sort/page params, `version` = `taskVersion` at fetch time). The page seeds its state from the cache on mount and **skips the network call** when both still match (same filters AND no mutation since) — same idea as `dashboardStats`. Any `incrementTaskVersion()` implicitly invalidates them (version mismatch); no explicit clear needed. Read imperatively via `useTaskStore.getState()` so the cache never becomes a hook dep / refetch trigger.
-  - `isNewTaskModalOpen` / `selectedTaskId` — modal visibility state.
+  - `boardCache` / `tasksCache` / `calendarCache` — last fetched result for `BoardView` / `MyTasks` / `Calendar`, tagged `{ key, version }` (`key` = JSON of filter/sort/page params, `version` = `taskVersion` at fetch time). The page seeds its state from the cache on mount and **skips the network call** when both still match (same filters AND no mutation since) — same idea as `dashboardStats`. Any `incrementTaskVersion()` implicitly invalidates them (version mismatch); no explicit clear needed. Read imperatively via `useTaskStore.getState()` so the cache never becomes a hook dep / refetch trigger. `calendarCache` fetches every task once (`limit: 200`, RBC slices by month client-side), so its `key` is the constant `"calendar"` — only a task mutation invalidates it.
+  - `isNewTaskModalOpen` / `selectedTaskId` — modal visibility state. `newTaskDefaults` — optional field prefills passed to `openNewTaskModal(defaults)` (Calendar passes the clicked day's `due_date`); guarded to a plain object so callers wiring the action straight to `onClick` don't leak a click event in.
 
 ---
 
@@ -216,7 +217,7 @@ Built feature by feature. Update this list whenever a feature ships.
 - [x] New Task Modal
 - [x] Kanban Board (drag-and-drop across Todo / In Progress / Done columns)
 - [x] Task Detail Modal (inline-editable title/description, status dropdown, progress bar, subtasks, comments, **Details sidebar with single Edit → Apply/Cancel flow**, activity log — opens from Kanban cards and MyTasks rows)
-- [ ] Calendar View
+- [x] Calendar View (monthly grid + agenda via react-big-calendar; tasks placed by `due_date`, colored by category. The day cell is the only click target: an **empty** day → New Task Modal pre-filled with that date; a day that **has** tasks — clicked anywhere, including a task chip, or via its "+N more" → a popover **at the click point** listing that day's tasks — click a task to open its Task Detail modal, or use the "Add task" button)
 - [ ] Analytics page (completion rate, priority/category charts, trends)
 - [ ] Notifications system
 - [ ] User Profile & Settings (avatar, theme, notification preferences)
@@ -225,6 +226,56 @@ Built feature by feature. Update this list whenever a feature ships.
 ---
 
 ## Session Log
+
+### 2026-05-22 — Calendar View
+
+**Done:**
+- Built `client/src/pages/Calendar.jsx` (was a stub) — monthly grid + agenda
+  views via `react-big-calendar` with `dayjsLocalizer(dayjs)`. The localizer
+  self-loads its required dayjs plugins, so no manual plugin setup.
+- Tasks → all-day events placed by `due_date` (tasks without one are dropped and
+  surfaced as a "N without a due date" count). Events are colored by category
+  and dimmed/struck when `done`. `parseLocalDate` parses only the Y-M-D so a
+  date-only string never shifts a day across timezones.
+- Click an event → `openTaskDetail(id)` (existing global modal). Click an empty
+  day → `openNewTaskModal({ due_date })` pre-filled with that date.
+- Custom toolbar (Today / prev / next / month label + Month·Agenda toggle)
+  replaces RBC's default chrome; RBC base CSS imported in the page, restyled via
+  `.tf-calendar` overrides appended to `index.css` to match the design system.
+  **Controlled `date`/`view`** (owned in `Calendar.jsx` state, passed as
+  `date`/`onNavigate`/`view`/`onView`): RBC's uncontrolled mode keeps that state
+  in an `uncontrollable` HOC that doesn't re-render under React 19, so the custom
+  toolbar's buttons were no-ops until we took ownership. Keep it controlled.
+- New `components/CalendarSkeleton.jsx` (toolbar + 7-col month grid, styled like
+  `BoardSkeleton`); shown while loading.
+- Caching: added `calendarCache` + `setCalendarCache` to `taskStore`, following
+  the `boardCache`/`tasksCache` pattern. Key is the constant `"calendar"` (fetch
+  is filterless); a `taskVersion` bump invalidates it. Editing a task via the
+  detail modal bumps `taskVersion`, so the mounted calendar refetches.
+- Store: `openNewTaskModal(defaults)` now takes optional field prefills (guarded
+  to a plain object so the BoardView/Navbar `onClick={openNewTaskModal}` callers
+  don't leak a click event); `NewTaskModal` seeds its form from them.
+- Added `dayjs` to `client/package.json` deps (it was only a hoisted transitive
+  dep before; we now import it directly).
+
+**Verify next session (needs backend + frontend running, manual test):**
+- Tasks with due dates appear on the right days; categories color-coded; done
+  tasks dimmed/struck. Today's cell tinted, today's number is a brand pill.
+- Click an event → Task Detail Modal opens. Edit/move the task there → return to
+  the calendar → change reflected (taskVersion refetch). Click an empty day →
+  New Task Modal opens with Due Date pre-filled; create it → it lands on that day.
+- Navigate prev/next/Today and toggle Month↔Agenda. Revisit Calendar with no
+  changes → no skeleton, no network call (cache hit). Full reload → fresh fetch.
+- Confirm `CalendarSkeleton` matches the real layout (no jump on data swap).
+
+**Lint note:** `Calendar.jsx` carries the same pre-existing
+`react-hooks/set-state-in-effect` error + `unnecessary dependency 'taskVersion'`
+warning as `BoardView`/`useTasks` — intentional (the `taskVersion` dep is the
+cross-view refetch trigger), not in scope.
+
+**Next task:** Analytics page — next unchecked item in Feature Progress
+(`client/src/pages/Analytics.jsx`: completion rate, priority/category charts,
+trends). Reuse the `taskVersion` + cache-tag pattern when wiring its data.
 
 ### 2026-05-16 — Board/MyTasks revisit caching + Kanban skeleton
 

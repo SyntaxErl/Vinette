@@ -42,7 +42,7 @@ const repeatOptions = [
 ]
 
 export default function NewTaskModal() {
-  const { isNewTaskModalOpen, closeNewTaskModal, incrementTaskVersion, clearDashboardStats } =
+  const { isNewTaskModalOpen, closeNewTaskModal, incrementTaskVersion, clearDashboardStats, newTaskDefaults } =
     useTaskStore()
 
   const [form, setForm]     = useState(INITIAL_FORM)
@@ -54,12 +54,12 @@ export default function NewTaskModal() {
 
   useEffect(() => {
     if (isNewTaskModalOpen) {
-      setForm(INITIAL_FORM)
+      setForm({ ...INITIAL_FORM, ...(newTaskDefaults || {}) })
       setError('')
       setTimeout(() => titleRef.current?.focus(), 50)
       getUsers().then((res) => setUsers(res.data.users || [])).catch(() => {})
     }
-  }, [isNewTaskModalOpen])
+  }, [isNewTaskModalOpen, newTaskDefaults])
 
   useEffect(() => {
     const handleKey = (e) => { if (e.key === 'Escape') closeNewTaskModal() }

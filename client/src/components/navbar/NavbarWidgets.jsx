@@ -229,30 +229,6 @@ export const SearchBar = ({ placeholder }) => {
   );
 };
 
-// ─── Calendar Nav ─────────────────────────────────────────────────────────────
-
-export const CalendarNav = () => {
-  const now = new Date();
-  const monthYear = now.toLocaleString("default", { month: "long", year: "numeric" });
-  return (
-    <div className="flex items-center gap-1 sm:gap-2">
-      <button className="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-600 bg-white hover:bg-gray-50 transition hidden sm:block">
-        Today
-      </button>
-      <button className="border border-gray-200 rounded-xl p-2 bg-white hover:bg-gray-50 transition">
-        <span className="material-icons text-gray-500" style={{ fontSize: "18px" }}>chevron_left</span>
-      </button>
-      <button className="border border-gray-200 rounded-xl p-2 bg-white hover:bg-gray-50 transition">
-        <span className="material-icons text-gray-500" style={{ fontSize: "18px" }}>chevron_right</span>
-      </button>
-      <div className="flex items-center gap-1 border border-gray-200 rounded-xl px-3 py-2 bg-white">
-        <span className="text-sm font-medium text-gray-700">{monthYear}</span>
-        <span className="material-icons text-gray-400" style={{ fontSize: "18px" }}>keyboard_arrow_down</span>
-      </div>
-    </div>
-  );
-};
-
 // ─── Analytics Date Range ─────────────────────────────────────────────────────
 
 export const AnalyticsDateRange = () => {
