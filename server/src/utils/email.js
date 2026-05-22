@@ -4,7 +4,11 @@
 // flow is testable without configuring a provider.
 
 const FROM = process.env.EMAIL_FROM || "TaskFlow <onboarding@resend.dev>";
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+
+function buildAcceptUrl({ to, token }) {
+  const base = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/+$/, "");
+  return `${base}/invite/accept?token=${token}&email=${encodeURIComponent(to)}`;
+}
 
 function inviteHtml({ inviterName, acceptUrl }) {
   const who = inviterName || "Someone";
@@ -54,7 +58,7 @@ async function sendViaEthereal({ to, subject, html }) {
 }
 
 async function sendInviteEmail({ to, token, inviterName }) {
-  const acceptUrl = `${CLIENT_URL}/invite/accept?token=${token}&email=${encodeURIComponent(to)}`;
+  const acceptUrl = buildAcceptUrl({ to, token });
   const subject = `${inviterName || "Someone"} invited you to their team on TaskFlow`;
   const html = inviteHtml({ inviterName, acceptUrl });
 
@@ -64,4 +68,4 @@ async function sendInviteEmail({ to, token, inviterName }) {
   return sendViaEthereal({ to, subject, html });
 }
 
-module.exports = { sendInviteEmail };
+module.exports = { sendInviteEmail, buildAcceptUrl };
