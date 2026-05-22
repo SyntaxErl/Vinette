@@ -1,8 +1,19 @@
 import api from '../api/axios'
 
-// Full team directory: { members, pending, stats }
+// Full team directory: { members, pending, stats, viewerIsOwner }
 export const getTeamMembers = () =>
   api.get('/team/members')
+
+// Shareable team invite link
+export const getInviteLink = () =>
+  api.get('/team/invite-link')
+
+export const regenerateInviteLink = () =>
+  api.post('/team/invite-link/regenerate')
+
+// Join a team via its invite token
+export const joinTeam = (token) =>
+  api.post('/team/join', { token })
 
 // Invite someone by email (role: 'member' | 'admin')
 export const inviteMember = (email, role = 'member') =>

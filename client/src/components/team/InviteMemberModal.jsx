@@ -1,35 +1,23 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import useTeamStore from '@/store/teamStore'
-import { inviteMember } from '@/services/teamService'
+import { getInviteLink, regenerateInviteLink } from '@/services/teamService'
 import { errMsg } from '@/components/taskDetail/utils'
 
 export default function InviteMemberModal() {
-  const { isInviteModalOpen, closeInviteModal, incrementTeamVersion } = useTeamStore()
-  const [email, setEmail] = useState('')
-  const [role, setRole] = useState('member')
+  const { isInviteModalOpen, closeInviteModal } = useTeamStore()
+  const [link, setLink] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [createdLink, setCreatedLink] = useState('')
-  const [emailSent, setEmailSent] = useState(true)
-  const emailRef = useRef(null)
 
   useEffect(() => {
-    if (isInviteModalOpen) {
-      setEmail('')
-      setRole('member')
-      setError('')
-      setCreatedLink('')
-      setEmailSent(true)
-      setTimeout(() => emailRef.current?.focus(), 50)
-    }
+    if (!isInviteModalOpen) return
+    setLink('')
+    setLoading(true)
+    getInviteLink()
+      .then((res) => setLink(res.data.link))
+      .catch((err) => toast.error(errMsg(err, 'Could not load the invite link')))
+      .finally(() => setLoading(false))
   }, [isInviteModalOpen])
-
-  const copyLink = () => {
-    navigator.clipboard?.writeText(createdLink)
-      .then(() => toast.success('Invite link copied'))
-      .catch(() => toast.error('Could not copy — select and copy manually'))
-  }
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') closeInviteModal() }
@@ -39,25 +27,20 @@ export default function InviteMemberModal() {
 
   if (!isInviteModalOpen) return null
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    if (!email.trim()) {
-      setError('Please enter an email address.')
-      return
-    }
+  const copy = () => {
+    navigator.clipboard?.writeText(link)
+      .then(() => toast.success('Invite link copied'))
+      .catch(() => toast.error('Could not copy — select the link and copy manually'))
+  }
+
+  const regenerate = async () => {
     setLoading(true)
     try {
-      const res = await inviteMember(email.trim(), role)
-      incrementTeamVersion()
-      if (res.data.emailSent) toast.success('Invitation sent')
-      else toast('Invite created — share the link below')
-      if (res.data.previewUrl) console.log('[invite] email preview:', res.data.previewUrl)
-      setEmailSent(!!res.data.emailSent)
-      setCreatedLink(res.data.inviteLink || '')
-      if (!res.data.inviteLink) closeInviteModal()
+      const res = await regenerateInviteLink()
+      setLink(res.data.link)
+      toast.success('New link generated — the old one no longer works')
     } catch (err) {
-      setError(errMsg(err, 'Could not send the invitation.'))
+      toast.error(errMsg(err, 'Could not regenerate the link'))
     } finally {
       setLoading(false)
     }
@@ -73,135 +56,66 @@ export default function InviteMemberModal() {
         {/* Header */}
         <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Invite Member</h2>
-            <p className="text-sm text-gray-400 mt-0.5">Send an invite by email to join your team.</p>
+            <h2 className="text-lg font-bold text-gray-900">Invite to your team</h2>
+            <p className="text-sm text-gray-400 mt-0.5">Share this link — anyone who opens it can join.</p>
           </div>
           <button onClick={closeInviteModal} className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100">
             <span className="material-icons" style={{ fontSize: '20px' }}>close</span>
           </button>
         </div>
 
-        {createdLink ? (
-          <>
-            {/* Success — show the shareable link */}
-            <div className="px-6 py-5 space-y-4">
-              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-green-50 border border-green-100">
-                <span className="material-icons text-green-500" style={{ fontSize: '20px' }}>check_circle</span>
-                <p className="text-sm text-green-700">
-                  {emailSent
-                    ? 'Invitation email sent. You can also share this link directly:'
-                    : 'Invite created. Share this link so they can join:'}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 bg-gray-50">
-                <input
-                  readOnly
-                  value={createdLink}
-                  onFocus={(e) => e.target.select()}
-                  className="flex-1 text-sm text-gray-600 bg-transparent outline-none truncate"
-                />
-                <button
-                  onClick={copyLink}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-xs font-semibold flex-shrink-0 transition hover:opacity-90"
-                  style={{ backgroundColor: '#5b4fcf' }}
-                >
-                  <span className="material-icons" style={{ fontSize: '14px' }}>content_copy</span>
-                  Copy
-                </button>
-              </div>
-              <p className="text-xs text-gray-400">
-                The link expires in 7 days. They'll need to log in or register to join.
-              </p>
-            </div>
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
+        {/* Body */}
+        <div className="px-6 py-5 space-y-4">
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-purple-50 border border-purple-100">
+            <span className="material-icons text-purple-500" style={{ fontSize: '20px' }}>link</span>
+            <p className="text-sm text-purple-700">
+              Send this link to anyone you want on your team. When they open it, they'll create an account
+              (or log in) and join automatically.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Invite link</label>
+            <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 bg-gray-50">
+              <span className="material-icons text-gray-400 flex-shrink-0" style={{ fontSize: '18px' }}>link</span>
+              <input
+                readOnly
+                value={loading ? 'Generating link…' : link}
+                onFocus={(e) => e.target.select()}
+                className="flex-1 text-sm text-gray-600 bg-transparent outline-none truncate"
+              />
               <button
-                onClick={closeInviteModal}
-                className="px-5 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90"
+                onClick={copy}
+                disabled={loading || !link}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-xs font-semibold flex-shrink-0 transition hover:opacity-90 disabled:opacity-50"
                 style={{ backgroundColor: '#5b4fcf' }}
               >
-                Done
+                <span className="material-icons" style={{ fontSize: '14px' }}>content_copy</span>
+                Copy
               </button>
             </div>
-          </>
-        ) : (
-          <>
-            {/* Body */}
-            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
-              {error && (
-                <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-2">
-                  <span className="material-icons" style={{ fontSize: '16px' }}>error_outline</span>
-                  {error}
-                </div>
-              )}
+          </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
-                <div className="relative">
-                  <span className="material-icons absolute left-3 top-2.5 text-gray-400 pointer-events-none" style={{ fontSize: '18px' }}>mail</span>
-                  <input
-                    ref={emailRef}
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="teammate@example.com"
-                    className="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition"
-                  />
-                </div>
-              </div>
+          <button
+            onClick={regenerate}
+            disabled={loading}
+            className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition disabled:opacity-50"
+          >
+            <span className="material-icons" style={{ fontSize: '14px' }}>autorenew</span>
+            Generate a new link (disables the current one)
+          </button>
+        </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Role</label>
-                <div className="flex gap-2">
-                  {['member', 'admin'].map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setRole(r)}
-                      className="flex-1 py-2.5 rounded-xl text-sm font-medium border transition capitalize"
-                      style={{
-                        backgroundColor: role === r ? '#ede9fe' : 'white',
-                        color: role === r ? '#5b4fcf' : '#6b7280',
-                        borderColor: role === r ? '#c4b5fd' : '#e5e7eb',
-                      }}
-                    >
-                      {r}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </form>
-
-            {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
-              <button
-                type="button"
-                onClick={closeInviteModal}
-                disabled={loading}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-100 transition disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="flex items-center gap-2 px-5 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90 disabled:opacity-60"
-                style={{ backgroundColor: '#5b4fcf' }}
-              >
-                {loading ? (
-                  <>
-                    <span className="material-icons animate-spin" style={{ fontSize: '16px' }}>refresh</span>
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <span className="material-icons" style={{ fontSize: '16px' }}>send</span>
-                    Send Invite
-                  </>
-                )}
-              </button>
-            </div>
-          </>
-        )}
+        {/* Footer */}
+        <div className="flex items-center justify-end px-6 py-4 border-t border-gray-100 bg-gray-50">
+          <button
+            onClick={closeInviteModal}
+            className="px-5 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90"
+            style={{ backgroundColor: '#5b4fcf' }}
+          >
+            Done
+          </button>
+        </div>
       </div>
     </div>
   )

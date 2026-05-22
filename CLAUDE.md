@@ -204,10 +204,13 @@ Vinette/
 All scoped to `req.user.userId` as the team **owner**. Specific routes registered before `:id` routes.
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| GET | `/team/members` | Yes | `{ members, pending, stats }` — owner synthesized as top admin; status seeded from the live presence registry |
-| POST | `/team/invite` | Yes | Create a `pending` invite (`email`, `role`) + send email; links `member_id` if the email already has an account |
-| POST | `/team/accept` | Yes | Accept via `{ token }` — sets `member_id` = current user, status `active` |
-| POST | `/team/resend/:id` | Yes | Regenerate token + re-send (`:id` = membership row id) |
+| GET | `/team/members` | Yes | `{ members, pending, stats, viewerIsOwner }` — owner synthesized as top admin; shows the team you own, else the team you joined (read-only). Status seeded from the live presence registry |
+| GET | `/team/invite-link` | Yes | Get (or lazily create) the owner's reusable invite link (`users.team_invite_token`) |
+| POST | `/team/invite-link/regenerate` | Yes | New token → invalidates the previous link |
+| POST | `/team/join` | Yes | Join a team via `{ token }` (the shareable link) — adds the current user as an active `member` |
+| POST | `/team/invite` | Yes | **Legacy** email invite (`email`, `role`) + send email — kept for compatibility, not used by the UI |
+| POST | `/team/accept` | Yes | **Legacy** per-email accept via `{ token }` |
+| POST | `/team/resend/:id` | Yes | **Legacy** regenerate token + re-send (`:id` = membership row id) |
 | GET | `/team/members/:userId/tasks` | Yes | Tasks assigned to that member (`assigned_to = :userId AND user_id = me` — only ever returns your own tasks) |
 | GET | `/team/members/:userId/activity` | Yes | That member's `activity_log` entries on your tasks |
 | PUT | `/team/members/:id/role` | Yes | Change role (`:id` = membership row id) |
