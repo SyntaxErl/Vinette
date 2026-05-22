@@ -360,7 +360,7 @@ export default function BoardView() {
   // ── Board ────────────────────────────────────────────────────────────────────
   return (
     <div style={{ fontFamily: "Inter, sans-serif" }}>
-      <div className="max-w-7xl mx-auto w-full px-1 sm:px-6 py-4 animate-fadeInUp">
+      <div className="max-w-7xl mx-auto w-full px-1 sm:px-6 py-4 animate-fadeIn">
 
         {/* ── Filter Bar ── */}
         {(() => {
