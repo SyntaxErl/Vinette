@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar'
 import Navbar from '../components/navbar/Navbar'
 import NewTaskModal from '../components/NewTaskModal'
 import TaskDetailModal from '../components/TaskDetailModal'
+import InviteMemberModal from '../components/team/InviteMemberModal'
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -21,6 +22,7 @@ export default function MainLayout() {
       {/* Global modals — available on every page */}
       <NewTaskModal />
       <TaskDetailModal />
+      <InviteMemberModal />
     </div>
   )
 }

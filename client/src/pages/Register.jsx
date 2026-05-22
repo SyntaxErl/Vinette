@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { registerUser } from '../services/authService'
 import useAuthStore from "../store/authStore";
 import logo from "../assets/images/logo.png";
@@ -8,10 +8,12 @@ import registerImg from "../assets/images/register.png";
 export default function Register() {
   const navigate = useNavigate();
   const { login } = useAuthStore();
+  const [params] = useSearchParams();
+  const invited = params.get("invited") === "1";
 
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
+    email: params.get("email") || "",
     password: "",
     confirmPassword: "",
   });
@@ -176,6 +178,13 @@ export default function Register() {
           <p className="text-sm text-gray-500 mb-2">
             Join Vinette and start managing your tasks the smart way.
           </p>
+
+          {invited && (
+            <div className="mb-4 p-3 rounded-lg bg-purple-50 border border-purple-100 text-sm text-purple-700 flex items-center gap-2">
+              <span className="material-icons" style={{ fontSize: "16px" }}>group_add</span>
+              You've been invited to a team — sign up to join.
+            </div>
+          )}
 
           {/* Tabs */}
           <div className="flex border-b border-gray-200 mb-6">

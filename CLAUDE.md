@@ -57,6 +57,12 @@ DB_PASSWORD=
 DB_NAME=taskflow_db
 JWT_SECRET=your_long_random_secret_key
 JWT_EXPIRES_IN=7d
+
+# Team feature — email invites + Socket.IO CORS origin
+CLIENT_URL=http://localhost:5173      # invite accept links + Socket.IO CORS origin
+RESEND_API_KEY=                        # if unset, invites fall back to a nodemailer Ethereal preview (logged URL)
+EMAIL_FROM=TaskFlow <onboarding@resend.dev>
+# VITE_SOCKET_URL on the client defaults to the API origin minus /api
 ```
 
 ### Database
@@ -75,8 +81,11 @@ says `taskflow_db` — `DB_NAME` must match the real database name). Tables:
 | `subtasks` | `is_done` (TINYINT) | `is_completed` | `SELECT *, is_done AS is_completed`; INSERT/UPDATE `is_done`. Also has `assigned_to`, `due_date` (unused by code). |
 | `activity_log` | `action` (VARCHAR 100), `detail` (TEXT, nullable) | `action` | Controllers only write `action`; `detail` left null. |
 | `tasks` | `is_repeated` (enum) | `repeat` | `SELECT ... is_repeated AS \`repeat\``; INSERT/UPDATE `is_repeated`. Renamed from `repeat` to dodge the reserved word. |
+| `team_members` | `owner_id`, `member_id` (nullable), `role` enum, `status` enum(`pending`/`active`), `invite_email`, `invite_token`, `token_expires`, `joined_at` | — | One row per (owner→invitee). `member_id` is NULL until the invite is accepted. The owner is **not** a row — the API synthesizes the owner as the top admin. Schema lives in `server/sql/team_members.sql`. |
+| `users` | `last_active` (DATETIME, nullable) | — | Stamped on socket disconnect; used only for a "last seen" label. Live presence is tracked in-memory over Socket.IO. |
 
 All `comments`/`subtasks`/`activity_log` rows cascade-delete with their parent task (FKs).
+`team_members` cascade-deletes with either the `owner` or `member` user (FKs).
 
 ---
 
@@ -191,6 +200,28 @@ Vinette/
 |---|---|---|---|
 | GET | `/tasks/:taskId/activity` | Yes | List activity log entries (JOINs users for actor_name/avatar) |
 
+### Team (`/api/team`)
+All scoped to `req.user.userId` as the team **owner**. Specific routes registered before `:id` routes.
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `/team/members` | Yes | `{ members, pending, stats }` — owner synthesized as top admin; status seeded from the live presence registry |
+| POST | `/team/invite` | Yes | Create a `pending` invite (`email`, `role`) + send email; links `member_id` if the email already has an account |
+| POST | `/team/accept` | Yes | Accept via `{ token }` — sets `member_id` = current user, status `active` |
+| POST | `/team/resend/:id` | Yes | Regenerate token + re-send (`:id` = membership row id) |
+| GET | `/team/members/:userId/tasks` | Yes | Tasks assigned to that member (`assigned_to = :userId AND user_id = me` — only ever returns your own tasks) |
+| GET | `/team/members/:userId/activity` | Yes | That member's `activity_log` entries on your tasks |
+| PUT | `/team/members/:id/role` | Yes | Change role (`:id` = membership row id) |
+| DELETE | `/team/members/:id` | Yes | Remove member / cancel invite (`:id` = membership row id) |
+
+> ⚠️ Param convention: `:userId` = a **user id** (tasks/activity, safe because scoped to your tasks);
+> `:id` = a **membership row id** (mutations).
+
+### WebSocket — presence (`Socket.IO`, same origin as the API)
+Handshake auth uses the JWT (`socket.handshake.auth.token`). Server keeps an in-memory, ref-counted
+registry (`server/src/realtime/presence.js`). Events: `presence:snapshot` (full map on connect),
+`presence:update` (`{ userId, status }`). Client emits `presence:away` / `presence:active` from idle +
+tab-visibility detection. `online` = ≥1 live socket, `away` = client-emitted idle/hidden, `offline` = none.
+
 ---
 
 ## State Management Patterns
@@ -201,6 +232,8 @@ Vinette/
   - `taskVersion` — integer counter; `MyTasks` **and** `BoardView` watch it and re-fetch when incremented. Call `incrementTaskVersion()` after **any** task mutation (create, edit, delete, bulk, **and Kanban drag**) — it is the single cross-view invalidation signal.
   - `boardCache` / `tasksCache` / `calendarCache` — last fetched result for `BoardView` / `MyTasks` / `Calendar`, tagged `{ key, version }` (`key` = JSON of filter/sort/page params, `version` = `taskVersion` at fetch time). The page seeds its state from the cache on mount and **skips the network call** when both still match (same filters AND no mutation since) — same idea as `dashboardStats`. Any `incrementTaskVersion()` implicitly invalidates them (version mismatch); no explicit clear needed. Read imperatively via `useTaskStore.getState()` so the cache never becomes a hook dep / refetch trigger. `calendarCache` fetches every task once (`limit: 200`, RBC slices by month client-side), so its `key` is the constant `"calendar"` — only a task mutation invalidates it.
   - `isNewTaskModalOpen` / `selectedTaskId` — modal visibility state. `newTaskDefaults` — optional field prefills passed to `openNewTaskModal(defaults)` (Calendar passes the clicked day's `due_date`); guarded to a plain object so callers wiring the action straight to `onClick` don't leak a click event in.
+- **teamStore** — `isInviteModalOpen` + `open/closeInviteModal` (the global `InviteMemberModal` in `MainLayout`, opened by the navbar button or the Team page button), and `teamVersion` + `incrementTeamVersion()` — the Team page watches it and refetches after any mutation (invite/remove/role), mirroring `taskVersion`.
+- **presenceStore** — `statuses` map keyed by `userId` (`online`/`away`/`offline`). Fed by `usePresenceSocket` from Socket.IO events (`presence:snapshot`, `presence:update`). The Team page overlays it onto the server-seeded status so dots update live. Reset is handled by re-snapshot on reconnect.
 
 ---
 
@@ -221,11 +254,58 @@ Built feature by feature. Update this list whenever a feature ships.
 - [ ] Analytics page (completion rate, priority/category charts, trends)
 - [ ] Notifications system
 - [ ] User Profile & Settings (avatar, theme, notification preferences)
-- [ ] Team page (invite members, assign tasks, manage roles)
+- [x] Team page (member directory + stat cards, **real-time presence via Socket.IO**, **real email invites (Resend) + token accept flow**, role management, per-member assigned-tasks/activity sidebar, Send Message via `mailto:`)
 
 ---
 
 ## Session Log
+
+### 2026-05-22 — Team / Members page
+
+**Done:**
+- Rebuilt `client/src/pages/Team.jsx` (was a stub mis-named `TaskCard`): stat cards
+  (Total = Active + Pending), filter bar (search + status + role), member directory
+  table (xl+) / card list (below xl), Pending Invites section, client-side pagination,
+  and a contextual right-drawer `MemberSidebar`. Components live in `client/src/components/team/`
+  (`TeamStats`, `TeamFilters`, `TeamTable`+`TeamMemberRow`, `TeamMemberCard`, `PendingInviteRow`,
+  `MemberAvatar`, `RoleBadge`, `StatusDot`, `MemberSidebar`, `InviteMemberModal`, `teamUtils.memberKey`).
+- **Backend**: `team.controller.js` + `team.routes.js` mounted at `/api/team` (see API Routes).
+  The logged-in user is the team **owner**; rows scoped by `owner_id`. New `server/sql/team_members.sql`
+  schema (`member_id` nullable — pending invites to non-registered emails have no user id yet).
+- **Real email invites (Resend)**: `server/src/utils/email.js` sends a tokenized accept link
+  (`${CLIENT_URL}/invite/accept?token=…`). No `RESEND_API_KEY` → nodemailer **Ethereal** fallback
+  logs a preview URL (and returns it as `previewUrl`). Accept flow: `AcceptInvite.jsx` page →
+  if unauthenticated, stashes `pendingInviteToken` in localStorage + routes to Register (email prefilled,
+  `invited=1` banner); `App.jsx` consumes the stashed token once authenticated (covers register **and** login).
+- **Real-time presence (Socket.IO)**: `server/src/realtime/{presence,socket}.js` + `http.createServer`
+  wrap in `server.js`. Client: `api/socket.js` singleton, `store/presenceStore.js`, `hooks/usePresenceSocket.jsx`
+  (connect on auth, idle/visibility → away/active). `authStore.logout()` calls `disconnectSocket()`.
+  Team page overlays `presenceStore` statuses onto the server-seeded ones so dots update live.
+- New stores: `store/teamStore.js` (invite-modal visibility + `teamVersion` refetch counter, mirrors
+  `taskVersion`) and `store/presenceStore.js`. `InviteMemberModal` rendered globally in `MainLayout`;
+  navbar `InviteMemberButton` now opens it. `Send Message` = `mailto:`; `View Profile` is a placeholder toast.
+
+**Verify next session (needs MySQL + both servers + manual test — NOT runnable in the cloud sandbox):**
+- Run `server/sql/team_members.sql` against `vinette_db` first.
+- Directory loads with you as the top Admin; stats correct. Filters/search/pagination work.
+- Invite an email → pending row + stats bump. With `RESEND_API_KEY` the email arrives; without it,
+  the **Ethereal preview URL** is logged (server) + in the browser console. Open the accept link →
+  logged-in user joins; a fresh email goes through Register then auto-joins → row flips to active.
+- Resend / Remove / Cancel invite / Role change behave. Sidebar Tasks lists tasks assigned to the member;
+  Activity lists their actions on your tasks; Send Message opens the mail client.
+- Presence: open two sessions → each shows the other Online ~instantly; close one → flips Offline live;
+  go idle / hide tab → Away; multi-tab keeps you Online until the last tab closes.
+- Confirm Socket.IO CORS `origin` (`CLIENT_URL`) matches the frontend.
+
+**Lint note:** new files carry the same accepted `react-hooks/set-state-in-effect` errors as
+`NewTaskModal`/`useTasks`/`BoardView` (data-fetch + modal-reset effects) — consistent with house style,
+not in scope. `client` production build passes; server boots (Socket.IO wired) — only the DB connection
+fails in the sandbox, as expected.
+
+**Caveats / sandbox limits:** live email delivery and two-session WebSocket presence can't be exercised
+from the cloud container (no MySQL, no browser, possible outbound-mail blocking) — verify locally.
+
+**Next task:** Analytics page — next unchecked item in Feature Progress.
 
 ### 2026-05-22 — Calendar View
 
