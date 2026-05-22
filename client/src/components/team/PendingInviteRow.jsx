@@ -3,7 +3,7 @@ import RoleBadge from './RoleBadge'
 import StatusDot from './StatusDot'
 import { formatDate } from '@/utils/taskHelpers'
 
-export default function PendingInviteRow({ invite, isSelected, onSelect, onResend, resending }) {
+export default function PendingInviteRow({ invite, isSelected, onSelect, onResend, resending, canManage = true }) {
   return (
     <tr
       onClick={() => onSelect(invite)}
@@ -22,13 +22,15 @@ export default function PendingInviteRow({ invite, isSelected, onSelect, onResen
       <td className="px-5 py-3.5"><StatusDot status="pending" /></td>
       <td className="px-5 py-3.5 text-sm text-gray-500">Invited {formatDate(invite.joined_at)}</td>
       <td className="px-5 py-3.5 text-right">
-        <button
-          onClick={(e) => { e.stopPropagation(); onResend(invite) }}
-          disabled={resending}
-          className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition disabled:opacity-50"
-        >
-          {resending ? 'Sending...' : 'Resend'}
-        </button>
+        {canManage && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onResend(invite) }}
+            disabled={resending}
+            className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition disabled:opacity-50"
+          >
+            {resending ? 'Sending...' : 'Resend'}
+          </button>
+        )}
       </td>
     </tr>
   )

@@ -7,10 +7,11 @@ import StatusDot from './StatusDot'
 import { getMemberTasks, getMemberActivity } from '@/services/teamService'
 import { getCategoryColor, getPriorityColor, formatDate } from '@/utils/taskHelpers'
 
-const TABS = ['Overview', 'Tasks', 'Activity', 'Settings']
+const ALL_TABS = ['Overview', 'Tasks', 'Activity', 'Settings']
 
-export default function MemberSidebar({ member, onClose, onRemove, onRoleChange, onResend, resending }) {
+export default function MemberSidebar({ member, canManage = true, onClose, onRemove, onRoleChange, onResend, resending }) {
   const openTaskDetail = useTaskStore((s) => s.openTaskDetail)
+  const tabs = canManage ? ALL_TABS : ALL_TABS.filter((t) => t !== 'Settings')
   const [tab, setTab] = useState('Overview')
   const [tasks, setTasks] = useState([])
   const [tasksLoaded, setTasksLoaded] = useState(false)
@@ -72,7 +73,7 @@ export default function MemberSidebar({ member, onClose, onRemove, onRoleChange,
           {/* Tabs */}
           {!member.isPending && (
             <div className="flex gap-5 mt-4 -mb-px">
-              {TABS.map((t) => (
+              {tabs.map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -92,7 +93,7 @@ export default function MemberSidebar({ member, onClose, onRemove, onRoleChange,
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {member.isPending ? (
-            <PendingBody member={member} onResend={onResend} resending={resending} onRemove={onRemove} />
+            <PendingBody member={member} canManage={canManage} onResend={onResend} resending={resending} onRemove={onRemove} />
           ) : tab === 'Overview' ? (
             <OverviewBody member={member} taskCount={tasksLoaded ? tasks.length : null} onOpenTasks={() => setTab('Tasks')} />
           ) : tab === 'Tasks' ? (
@@ -122,7 +123,7 @@ export default function MemberSidebar({ member, onClose, onRemove, onRoleChange,
               <span className="material-icons" style={{ fontSize: '18px' }}>badge</span>
               View Profile
             </button>
-            {!member.isOwner && (
+            {!member.isOwner && canManage && (
               <button
                 onClick={() => onRemove(member)}
                 className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-500 hover:bg-red-50 transition"
@@ -295,7 +296,7 @@ function SettingsBody({ member, onRoleChange, onRemove }) {
   )
 }
 
-function PendingBody({ member, onResend, resending, onRemove }) {
+function PendingBody({ member, canManage = true, onResend, resending, onRemove }) {
   return (
     <div>
       <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 flex items-start gap-2.5">
@@ -309,37 +310,39 @@ function PendingBody({ member, onResend, resending, onRemove }) {
       <InfoRow icon="badge" label="Role"><RoleBadge role={member.role} /></InfoRow>
       <InfoRow icon="calendar_today" label="Invited">{formatDate(member.joined_at)}</InfoRow>
 
-      <div className="mt-4 space-y-2">
-        {member.inviteLink && (
+      {canManage && (
+        <div className="mt-4 space-y-2">
+          {member.inviteLink && (
+            <button
+              onClick={() =>
+                navigator.clipboard?.writeText(member.inviteLink)
+                  .then(() => toast.success('Invite link copied'))
+                  .catch(() => toast.error('Could not copy'))
+              }
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            >
+              <span className="material-icons" style={{ fontSize: '18px' }}>content_copy</span>
+              Copy Invite Link
+            </button>
+          )}
           <button
-            onClick={() =>
-              navigator.clipboard?.writeText(member.inviteLink)
-                .then(() => toast.success('Invite link copied'))
-                .catch(() => toast.error('Could not copy'))
-            }
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            onClick={() => onResend(member)}
+            disabled={resending}
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-sm font-semibold transition hover:opacity-90 disabled:opacity-60"
+            style={{ backgroundColor: '#5b4fcf' }}
           >
-            <span className="material-icons" style={{ fontSize: '18px' }}>content_copy</span>
-            Copy Invite Link
+            <span className="material-icons" style={{ fontSize: '18px' }}>send</span>
+            {resending ? 'Sending...' : 'Resend Invitation'}
           </button>
-        )}
-        <button
-          onClick={() => onResend(member)}
-          disabled={resending}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-sm font-semibold transition hover:opacity-90 disabled:opacity-60"
-          style={{ backgroundColor: '#5b4fcf' }}
-        >
-          <span className="material-icons" style={{ fontSize: '18px' }}>send</span>
-          {resending ? 'Sending...' : 'Resend Invitation'}
-        </button>
-        <button
-          onClick={() => onRemove(member)}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-500 hover:bg-red-50 transition"
-        >
-          <span className="material-icons" style={{ fontSize: '18px' }}>cancel</span>
-          Cancel Invite
-        </button>
-      </div>
+          <button
+            onClick={() => onRemove(member)}
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-500 hover:bg-red-50 transition"
+          >
+            <span className="material-icons" style={{ fontSize: '18px' }}>cancel</span>
+            Cancel Invite
+          </button>
+        </div>
+      )}
     </div>
   )
 }
