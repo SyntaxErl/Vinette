@@ -1,4 +1,4 @@
-import { SearchBar, CalendarNav, AnalyticsDateRange } from "./NavbarWidgets";
+import { SearchBar, AnalyticsDateRange } from "./NavbarWidgets";
 import {
   NewTaskButton,
   InviteMemberButton,
@@ -46,7 +46,9 @@ export const ROUTE_CONFIG = {
   "/calendar": {
     title: "Calendar",
     subtitle: "Plan your tasks and never miss a deadline",
-    middle: <CalendarNav />,
+    // Month navigation lives in the Calendar page's own toolbar, so the navbar
+    // shows task search here (consistent with Dashboard / Board / My Tasks).
+    middle: <SearchBar placeholder="Search tasks..." />,
     right: <NewTaskButton />,
     mobileRight: <NewTaskButton mobile />,
   },

@@ -42,10 +42,22 @@ const useTaskStore = create((set, get) => ({
   tasksCache: null, // { key, version, tasks, total }
   setTasksCache: (cache) => set({ tasksCache: cache }),
 
+  calendarCache: null, // { key, version, tasks } — Calendar fetches every task once
+  setCalendarCache: (cache) => set({ calendarCache: cache }),
+
   // ── New Task Modal ─────────────────────────────────────────────────────────
+  // newTaskDefaults — optional field prefills (e.g. Calendar passes the date of
+  // the clicked day). Guarded to a plain object so callers that wire this action
+  // straight to onClick (BoardView, NavbarButtons) never leak a click event in.
   isNewTaskModalOpen: false,
-  openNewTaskModal: () => set({ isNewTaskModalOpen: true }),
-  closeNewTaskModal: () => set({ isNewTaskModalOpen: false }),
+  newTaskDefaults: null,
+  openNewTaskModal: (defaults = null) =>
+    set({
+      isNewTaskModalOpen: true,
+      newTaskDefaults:
+        defaults && Object.getPrototypeOf(defaults) === Object.prototype ? defaults : null,
+    }),
+  closeNewTaskModal: () => set({ isNewTaskModalOpen: false, newTaskDefaults: null }),
 
   // ── Task Detail Modal ──────────────────────────────────────────────────────
   // selectedTaskId — the task whose details are shown

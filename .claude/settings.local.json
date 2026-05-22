@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(node -c src/controllers/task.controller.js)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(node -p \"require\\('dayjs/package.json'\\).version\")",
+      "Bash(node -p \"require\\('react-big-calendar/package.json'\\).version\")",
+      "Bash(node *)",
+      "Bash(npm run *)"
     ]
   }
 }
