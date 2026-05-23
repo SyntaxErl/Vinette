@@ -18,6 +18,7 @@ import useAuthStore from "./store/authStore";
 import api from "./api/axios";
 import { joinTeam } from "./services/teamService";
 import usePresenceSocket from "./hooks/usePresenceSocket";
+import useNotificationSocket from "./hooks/useNotificationSocket";
 
 export default function App() {
   const { token, login, logout } = useAuthStore();
@@ -25,6 +26,8 @@ export default function App() {
 
   // Real-time presence socket (connects while authenticated).
   usePresenceSocket();
+  // Real-time notifications (seeds + listens for the bell badge).
+  useNotificationSocket();
 
   useEffect(() => {
     const restoreUser = async () => {

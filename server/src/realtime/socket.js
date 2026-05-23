@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 const presence = require("./presence");
 
+let ioInstance = null;
+
 // Attaches a Socket.IO server to the given HTTP server and wires real-time presence.
 function initSocket(httpServer) {
   const io = new Server(httpServer, {
@@ -11,6 +13,7 @@ function initSocket(httpServer) {
       methods: ["GET", "POST"],
     },
   });
+  ioInstance = io;
 
   // Authenticate the handshake with the same JWT the REST API uses.
   io.use((socket, next) => {
@@ -27,6 +30,9 @@ function initSocket(httpServer) {
 
   io.on("connection", (socket) => {
     const userId = socket.userId;
+
+    // Per-user room so we can push notifications to all of a user's tabs.
+    socket.join(`user:${userId}`);
 
     const firstConnection = presence.addSocket(userId, socket.id);
     if (firstConnection) {
@@ -61,4 +67,9 @@ function initSocket(httpServer) {
   return io;
 }
 
-module.exports = { initSocket };
+// Push an event to every live socket of a specific user.
+function emitToUser(userId, event, payload) {
+  if (ioInstance) ioInstance.to(`user:${Number(userId)}`).emit(event, payload);
+}
+
+module.exports = { initSocket, emitToUser };

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import useTaskStore from "../store/taskStore";
 
 const timeAgo = (ts) => {
   const diff = Math.floor((Date.now() - new Date(ts)) / 1000);
@@ -20,6 +21,7 @@ const TYPE_ICON = {
 
 export default function NotificationModal({ onClose, onCountChange }) {
   const navigate = useNavigate();
+  const openTaskDetail = useTaskStore((s) => s.openTaskDetail);
   const modalRef = useRef(null);
 
   const [notifications, setNotifications] = useState([]);
@@ -88,7 +90,7 @@ export default function NotificationModal({ onClose, onCountChange }) {
   const handleNotifClick = (notif) => {
     if (!notif.is_read) markOneRead(notif.id);
     if (notif.related_task_id) {
-      navigate(`/tasks?task_id=${notif.related_task_id}`);
+      openTaskDetail(notif.related_task_id);
       onClose();
     }
   };

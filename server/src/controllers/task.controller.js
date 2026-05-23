@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const { createNotification } = require("../utils/notify");
 
 const getTaskById = async (req, res) => {
   const userId = req.user.userId;
@@ -166,6 +167,19 @@ const createTask = async (req, res) => {
       [result.insertId, userId, "created this task"]
     );
 
+    // Notify the assignee (unless you assigned it to yourself).
+    if (assigned_to && Number(assigned_to) !== userId) {
+      const [[actor]] = await db.query("SELECT name FROM users WHERE id = ?", [userId]);
+      await createNotification({
+        userId: assigned_to,
+        actorId: userId,
+        type: "task",
+        title: "Task assigned to you",
+        message: `${actor?.name || "Someone"} assigned you "${title}"`,
+        relatedTaskId: result.insertId,
+      });
+    }
+
     res.status(201).json({
       success: true,
       message: "Task created successfully",
@@ -251,6 +265,42 @@ const updateTask = async (req, res) => {
         "INSERT INTO activity_log (task_id, user_id, action) VALUES (?, ?, ?)",
         [taskId, userId, action]
       );
+    }
+
+    // Notifications: reassignment + completion
+    const notifTitle = title || task.title;
+    let actorName = null;
+    const getActor = async () => {
+      if (actorName === null) {
+        const [[actor]] = await db.query("SELECT name FROM users WHERE id = ?", [userId]);
+        actorName = actor?.name || "Someone";
+      }
+      return actorName;
+    };
+
+    if (
+      assigned_to !== undefined && assigned_to &&
+      Number(assigned_to) !== Number(task.assigned_to) &&
+      Number(assigned_to) !== userId
+    ) {
+      await createNotification({
+        userId: assigned_to,
+        actorId: userId,
+        type: "task",
+        title: "Task assigned to you",
+        message: `${await getActor()} assigned you "${notifTitle}"`,
+        relatedTaskId: taskId,
+      });
+    }
+    if (status && status === "done" && task.status !== "done" && Number(task.user_id) !== userId) {
+      await createNotification({
+        userId: task.user_id,
+        actorId: userId,
+        type: "task",
+        title: "Task completed",
+        message: `${await getActor()} completed "${notifTitle}"`,
+        relatedTaskId: taskId,
+      });
     }
 
     const [updated] = await db.query(
