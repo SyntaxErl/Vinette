@@ -428,7 +428,7 @@ also skips refetch on revisit.
 
 ## Key Conventions
 
-- Task **read** queries (`getTasks`, `getTaskById`, `getDashboard`) and `updateTask` are scoped to **owner OR assignee** (`WHERE (user_id = ? OR assigned_to = ?)`) so a member sees and can update tasks assigned to them. `deleteTask` and `bulkAction` stay **owner-only** (`user_id`). Subtask/comment/activity queries are by `task_id` (not user-scoped).
+- Task **read** queries (`getTasks`, `getTaskById`, `getDashboard`) and `updateTask` are scoped to **owner OR assignee** (`WHERE (user_id = ? OR assigned_to = ?)`) so a member sees and can update tasks assigned to them. `deleteTask` and `bulkAction` stay **owner-only** (`user_id`). The subtask/comment/activity controllers guard their parent task by **owner OR assignee** before reading/writing, so an assignee can view and add subtasks/comments on a task assigned to them.
 - `PATCH /tasks/bulk` must be registered before `PUT /tasks/:id` in the router to avoid Express matching `bulk` as an `:id` parameter.
 - The Axios base URL is configured in `client/src/api/axios.js` — update it there if the backend port changes.
 - Tailwind CSS v4 is used (configured via `@tailwindcss/vite` plugin — there is no `tailwind.config.js`).
