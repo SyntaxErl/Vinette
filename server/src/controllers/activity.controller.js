@@ -6,8 +6,8 @@ const getActivity = async (req, res) => {
 
   try {
     const [[task]] = await db.query(
-      'SELECT id FROM tasks WHERE id = ? AND user_id = ?',
-      [taskId, userId]
+      'SELECT id FROM tasks WHERE id = ? AND (user_id = ? OR assigned_to = ?)',
+      [taskId, userId, userId]
     )
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' })
 

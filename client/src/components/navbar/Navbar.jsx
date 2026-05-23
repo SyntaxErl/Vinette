@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import useAuthStore from "../../store/authStore";
+import useNotificationStore from "../../store/notificationStore";
 import api from "../../api/axios";
 import { ROUTE_CONFIG, DEFAULT_CONFIG, getGreeting } from "./navbarConfig";
 import NotificationModal from "../NotificationModal";
@@ -9,10 +10,11 @@ export default function Navbar({ onMenuClick }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const notifCount = useNotificationStore((s) => s.unreadCount);
+  const setUnreadCount = useNotificationStore((s) => s.setUnreadCount);
 
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [dueTodayCount, setDueTodayCount] = useState(0);
-  const [notifCount, setNotifCount] = useState(0);
 
   // Fetch due-today task count
   useEffect(() => {
@@ -31,23 +33,6 @@ export default function Navbar({ onMenuClick }) {
     fetchDueToday();
     return () => controller.abort();
   }, []);
-
-  // Fetch unread notification count — silent fallback until endpoint is ready
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchNotifCount = async () => {
-      try {
-        const res = await api.get("/notifications?unread=true", {
-          signal: controller.signal,
-        });
-        setNotifCount(res.data.count ?? res.data.notifications?.length ?? 0);
-      } catch (err) {
-        if (err.name !== "CanceledError") setNotifCount(0);
-      }
-    };
-    fetchNotifCount();
-    return () => controller.abort();
-  }, [location.pathname]);
 
   const config = ROUTE_CONFIG[location.pathname] ?? DEFAULT_CONFIG;
 
@@ -157,7 +142,7 @@ export default function Navbar({ onMenuClick }) {
       {showNotifModal && (
         <NotificationModal
           onClose={() => setShowNotifModal(false)}
-          onCountChange={(count) => setNotifCount(count)}
+          onCountChange={setUnreadCount}
         />
       )}
     </header>

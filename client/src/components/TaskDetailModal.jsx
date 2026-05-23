@@ -4,12 +4,13 @@ import toast from 'react-hot-toast'
 import useTaskStore from '@/store/taskStore'
 import useAuthStore from '@/store/authStore'
 import {
-  getTaskById, updateTask, getUsers,
+  getTaskById, updateTask,
   getSubtasks, createSubtask as apiCreateSubtask,
   toggleSubtask as apiToggleSubtask, deleteSubtask as apiDeleteSubtask,
   getComments, createComment as apiCreateComment,
   getActivity,
 } from '@/services/taskService'
+import { getAssignableUsers } from '@/services/teamService'
 import { getCategoryColor, getPriorityColor, getStatusStyle, getDaysLeft } from '@/utils/taskHelpers'
 import { errMsg } from './taskDetail/utils'
 import TaskDetailSkeleton from './taskDetail/Skeleton'
@@ -95,7 +96,7 @@ export default function TaskDetailModal() {
       setActiveTab('overview')
       setEditingDetails(false)
       fetchAll(selectedTaskId)
-      getUsers().then((r) => setUsers(r.data.users || [])).catch(() => {})
+      getAssignableUsers().then((r) => setUsers(r.data.users || [])).catch(() => {})
     } else {
       setTask(null); setSubtasks([]); setComments([]); setActivity([])
       setEditingTitle(false); setEditingDesc(false)

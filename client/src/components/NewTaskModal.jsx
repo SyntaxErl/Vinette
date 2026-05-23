@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import useTaskStore from '../store/taskStore'
-import { createTask, getUsers } from '../services/taskService'
+import { createTask } from '../services/taskService'
+import { getAssignableUsers } from '../services/teamService'
 
 const INITIAL_FORM = {
   title: '',
@@ -57,7 +58,7 @@ export default function NewTaskModal() {
       setForm({ ...INITIAL_FORM, ...(newTaskDefaults || {}) })
       setError('')
       setTimeout(() => titleRef.current?.focus(), 50)
-      getUsers().then((res) => setUsers(res.data.users || [])).catch(() => {})
+      getAssignableUsers().then((res) => setUsers(res.data.users || [])).catch(() => {})
     }
   }, [isNewTaskModalOpen, newTaskDefaults])
 
