@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import useAuthStore from '@/store/authStore'
 import useNotificationStore from '@/store/notificationStore'
+import useTaskStore from '@/store/taskStore'
 import { getNotifications } from '@/services/notificationService'
 import { getSocket } from '@/api/socket'
 
@@ -28,6 +29,13 @@ export default function useNotificationSocket() {
     const onNew = (notif) => {
       incrementUnread()
       toast(notif?.message || notif?.title || 'New notification', { icon: '🔔' })
+      // A task was assigned / reassigned / completed for me by someone else →
+      // refresh task views (board, list, calendar, dashboard) without a reload.
+      if (notif?.type === 'task') {
+        const ts = useTaskStore.getState()
+        ts.incrementTaskVersion()
+        ts.clearDashboardStats()
+      }
     }
     socket.on('notification:new', onNew)
     return () => socket.off('notification:new', onNew)
