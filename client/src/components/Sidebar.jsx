@@ -1,8 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 import useAuthStore from "../store/authStore";
+import useNotificationStore from "../store/notificationStore";
 import logo from "../assets/images/logo.png";
-import api from "../api/axios";
 
 const navItems = [
   { path: "/dashboard", icon: "dashboard", label: "Dashboard" },
@@ -18,24 +17,7 @@ const navItems = [
 export default function Sidebar({ isOpen, onClose }) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchUnreadCount = async () => {
-      try {
-        const res = await api.get("/notifications", {
-          signal: controller.signal,
-        });
-        const unread = res.data.notifications?.filter((n) => !n.is_read) || [];
-        setUnreadCount(unread.length);
-      } catch (err) {
-        if (err.name !== "CanceledError") setUnreadCount(0);
-      }
-    };
-    fetchUnreadCount();
-    return () => controller.abort();
-  }, []);
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   const handleLogout = () => {
     logout();
