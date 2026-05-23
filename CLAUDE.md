@@ -206,6 +206,7 @@ All scoped to `req.user.userId` as the team **owner**. Specific routes registere
 | Method | Path | Auth | Description |
 |---|---|---|---|
 | GET | `/team/members` | Yes | `{ members, pending, stats, viewerIsOwner }` — owner synthesized as top admin; shows the team you own, else the team you joined (read-only). Status seeded from the live presence registry |
+| GET | `/team/assignable` | Yes | `{ users }` = owner + active members of your team — powers the New Task / Task Detail assignee pickers |
 | GET | `/team/invite-link` | Yes | Get (or lazily create) the owner's reusable invite link (`users.team_invite_token`) |
 | POST | `/team/invite-link/regenerate` | Yes | New token → invalidates the previous link |
 | POST | `/team/join` | Yes | Join a team via `{ token }` (the shareable link) — adds the current user as an active `member` |
@@ -248,6 +249,7 @@ tab-visibility detection. `online` = ≥1 live socket, `away` = client-emitted i
   - `isNewTaskModalOpen` / `selectedTaskId` — modal visibility state. `newTaskDefaults` — optional field prefills passed to `openNewTaskModal(defaults)` (Calendar passes the clicked day's `due_date`); guarded to a plain object so callers wiring the action straight to `onClick` don't leak a click event in.
 - **teamStore** — `isInviteModalOpen` + `open/closeInviteModal` (the global `InviteMemberModal` in `MainLayout`, opened by the navbar button or the Team page button), and `teamVersion` + `incrementTeamVersion()` — the Team page watches it and refetches after any mutation (invite/remove/role), mirroring `taskVersion`.
 - **presenceStore** — `statuses` map keyed by `userId` (`online`/`away`/`offline`). Fed by `usePresenceSocket` from Socket.IO events (`presence:snapshot`, `presence:update`). The Team page overlays it onto the server-seeded status so dots update live. Reset is handled by re-snapshot on reconnect.
+- **notificationStore** — `unreadCount` (the single source of truth for the navbar bell **and** sidebar badge). Seeded + incremented by `usePresenceSocket`'s sibling hook `useNotificationSocket` (listens for `notification:new`); updated by `NotificationModal` / the Notifications page on mark-read/clear. On a `type:'task'` notification the hook also bumps `taskVersion` + clears dashboard stats so the recipient's Board/MyTasks/Calendar/Dashboard refetch live (no reload).
 
 ---
 
@@ -273,6 +275,46 @@ Built feature by feature. Update this list whenever a feature ships.
 ---
 
 ## Session Log
+
+### 2026-05-23 — Team collaboration + Notifications (deployed to prod)
+
+Built on top of the Team page across several PRs (all merged into the **`Erl`** branch, which is
+what Railway/Vercel deploy — **not `main`**). Production: backend on Railway
+(`taskflow-production-4c8b.up.railway.app`), frontend on Vercel (`vinette.vercel.app`).
+
+**Shipped:**
+- **Invite flow restructured** to a **reusable shareable link** (replaces email-typed invite + resend).
+  `users.team_invite_token`; `GET /team/invite-link`, `POST /team/invite-link/regenerate`, `POST /team/join`.
+  Invite modal shows a copyable link; opening it → Create Account (or login) → `joinTeam` on auth
+  (`App.jsx` consumes the stashed `pendingInviteToken`). Legacy email endpoints kept but unused.
+- **Members see the team read-only.** `getTeam` resolves *whose* team to show: your own if you own one,
+  else the team you joined; returns `viewerIsOwner`. Non-owners: invite/resend/remove/role/Settings hidden
+  (gated on `canManage`, mirrored into `teamStore` so the navbar button hides too). `isYou` flags the viewer's row.
+- **Assignees see & work their tasks.** Task **read** queries + `updateTask` broadened to
+  `(user_id = ? OR assigned_to = ?)`; the subtask/comment/activity parent-task guards too. `deleteTask`/`bulkAction`
+  stay owner-only. (Without the nested-guard fix, opening an assigned task "failed to load details".)
+- **Notifications system** (real-time): `notifications` table + controller/routes; `utils/notify.js` inserts
+  and pushes `notification:new` to the recipient's `user:<id>` Socket.IO room (`emitToUser` in `realtime/socket.js`).
+  Triggers: assign/reassign (→ assignee), completion (→ owner), new comment (→ owner+assignee−actor).
+  Client: `notificationStore` + `useNotificationSocket` (bell badge + toast); navbar **and** sidebar badges read
+  the shared count; clicking a notification opens the task detail. Notifications page built out (was a stub).
+- **Live task refresh:** a `type:'task'` notification bumps `taskVersion` so the recipient's board/list/etc.
+  refetch without a manual reload.
+- **Assignee picker scoped to team** via `GET /team/assignable`.
+
+**Migrations run on the prod DB this session (already applied):**
+`team_members` table; `users.last_active`; `users.team_invite_token`; `notifications` table
+(note: the table must include **`actor_id`** — a hand-created version missing it caused silent insert failures).
+
+**Deploy gotchas hit (for reference):** PRs merge into **`Erl`**; Railway lost its GitHub link once
+("repo not found" → reconnect); `VITE_API_URL` on Vercel must be the bare value (not `VITE_API_URL=...`)
+and needs a redeploy (Vite bakes env at build time); `CLIENT_URL` on Railway = `https://vinette.vercel.app`
+(no trailing slash) for Socket.IO CORS. Real-time (presence, notifications, live refresh) only fires while
+the user is online; otherwise state catches up on next load.
+
+**Next task (collaboration roadmap, in order):** Team task board (admin sees *all* members' tasks, filter by
+member) → In-app messaging (replace `mailto:` over Socket.IO) → smaller polish (comment @mentions,
+promoted-admins-can-manage, member "leave team"). Analytics + Profile/Settings explicitly deferred.
 
 ### 2026-05-22 — Team / Members page
 
