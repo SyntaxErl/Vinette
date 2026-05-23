@@ -82,7 +82,8 @@ says `taskflow_db` — `DB_NAME` must match the real database name). Tables:
 | `activity_log` | `action` (VARCHAR 100), `detail` (TEXT, nullable) | `action` | Controllers only write `action`; `detail` left null. |
 | `tasks` | `is_repeated` (enum) | `repeat` | `SELECT ... is_repeated AS \`repeat\``; INSERT/UPDATE `is_repeated`. Renamed from `repeat` to dodge the reserved word. |
 | `team_members` | `owner_id`, `member_id` (nullable), `role` enum, `status` enum(`pending`/`active`), `invite_email`, `invite_token`, `token_expires`, `joined_at` | — | One row per (owner→invitee). `member_id` is NULL until the invite is accepted. The owner is **not** a row — the API synthesizes the owner as the top admin. Schema lives in `server/sql/team_members.sql`. |
-| `users` | `last_active` (DATETIME, nullable) | — | Stamped on socket disconnect; used only for a "last seen" label. Live presence is tracked in-memory over Socket.IO. |
+| `users` | `last_active` (DATETIME), `team_invite_token` (VARCHAR 64) | — | `last_active` = "last seen" label (stamped on socket disconnect). `team_invite_token` = the owner's reusable invite link token. |
+| `notifications` | `user_id` (recipient), `actor_id`, `type` (`task`/`comment`/`mention`), `title`, `message`, `related_task_id`, `is_read`, `created_at` | — | Created by `server/src/utils/notify.js` (insert + Socket.IO push to `user:<id>` room). Schema in `server/sql/notifications.sql`. Cascade-deletes with the recipient or the related task. |
 
 All `comments`/`subtasks`/`activity_log` rows cascade-delete with their parent task (FKs).
 `team_members` cascade-deletes with either the `owner` or `member` user (FKs).
@@ -219,6 +220,16 @@ All scoped to `req.user.userId` as the team **owner**. Specific routes registere
 > ⚠️ Param convention: `:userId` = a **user id** (tasks/activity, safe because scoped to your tasks);
 > `:id` = a **membership row id** (mutations).
 
+### Notifications (`/api/notifications`)
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `/notifications` | Yes | List own notifications (`?unread=true` to filter); returns `{ notifications, count }` (count = unread) |
+| PATCH | `/notifications/read-all` | Yes | Mark all read |
+| PATCH | `/notifications/:id/read` | Yes | Mark one read |
+| DELETE | `/notifications` | Yes | Clear all |
+
+Created via `createNotification()` on: task **assign**/​**reassign** (→ assignee), task **completion** (→ owner), and **new comment** (→ owner + assignee, minus the actor). Pushed live over Socket.IO (`notification:new`) to the recipient's `user:<id>` room; the client increments the navbar bell + toasts. Assignee pickers (New Task / Task Detail) use `GET /team/assignable` (owner + active members of your team).
+
 ### WebSocket — presence (`Socket.IO`, same origin as the API)
 Handshake auth uses the JWT (`socket.handshake.auth.token`). Server keeps an in-memory, ref-counted
 registry (`server/src/realtime/presence.js`). Events: `presence:snapshot` (full map on connect),
@@ -255,7 +266,7 @@ Built feature by feature. Update this list whenever a feature ships.
 - [x] Task Detail Modal (inline-editable title/description, status dropdown, progress bar, subtasks, comments, **Details sidebar with single Edit → Apply/Cancel flow**, activity log — opens from Kanban cards and MyTasks rows)
 - [x] Calendar View (monthly grid + agenda via react-big-calendar; tasks placed by `due_date`, colored by category. The day cell is the only click target: an **empty** day → New Task Modal pre-filled with that date; a day that **has** tasks — clicked anywhere, including a task chip, or via its "+N more" → a popover **at the click point** listing that day's tasks — click a task to open its Task Detail modal, or use the "Add task" button)
 - [ ] Analytics page (completion rate, priority/category charts, trends)
-- [ ] Notifications system
+- [x] Notifications system (real-time bell via Socket.IO; triggered on task assign/reassign, completion, and new comments)
 - [ ] User Profile & Settings (avatar, theme, notification preferences)
 - [x] Team page (member directory + stat cards, **real-time presence via Socket.IO**, **real email invites (Resend) + token accept flow**, role management, per-member assigned-tasks/activity sidebar, Send Message via `mailto:`)
 

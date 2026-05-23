@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const {
   getTeam,
+  getAssignableUsers,
   inviteMember,
   resendInvite,
   acceptInvite,
@@ -17,6 +18,7 @@ const {
 
 // Specific routes before param routes.
 router.get("/members", authMiddleware, getTeam);
+router.get("/assignable", authMiddleware, getAssignableUsers);
 
 // Shareable invite link flow
 router.get("/invite-link", authMiddleware, getInviteLink);

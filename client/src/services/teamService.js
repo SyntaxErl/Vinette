@@ -4,6 +4,10 @@ import api from '../api/axios'
 export const getTeamMembers = () =>
   api.get('/team/members')
 
+// Users you can assign tasks to (your team's owner + active members)
+export const getAssignableUsers = () =>
+  api.get('/team/assignable')
+
 // Shareable team invite link
 export const getInviteLink = () =>
   api.get('/team/invite-link')

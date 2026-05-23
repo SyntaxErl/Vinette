@@ -426,8 +426,38 @@ const joinTeam = async (req, res) => {
   }
 };
 
+// Users the current user can assign tasks to: the owner + active members of
+// the team they belong to (their own team, or the one they joined).
+const getAssignableUsers = async (req, res) => {
+  const userId = req.user.userId;
+  try {
+    const [[ownsTeam]] = await db.query("SELECT 1 AS x FROM team_members WHERE owner_id = ? LIMIT 1", [userId]);
+    let teamOwnerId = userId;
+    if (!ownsTeam) {
+      const [[membership]] = await db.query(
+        "SELECT owner_id FROM team_members WHERE member_id = ? AND status = 'active' LIMIT 1",
+        [userId],
+      );
+      if (membership) teamOwnerId = membership.owner_id;
+    }
+    const [[owner]] = await db.query("SELECT id, name, email FROM users WHERE id = ?", [teamOwnerId]);
+    const [members] = await db.query(
+      `SELECT u.id, u.name, u.email
+       FROM team_members tm
+       JOIN users u ON tm.member_id = u.id
+       WHERE tm.owner_id = ? AND tm.status = 'active'`,
+      [teamOwnerId],
+    );
+    res.json({ success: true, users: [owner, ...members] });
+  } catch (error) {
+    console.error("[getAssignableUsers]", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   getTeam,
+  getAssignableUsers,
   inviteMember,
   resendInvite,
   acceptInvite,
