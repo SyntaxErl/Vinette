@@ -432,17 +432,17 @@ const getDashboard = async (req, res) => {
     );
 
     const [[{ completed }]] = await db.query(
-      `SELECT COUNT(*) as completed FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND status = "done"`,
+      `SELECT COUNT(*) as completed FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND status = 'done'`,
       [userId, userId],
     );
 
     const [[{ pending }]] = await db.query(
-      'SELECT COUNT(*) as pending FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND status != "done"',
+      `SELECT COUNT(*) as pending FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND status != 'done'`,
       [userId, userId],
     );
 
     const [[{ overdue }]] = await db.query(
-      'SELECT COUNT(*) as overdue FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND due_date < ? AND status != "done"',
+      `SELECT COUNT(*) as overdue FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND due_date < ? AND status != 'done'`,
       [userId, userId, today],
     );
 
@@ -465,7 +465,6 @@ const getDashboard = async (req, res) => {
       [userId, userId],
     );
 
-    // Last week total for growth comparison
     const [[{ lastWeekTotal }]] = await db.query(
       `SELECT COUNT(*) as lastWeekTotal FROM tasks
        WHERE (user_id = ? OR assigned_to = ?)
