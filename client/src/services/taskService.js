@@ -32,6 +32,10 @@ export const bulkAction = (taskIds, action, extra = {}) =>
 export const getDashboardStats = () =>
   api.get('/tasks/dashboard/stats')
 
+// Analytics stats
+export const getAnalytics = () =>
+  api.get('/tasks/analytics/stats')
+
 // ── Subtasks ────────────────────────────────────────────────────────────────────
 export const getSubtasks = (taskId) =>
   api.get(`/tasks/${taskId}/subtasks`)

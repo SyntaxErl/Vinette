@@ -490,6 +490,175 @@ const getDashboard = async (req, res) => {
   }
 };
 
+// The activity_log row written when a task is moved to Done (see updateTask).
+// We use it as the only available "completed at" signal, since tasks have no
+// completed_at / updated_at column — only created_at.
+const DONE_ACTION = 'changed status to "Done"';
+
+const getAnalytics = async (req, res) => {
+  const userId = req.user.userId;
+  const owner = [userId, userId];
+
+  try {
+    // ── Totals ────────────────────────────────────────────────────────────
+    const [[{ total }]] = await db.query(
+      "SELECT COUNT(*) total FROM tasks WHERE (user_id = ? OR assigned_to = ?)",
+      owner,
+    );
+    const [[{ completed }]] = await db.query(
+      "SELECT COUNT(*) completed FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND status = 'done'",
+      owner,
+    );
+    const [[{ overdue }]] = await db.query(
+      `SELECT COUNT(*) overdue FROM tasks
+       WHERE (user_id = ? OR assigned_to = ?)
+       AND status != 'done' AND due_date IS NOT NULL AND due_date < CURDATE()`,
+      owner,
+    );
+
+    const completionRate = total ? Math.round((completed / total) * 100) : 0;
+
+    // ── Distributions ─────────────────────────────────────────────────────
+    const [byPriority] = await db.query(
+      "SELECT priority, COUNT(*) count FROM tasks WHERE (user_id = ? OR assigned_to = ?) GROUP BY priority",
+      owner,
+    );
+    const [byCategory] = await db.query(
+      "SELECT category, COUNT(*) count FROM tasks WHERE (user_id = ? OR assigned_to = ?) GROUP BY category",
+      owner,
+    );
+
+    // First time each task was marked Done — our "completed at" timeline.
+    const doneEvents = `
+      SELECT a.task_id, MIN(a.created_at) AS doneAt
+      FROM activity_log a
+      JOIN tasks t ON t.id = a.task_id
+      WHERE (t.user_id = ? OR t.assigned_to = ?) AND a.action = ?
+      GROUP BY a.task_id`;
+    const doneParams = [...owner, DONE_ACTION];
+
+    // ── Completed: last 30 days vs the 30 before that ─────────────────────
+    const [[{ c30 }]] = await db.query(
+      `SELECT COUNT(*) c30 FROM (${doneEvents}) d
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+      doneParams,
+    );
+    const [[{ cPrev30 }]] = await db.query(
+      `SELECT COUNT(*) cPrev30 FROM (${doneEvents}) d
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 60 DAY)
+       AND d.doneAt < DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+      doneParams,
+    );
+
+    // ── Average completion time (days), created_at → first doneAt ─────────
+    const [[{ avgDays }]] = await db.query(
+      `SELECT ROUND(AVG(TIMESTAMPDIFF(HOUR, t.created_at, d.doneAt)) / 24, 1) avgDays
+       FROM (${doneEvents}) d JOIN tasks t ON t.id = d.task_id
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+      doneParams,
+    );
+    const [[{ avgDaysPrev }]] = await db.query(
+      `SELECT ROUND(AVG(TIMESTAMPDIFF(HOUR, t.created_at, d.doneAt)) / 24, 1) avgDaysPrev
+       FROM (${doneEvents}) d JOIN tasks t ON t.id = d.task_id
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 60 DAY)
+       AND d.doneAt < DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+      doneParams,
+    );
+
+    // ── Weekly buckets (last 5 rolling 7-day windows) ─────────────────────
+    // wago 0 = this week (last 7 days), 1 = the week before, … up to 4.
+    const [doneWeeks] = await db.query(
+      `SELECT FLOOR(DATEDIFF(CURDATE(), DATE(d.doneAt)) / 7) wago, COUNT(*) completed
+       FROM (${doneEvents}) d
+       WHERE d.doneAt >= DATE_SUB(CURDATE(), INTERVAL 34 DAY)
+       GROUP BY wago`,
+      doneParams,
+    );
+    const [createdWeeks] = await db.query(
+      `SELECT FLOOR(DATEDIFF(CURDATE(), DATE(created_at)) / 7) wago, COUNT(*) created
+       FROM tasks
+       WHERE (user_id = ? OR assigned_to = ?)
+       AND created_at >= DATE_SUB(CURDATE(), INTERVAL 34 DAY)
+       GROUP BY wago`,
+      owner,
+    );
+
+    const doneByWago = Object.fromEntries(doneWeeks.map((r) => [r.wago, r.completed]));
+    const createdByWago = Object.fromEntries(createdWeeks.map((r) => [r.wago, r.created]));
+
+    const today = new Date();
+    const fmt = (d) =>
+      d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    // Build 5 points, oldest → newest, so the line reads left-to-right.
+    const completionTrend = [];
+    for (let wago = 4; wago >= 0; wago--) {
+      const end = new Date(today);
+      end.setDate(end.getDate() - wago * 7);
+      const start = new Date(end);
+      start.setDate(start.getDate() - 6);
+      const c = doneByWago[wago] || 0;
+      const cr = createdByWago[wago] || 0;
+      completionTrend.push({
+        label: `${fmt(start)} - ${fmt(end)}`,
+        completed: c,
+        created: cr,
+        // "That week's throughput" — completed vs created, capped at 100%.
+        rate: cr ? Math.min(100, Math.round((c / cr) * 100)) : 0,
+      });
+    }
+
+    const thisWeekCompleted = doneByWago[0] || 0;
+    const lastWeekCompleted = doneByWago[1] || 0;
+
+    // ── Most productive weekday (by completions, last 30 days) ────────────
+    const [[bestRow]] = await db.query(
+      `SELECT DAYNAME(d.doneAt) day, COUNT(*) c FROM (${doneEvents}) d
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+       GROUP BY DAYNAME(d.doneAt), DAYOFWEEK(d.doneAt)
+       ORDER BY c DESC LIMIT 1`,
+      doneParams,
+    );
+
+    // ── Productivity score (0–100), transparent blend ─────────────────────
+    //   60% how much you finish · 25% staying on time · 15% recent throughput
+    const onTimeRate = total ? (1 - overdue / total) * 100 : 100;
+    const activityRate = Math.min(100, (c30 / 30) * 100); // ~1 completion/day target
+    const productivityScore = Math.round(
+      completionRate * 0.6 + onTimeRate * 0.25 + activityRate * 0.15,
+    );
+
+    res.json({
+      success: true,
+      summary: {
+        total,
+        completed,
+        overdue,
+        completionRate,
+        completedThis30: c30,
+        completedPrev30: cPrev30,
+        avgCompletionDays: avgDays, // null when nothing completed in window
+        avgCompletionDaysPrev: avgDaysPrev,
+        productivityScore,
+      },
+      completionTrend,
+      byPriority,
+      byCategory,
+      weeklyPerformance: {
+        thisWeek: thisWeekCompleted,
+        lastWeek: lastWeekCompleted,
+      },
+      bestDay: bestRow?.day || null,
+    });
+  } catch (error) {
+    console.error("[getAnalytics]", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getTaskById,
   getTasks,
@@ -498,4 +667,5 @@ module.exports = {
   deleteTask,
   bulkAction,
   getDashboard,
+  getAnalytics,
 };

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { getDashboardStats } from '../services/taskService'
+import { getDashboardStats, getAnalytics } from '../services/taskService'
 
 const useTaskStore = create((set, get) => ({
 
@@ -21,6 +21,24 @@ const useTaskStore = create((set, get) => ({
   // Call this after creating / editing / deleting a task
   // so Dashboard re-fetches fresh stats next time it mounts
   clearDashboardStats: () => set({ dashboardStats: null }),
+
+  // ── Analytics ────────────────────────────────────────────────────────────────
+  // Tagged with the taskVersion it was fetched at (like boardCache/tasksCache),
+  // so any task mutation implicitly invalidates it — no manual clear needed.
+  analyticsStats: null, // { version, data }
+  analyticsLoading: false,
+
+  fetchAnalytics: async () => {
+    const { analyticsStats, taskVersion } = get()
+    if (analyticsStats && analyticsStats.version === taskVersion) return // fresh — skip
+    set({ analyticsLoading: true })
+    try {
+      const res = await getAnalytics()
+      set({ analyticsStats: { version: get().taskVersion, data: res.data }, analyticsLoading: false })
+    } catch {
+      set({ analyticsLoading: false })
+    }
+  },
 
   // ── Task version counter ───────────────────────────────────────────────────
   // MyTasks watches this — incrementing it triggers a re-fetch
@@ -73,6 +91,8 @@ const useTaskStore = create((set, get) => ({
     set({
       dashboardStats: null,
       dashboardLoading: false,
+      analyticsStats: null,
+      analyticsLoading: false,
       taskVersion: 0,
       boardCache: null,
       tasksCache: null,
