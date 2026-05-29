@@ -1,5 +1,17 @@
 import { create } from "zustand";
 import { disconnectSocket } from "../api/socket";
+import useTaskStore from "./taskStore";
+import useNotificationStore from "./notificationStore";
+import usePresenceStore from "./presenceStore";
+
+// Wipe all per-user, in-memory store state on logout so the next account to
+// log in (without a full page reload) never shows the previous user's cached
+// data. Not done on login to avoid racing the session-restore re-seed on refresh.
+const clearUserState = () => {
+  useTaskStore.getState().reset();
+  useNotificationStore.getState().reset();
+  usePresenceStore.getState().reset();
+};
 
 const useAuthStore = create((set) => ({
   user: null,
@@ -14,6 +26,7 @@ const useAuthStore = create((set) => ({
   logout: () => {
     localStorage.removeItem("token");
     disconnectSocket();
+    clearUserState();
     set({ user: null, token: null, isAuthenticated: false });
   },
 }));

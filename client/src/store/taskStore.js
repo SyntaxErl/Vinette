@@ -66,6 +66,22 @@ const useTaskStore = create((set, get) => ({
   openTaskDetail: (id) => set({ selectedTaskId: id }),
   closeTaskDetail: () => set({ selectedTaskId: null }),
 
+  // ── Reset ────────────────────────────────────────────────────────────────
+  // Clear all cached/per-user state. Called on logout so the next account
+  // never seeds a page from the previous user's cached data.
+  reset: () =>
+    set({
+      dashboardStats: null,
+      dashboardLoading: false,
+      taskVersion: 0,
+      boardCache: null,
+      tasksCache: null,
+      calendarCache: null,
+      isNewTaskModalOpen: false,
+      newTaskDefaults: null,
+      selectedTaskId: null,
+    }),
+
 }))
 
 export default useTaskStore
