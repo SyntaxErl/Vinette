@@ -178,6 +178,7 @@ Vinette/
 | POST | `/tasks` | Yes | Create task (also logs "created this task" to activity_log) |
 | PATCH | `/tasks/bulk` | Yes | Bulk action: `delete`, `done`, or `priority` |
 | GET | `/tasks/dashboard/stats` | Yes | Dashboard aggregates |
+| GET | `/tasks/analytics/stats` | Yes | Analytics aggregates (summary, completion trend, priority/category, weekly performance, best day) |
 | GET | `/tasks/:id` | Yes | Get single task by ID |
 | PUT | `/tasks/:id` | Yes | Update task (diffs & logs field changes to activity_log) |
 | DELETE | `/tasks/:id` | Yes | Delete task |
@@ -267,7 +268,7 @@ Built feature by feature. Update this list whenever a feature ships.
 - [x] Kanban Board (drag-and-drop across Todo / In Progress / Done columns)
 - [x] Task Detail Modal (inline-editable title/description, status dropdown, progress bar, subtasks, comments, **Details sidebar with single Edit → Apply/Cancel flow**, activity log — opens from Kanban cards and MyTasks rows)
 - [x] Calendar View (monthly grid + agenda via react-big-calendar; tasks placed by `due_date`, colored by category. The day cell is the only click target: an **empty** day → New Task Modal pre-filled with that date; a day that **has** tasks — clicked anywhere, including a task chip, or via its "+N more" → a popover **at the click point** listing that day's tasks — click a task to open its Task Detail modal, or use the "Add task" button)
-- [ ] Analytics page (completion rate, priority/category charts, trends)
+- [x] Analytics page (completion rate, priority/category charts, completion-rate-over-time, productivity score, avg completion time, weekly performance, insights & trends)
 - [x] Notifications system (real-time bell via Socket.IO; triggered on task assign/reassign, completion, and new comments)
 - [ ] User Profile & Settings (avatar, theme, notification preferences)
 - [x] Team page (member directory + stat cards, **real-time presence via Socket.IO**, **real email invites (Resend) + token accept flow**, role management, per-member assigned-tasks/activity sidebar, Send Message via `mailto:`)
@@ -275,6 +276,52 @@ Built feature by feature. Update this list whenever a feature ships.
 ---
 
 ## Session Log
+
+### 2026-05-29 — Analytics page
+
+**Done:**
+- Built `client/src/pages/Analytics.jsx` (was a stub mis-named `TaskCard`) — kept the page thin and
+  split everything into `client/src/components/analytics/`:
+  - `analyticsUtils.js` — color/label maps (mirror the Dashboard hexes), formatters (`formatDuration`,
+    `pct`, `capitalize`), and `deriveInsights()` (builds the bottom cards from the payload). **No JSX**
+    so it doesn't trip `react-refresh/only-export-components`.
+  - `tooltips.jsx` — the three shared recharts tooltips (kept separate from the constants for the same
+    fast-refresh reason).
+  - `ChartCard.jsx` — shared white-card wrapper (title/subtitle/right slot + empty state) so each chart
+    only owns its chart.
+  - `StatCard.jsx` / `SummaryCards.jsx` — the 4 top cards (Completion Rate w/ inline SVG sparkline,
+    Tasks Completed, Productivity Score w/ `ScoreRing`, Avg. Completion Time).
+  - `ScoreRing.jsx` — reusable SVG gauge.
+  - `CompletionTrendChart.jsx` (area), `PriorityChart.jsx` (bar + legend), `CategoryDonut.jsx` (donut +
+    legend), `WeeklyPerformance.jsx`, `InsightsTrends.jsx`.
+  - `components/AnalyticsSkeleton.jsx` (matches the layout, styled like `DashboardSkeleton`).
+- **Backend:** new `getAnalytics` controller + `GET /tasks/analytics/stats` route. Scoped owner-OR-assignee
+  like the dashboard. Returns `summary` (total/completed/overdue, completionRate, completedThis30/Prev30,
+  avgCompletionDays/Prev, productivityScore), `completionTrend` (5 rolling weeks), `byPriority`,
+  `byCategory`, `weeklyPerformance` (this vs last week completed), and `bestDay`.
+  - **Completion timing** has no `completed_at`/`updated_at` column to read, so it's derived from the
+    `activity_log` row written on completion — `action = 'changed status to "Done"'` (the exact string
+    `updateTask` writes; keep them in sync). First done-event per task = its "completed at".
+  - Productivity score is a transparent blend: `0.6·completionRate + 0.25·onTimeRate + 0.15·recentActivityRate`.
+- **Store:** `analyticsStats` (tagged `{ version, data }`) + `analyticsLoading` + `fetchAnalytics` in
+  `taskStore`. Uses the **taskVersion-tag** pattern (like `boardCache`/`tasksCache`) so any task mutation
+  implicitly invalidates it — no manual clear needed across all the mutation sites. Added to `reset()`.
+  Service: `getAnalytics()` in `taskService.js`. Page watches `taskVersion` to refetch.
+- Navbar already wired `AnalyticsDateRange` + `ExportReportButton` for `/analytics` — both are still
+  decorative (static last-30-days label / no-op export); left as-is, out of scope.
+
+**Verify next session (needs MySQL + both servers + manual test — NOT runnable in the sandbox):**
+- Page loads with summary cards, charts, weekly performance, insights. Numbers sane vs the DB.
+- Completion-rate-over-time line populates only if tasks were marked Done (relies on the activity_log
+  done events — tasks created directly as `done` won't have one, so avg-time/trend ignore them).
+- Edit a task / mark done → revisit Analytics → numbers refresh (taskVersion invalidation); revisit with
+  no changes → cache hit, no refetch.
+
+**Lint/build:** `client` production build passes; ESLint clean on the new files; server controller/routes
+parse (`node -c`). DB connection still can't be exercised in the sandbox (expected).
+
+**Next task:** User Profile & Settings — next unchecked item in Feature Progress
+(`client/src/pages/Profile.jsx`: avatar, theme, notification preferences).
 
 ### 2026-05-23 — Team collaboration + Notifications (deployed to prod)
 
