@@ -24,6 +24,15 @@ export default function Register() {
       document.body.style.backgroundColor = "#ffffff";
     };
   }, []);
+
+  // Manual sign-up (not arriving from an invite link) → start fresh.
+  // Drop any stale pendingInviteToken so the new account doesn't auto-join
+  // a team and pull in its data after login.
+  useEffect(() => {
+    if (!invited) {
+      localStorage.removeItem("pendingInviteToken");
+    }
+  }, [invited]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
