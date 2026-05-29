@@ -23,18 +23,30 @@ const useTaskStore = create((set, get) => ({
   clearDashboardStats: () => set({ dashboardStats: null }),
 
   // ── Analytics ────────────────────────────────────────────────────────────────
-  // Tagged with the taskVersion it was fetched at (like boardCache/tasksCache),
-  // so any task mutation implicitly invalidates it — no manual clear needed.
-  analyticsStats: null, // { version, data }
+  // analyticsRange — date-range window in days, driven by the navbar picker.
+  // analyticsStats is tagged with { version, range } so a task mutation OR a
+  // range change invalidates it (like boardCache/tasksCache).
+  analyticsRange: 30,
+  setAnalyticsRange: (days) => set({ analyticsRange: days }),
+
+  analyticsStats: null, // { version, range, data }
   analyticsLoading: false,
 
   fetchAnalytics: async () => {
-    const { analyticsStats, taskVersion } = get()
-    if (analyticsStats && analyticsStats.version === taskVersion) return // fresh — skip
+    const { analyticsStats, taskVersion, analyticsRange } = get()
+    if (
+      analyticsStats &&
+      analyticsStats.version === taskVersion &&
+      analyticsStats.range === analyticsRange
+    )
+      return // fresh — skip
     set({ analyticsLoading: true })
     try {
-      const res = await getAnalytics()
-      set({ analyticsStats: { version: get().taskVersion, data: res.data }, analyticsLoading: false })
+      const res = await getAnalytics(analyticsRange)
+      set({
+        analyticsStats: { version: get().taskVersion, range: get().analyticsRange, data: res.data },
+        analyticsLoading: false,
+      })
     } catch {
       set({ analyticsLoading: false })
     }
@@ -93,6 +105,7 @@ const useTaskStore = create((set, get) => ({
       dashboardLoading: false,
       analyticsStats: null,
       analyticsLoading: false,
+      analyticsRange: 30,
       taskVersion: 0,
       boardCache: null,
       tasksCache: null,

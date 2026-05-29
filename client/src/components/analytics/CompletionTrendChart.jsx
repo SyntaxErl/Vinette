@@ -19,10 +19,10 @@ export default function CompletionTrendChart({ trend = [] }) {
   return (
     <ChartCard
       title="Completion Rate Over Time"
-      subtitle="Weekly completion rate (completed vs created)"
+      subtitle="Completion rate over the selected range (completed vs created)"
       isEmpty={!hasData}
       emptyIcon="show_chart"
-      emptyText="No completed tasks in the last 5 weeks"
+      emptyText="No completed tasks in this range"
       className="lg:col-span-3"
     >
       <ResponsiveContainer width="100%" height={260}>

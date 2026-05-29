@@ -178,7 +178,7 @@ Vinette/
 | POST | `/tasks` | Yes | Create task (also logs "created this task" to activity_log) |
 | PATCH | `/tasks/bulk` | Yes | Bulk action: `delete`, `done`, or `priority` |
 | GET | `/tasks/dashboard/stats` | Yes | Dashboard aggregates |
-| GET | `/tasks/analytics/stats` | Yes | Analytics aggregates (summary, completion trend, priority/category, weekly performance, best day) |
+| GET | `/tasks/analytics/stats` | Yes | Analytics aggregates (summary, completion trend, priority/category, weekly performance, best day) — `?days=N` scopes the window to the selected date range |
 | GET | `/tasks/:id` | Yes | Get single task by ID |
 | PUT | `/tasks/:id` | Yes | Update task (diffs & logs field changes to activity_log) |
 | DELETE | `/tasks/:id` | Yes | Delete task |
@@ -277,6 +277,33 @@ Built feature by feature. Update this list whenever a feature ships.
 
 ## Session Log
 
+### 2026-05-29 — Analytics date range + Export Report (made functional)
+
+**Done:**
+- **Date-range picker works.** `AnalyticsDateRange` (navbar) is now a dropdown (Last 7 / 30 / 90 days)
+  bound to `taskStore.analyticsRange` (+ `setAnalyticsRange`). `getAnalytics(days)` passes `?days=N`;
+  `fetchAnalytics` keys its cache on `{ version, range }` so changing the range (or any task mutation)
+  refetches, and the Analytics page effect now also depends on `analyticsRange`. The picker shows the
+  live date span for the selection.
+- **Backend is range-aware.** `getAnalytics` reads `?days` (sanitised int, clamped ≤366) and scopes
+  everything to that window: totals + distributions = tasks **created** in the window; completed / avg
+  time / best day = done-events in the window; the period-vs-previous deltas compare equal back-to-back
+  windows. Completion-trend granularity is **adaptive** — daily buckets for ranges ≤10 days, weekly
+  otherwise. `weeklyPerformance` stays fixed 7-day windows (independent of range). Completion rate is
+  capped at 100%. Response now includes `range: { days, label }`; summary fields renamed
+  `completedThis30/Prev30` → `completedThisPeriod/PrevPeriod`.
+- **Export Report works.** `ExportReportButton` builds a CSV from the cached analytics payload
+  (`components/analytics/exportReport.js`) and downloads `taskflow-analytics-<date>.csv` (summary,
+  completion trend, priority/category, weekly performance). Toasts on success / if data isn't loaded yet.
+- Summary card labels + insight text now reflect the selected range (e.g. "vs last 7 days").
+
+**Verify next session (needs MySQL + both servers):** switch the range → numbers + trend update
+(daily points for 7d, weekly for 30/90d); cache hit on revisit with same range; Export downloads a CSV
+that matches the on-screen numbers.
+
+**Next task:** User Profile & Settings — next unchecked item in Feature Progress
+(`client/src/pages/Profile.jsx`: avatar, theme, notification preferences).
+
 ### 2026-05-29 — Analytics page
 
 **Done:**
@@ -307,8 +334,8 @@ Built feature by feature. Update this list whenever a feature ships.
   `taskStore`. Uses the **taskVersion-tag** pattern (like `boardCache`/`tasksCache`) so any task mutation
   implicitly invalidates it — no manual clear needed across all the mutation sites. Added to `reset()`.
   Service: `getAnalytics()` in `taskService.js`. Page watches `taskVersion` to refetch.
-- Navbar already wired `AnalyticsDateRange` + `ExportReportButton` for `/analytics` — both are still
-  decorative (static last-30-days label / no-op export); left as-is, out of scope.
+- Navbar already wired `AnalyticsDateRange` + `ExportReportButton` for `/analytics` — decorative when
+  first built; **made functional in the follow-up entry above.**
 
 **Verify next session (needs MySQL + both servers + manual test — NOT runnable in the sandbox):**
 - Page loads with summary cards, charts, weekly performance, insights. Numbers sane vs the DB.

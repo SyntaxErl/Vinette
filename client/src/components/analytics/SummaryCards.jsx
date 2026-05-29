@@ -36,8 +36,9 @@ const scoreHint = (s) => {
   return "Just getting started";
 };
 
-export default function SummaryCards({ summary, completionTrend }) {
-  const completedDelta = summary.completedThis30 - summary.completedPrev30;
+export default function SummaryCards({ summary, completionTrend, rangeLabel = "last 30 days" }) {
+  const completedDelta = summary.completedThisPeriod - summary.completedPrevPeriod;
+  const vsLabel = `vs ${rangeLabel}`;
 
   // Average completion time trend (faster = good).
   let avgTrend = null;
@@ -48,7 +49,7 @@ export default function SummaryCards({ summary, completionTrend }) {
         up: diff > 0,
         good: diff < 0, // shorter completion time is better
         value: `${Math.abs(diff)} ${Math.abs(diff) === 1 ? "day" : "days"}`,
-        label: "vs last 30 days",
+        label: vsLabel,
       };
     }
   }
@@ -64,20 +65,20 @@ export default function SummaryCards({ summary, completionTrend }) {
           up: completedDelta >= 0,
           good: completedDelta >= 0,
           value: `${completedDelta >= 0 ? "+" : ""}${completedDelta}`,
-          label: "completed vs last 30 days",
+          label: `completed ${vsLabel}`,
         }}
         visual={<Sparkline points={completionTrend} />}
       />
 
       <StatCard
         label="Tasks Completed"
-        value={summary.completedThis30}
+        value={summary.completedThisPeriod}
         tone="green"
         trend={{
           up: completedDelta >= 0,
           good: completedDelta >= 0,
           value: `${completedDelta >= 0 ? "+" : ""}${completedDelta}`,
-          label: "vs last 30 days",
+          label: vsLabel,
         }}
         visual={
           <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-100">

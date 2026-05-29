@@ -13,13 +13,15 @@ export default function Analytics() {
   const analyticsLoading = useTaskStore((s) => s.analyticsLoading);
   const fetchAnalytics = useTaskStore((s) => s.fetchAnalytics);
   // taskVersion is the cross-view invalidation signal: any task mutation bumps
-  // it, which re-runs this effect; fetchAnalytics refetches only when the cached
-  // version is stale (see taskStore.fetchAnalytics).
+  // it, which re-runs this effect. analyticsRange changes when the navbar
+  // date-range picker is used. fetchAnalytics refetches only when the cached
+  // version/range is stale (see taskStore.fetchAnalytics).
   const taskVersion = useTaskStore((s) => s.taskVersion);
+  const analyticsRange = useTaskStore((s) => s.analyticsRange);
 
   useEffect(() => {
     fetchAnalytics();
-  }, [fetchAnalytics, taskVersion]);
+  }, [fetchAnalytics, taskVersion, analyticsRange]);
 
   if (analyticsLoading && !analyticsStats) return <AnalyticsSkeleton />;
 
@@ -28,7 +30,11 @@ export default function Analytics() {
 
   return (
     <div className="max-w-7xl mx-auto w-full px-1 sm:px-6 lg:px-8" style={{ fontFamily: "Inter, sans-serif" }}>
-      <SummaryCards summary={data.summary} completionTrend={data.completionTrend} />
+      <SummaryCards
+        summary={data.summary}
+        completionTrend={data.completionTrend}
+        rangeLabel={data.range?.label}
+      />
 
       {/* Trend (full row) · Priority (2/3) · Category (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
