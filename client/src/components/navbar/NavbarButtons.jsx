@@ -22,6 +22,9 @@ export const NewTaskButton = ({ mobile = false }) => {
 
 export const InviteMemberButton = ({ mobile = false }) => {
   const openInviteModal = useTeamStore((state) => state.openInviteModal)
+  const canManage = useTeamStore((state) => state.canManage)
+
+  if (!canManage) return null
 
   return (
     <button
