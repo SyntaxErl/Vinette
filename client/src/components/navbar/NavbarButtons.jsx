@@ -1,5 +1,7 @@
 import useTaskStore from '../../store/taskStore'
 import useTeamStore from '../../store/teamStore'
+import toast from 'react-hot-toast'
+import { exportAnalyticsCsv } from '../analytics/exportReport'
 
 // ─── Navbar Button Sub-components ────────────────────────────────────────────
 
@@ -20,9 +22,6 @@ export const NewTaskButton = ({ mobile = false }) => {
 
 export const InviteMemberButton = ({ mobile = false }) => {
   const openInviteModal = useTeamStore((state) => state.openInviteModal)
-  const canManage = useTeamStore((state) => state.canManage)
-
-  if (!canManage) return null
 
   return (
     <button
@@ -38,13 +37,13 @@ export const InviteMemberButton = ({ mobile = false }) => {
 
 export const ExportReportButton = ({ mobile = false }) => {
   const handleExport = () => {
-    const stats = useTaskStore.getState().analyticsStats;
+    const stats = useTaskStore.getState().analyticsStats
     if (!stats?.data) {
-      toast.error("Analytics are still loading — try again in a moment");
-      return;
+      toast.error('Analytics are still loading — try again in a moment')
+      return
     }
-    if (exportAnalyticsCsv(stats.data)) toast.success("Report exported");
-  };
+    if (exportAnalyticsCsv(stats.data)) toast.success('Report exported')
+  }
 
   return (
     <button
