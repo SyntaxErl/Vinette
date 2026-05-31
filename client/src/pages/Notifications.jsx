@@ -1,13 +1,7 @@
-import { useState, useEffect } from 'react'
 import useTaskStore from '@/store/taskStore'
 import useNotificationStore from '@/store/notificationStore'
 import { timeAgo } from '@/components/taskDetail/utils'
-import {
-  getNotifications,
-  markNotificationRead,
-  markAllNotificationsRead,
-  clearNotifications,
-} from '@/services/notificationService'
+import { useEffect } from 'react'
 
 const TYPE_ICON = {
   task:    { icon: 'check_box',        color: '#5b4fcf' },
@@ -18,42 +12,26 @@ const TYPE_ICON = {
 
 export default function Notifications() {
   const openTaskDetail = useTaskStore((s) => s.openTaskDetail)
-  const setUnreadCount = useNotificationStore((s) => s.setUnreadCount)
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
+  const items = useNotificationStore((s) => s.notifications)
+  const loading = useNotificationStore((s) => s.notificationsLoading)
+  const fetchNotifications = useNotificationStore((s) => s.fetchNotifications)
+  const markRead = useNotificationStore((s) => s.markRead)
+  const markAllRead = useNotificationStore((s) => s.markAllRead)
+  const clearAll = useNotificationStore((s) => s.clearAll)
 
+  // Cache hit on revisit: fetchNotifications skips the call when the list is
+  // already loaded (the socket keeps the cache fresh).
   useEffect(() => {
-    let active = true
-    getNotifications()
-      .then((res) => { if (active) setItems(res.data.notifications || []) })
-      .catch(() => {})
-      .finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [])
+    fetchNotifications()
+  }, [fetchNotifications])
 
-  // Keep the navbar badge in sync with this list.
-  useEffect(() => {
-    setUnreadCount(items.filter((n) => !n.is_read).length)
-  }, [items, setUnreadCount])
-
-  const unread = items.filter((n) => !n.is_read).length
+  const list = items ?? []
+  const isLoading = loading && items === null
+  const unread = list.filter((n) => !n.is_read).length
 
   const onClick = (n) => {
-    if (!n.is_read) {
-      markNotificationRead(n.id).catch(() => {})
-      setItems((prev) => prev.map((x) => (x.id === n.id ? { ...x, is_read: 1 } : x)))
-    }
+    if (!n.is_read) markRead(n.id)
     if (n.related_task_id) openTaskDetail(n.related_task_id)
-  }
-
-  const markAll = () => {
-    markAllNotificationsRead().catch(() => {})
-    setItems((prev) => prev.map((x) => ({ ...x, is_read: 1 })))
-  }
-
-  const clearAll = () => {
-    clearNotifications().catch(() => {})
-    setItems([])
   }
 
   return (
@@ -66,11 +44,11 @@ export default function Notifications() {
           </p>
           <div className="flex items-center gap-2">
             {unread > 0 && (
-              <button onClick={markAll} className="text-xs font-medium text-purple-600 hover:text-purple-800 px-3 py-1.5 rounded-lg hover:bg-purple-50 transition">
+              <button onClick={markAllRead} className="text-xs font-medium text-purple-600 hover:text-purple-800 px-3 py-1.5 rounded-lg hover:bg-purple-50 transition">
                 Mark all read
               </button>
             )}
-            {items.length > 0 && (
+            {list.length > 0 && (
               <button onClick={clearAll} className="text-xs font-medium text-gray-400 hover:text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">
                 Clear all
               </button>
@@ -79,11 +57,11 @@ export default function Notifications() {
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          {loading ? (
+          {isLoading ? (
             <div className="flex items-center justify-center py-20">
               <span className="material-icons animate-spin text-purple-400" style={{ fontSize: '32px' }}>autorenew</span>
             </div>
-          ) : items.length === 0 ? (
+          ) : list.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <span className="material-icons text-gray-200 mb-3" style={{ fontSize: '48px' }}>notifications_off</span>
               <p className="text-sm font-medium text-gray-400">No notifications yet</p>
@@ -91,7 +69,7 @@ export default function Notifications() {
             </div>
           ) : (
             <ul>
-              {items.map((n) => {
+              {list.map((n) => {
                 const { icon, color } = TYPE_ICON[n.type] ?? TYPE_ICON.default
                 const isUnread = !n.is_read
                 return (

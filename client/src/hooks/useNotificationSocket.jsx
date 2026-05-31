@@ -10,9 +10,10 @@ import { getSocket } from '@/api/socket'
 export default function useNotificationSocket() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const setUnreadCount = useNotificationStore((s) => s.setUnreadCount)
-  const incrementUnread = useNotificationStore((s) => s.incrementUnread)
+  const addNotification = useNotificationStore((s) => s.addNotification)
 
-  // Seed the badge from the server on auth.
+  // Seed the badge from the server on auth (count only — the full list is
+  // fetched lazily and cached the first time the modal/page opens).
   useEffect(() => {
     if (!isAuthenticated) return
     getNotifications(true)
@@ -27,7 +28,8 @@ export default function useNotificationSocket() {
     if (!socket) return
 
     const onNew = (notif) => {
-      incrementUnread()
+      // Prepend to the cached list (if loaded) and bump the unread count.
+      addNotification(notif)
       toast(notif?.message || notif?.title || 'New notification', { icon: '🔔' })
       // A task was assigned / reassigned / completed for me by someone else →
       // refresh task views (board, list, calendar, dashboard) without a reload.
@@ -39,5 +41,5 @@ export default function useNotificationSocket() {
     }
     socket.on('notification:new', onNew)
     return () => socket.off('notification:new', onNew)
-  }, [isAuthenticated, incrementUnread])
+  }, [isAuthenticated, addNotification])
 }

@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
 import useTaskStore from "../store/taskStore";
+import useNotificationStore from "../store/notificationStore";
 
 const timeAgo = (ts) => {
   const diff = Math.floor((Date.now() - new Date(ts)) / 1000);
@@ -19,35 +19,28 @@ const TYPE_ICON = {
 };
 
 
-export default function NotificationModal({ onClose, onCountChange }) {
+export default function NotificationModal({ onClose }) {
   const navigate = useNavigate();
   const openTaskDetail = useTaskStore((s) => s.openTaskDetail);
   const modalRef = useRef(null);
 
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Store-backed cache (shared with the Notifications page). The list is fetched
+  // once and reused; fetchNotifications is a no-op cache hit when already loaded,
+  // and the socket keeps it fresh.
+  const notifications = useNotificationStore((s) => s.notifications);
+  const loading = useNotificationStore((s) => s.notificationsLoading);
+  const fetchNotifications = useNotificationStore((s) => s.fetchNotifications);
+  const markRead = useNotificationStore((s) => s.markRead);
+  const markAllRead = useNotificationStore((s) => s.markAllRead);
+  const clearAll = useNotificationStore((s) => s.clearAll);
 
-  // Fetch all notifications on mount
+  const list = notifications ?? [];
+  const isLoading = loading && notifications === null;
+
+  // Fetch on open (cache hit if already loaded).
   useEffect(() => {
-    const controller = new AbortController();
-    const fetchNotifications = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get("/notifications", {
-          signal: controller.signal,
-        });
-        setNotifications(res.data.notifications || []);
-      } catch (err) {
-        if (err.name !== "CanceledError")
-          setError("Failed to load notifications.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchNotifications();
-    return () => controller.abort();
-  }, []);
+  }, [fetchNotifications]);
 
   // Click-outside closes modal
   useEffect(() => {
@@ -58,44 +51,15 @@ export default function NotificationModal({ onClose, onCountChange }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
-  // Sync unread count back to Navbar bell badge
-  useEffect(() => {
-    const unread = notifications.filter((n) => !n.is_read).length;
-    onCountChange?.(unread);
-  }, [notifications, onCountChange]);
-
-  const markOneRead = async (id) => {
-    try {
-      await api.patch(`/notifications/${id}/read`);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: 1 } : n)),
-      );
-    } catch (_) {}
-  };
-
-  const markAllRead = async () => {
-    try {
-      await api.patch("/notifications/read-all");
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: 1 })));
-    } catch (_) {}
-  };
-
-  const clearAll = async () => {
-    try {
-      await api.delete("/notifications");
-      setNotifications([]);
-    } catch (_) {}
-  };
-
   const handleNotifClick = (notif) => {
-    if (!notif.is_read) markOneRead(notif.id);
+    if (!notif.is_read) markRead(notif.id);
     if (notif.related_task_id) {
       openTaskDetail(notif.related_task_id);
       onClose();
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const unreadCount = list.filter((n) => !n.is_read).length;
 
   return (
     // Backdrop
@@ -134,7 +98,7 @@ export default function NotificationModal({ onClose, onCountChange }) {
                 Mark all read
               </button>
             )}
-            {notifications.length > 0 && (
+            {list.length > 0 && (
               <button
                 onClick={clearAll}
                 className="text-xs text-gray-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 transition font-medium"
@@ -159,7 +123,7 @@ export default function NotificationModal({ onClose, onCountChange }) {
 
         {/* Body */}
         <div className="overflow-y-auto flex-1">
-          {loading && (
+          {isLoading && (
             <div className="flex items-center justify-center py-12">
               <span
                 className="material-icons text-gray-300 animate-spin"
@@ -170,19 +134,7 @@ export default function NotificationModal({ onClose, onCountChange }) {
             </div>
           )}
 
-          {error && !loading && (
-            <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-              <span
-                className="material-icons text-red-300 mb-2"
-                style={{ fontSize: "32px" }}
-              >
-                error_outline
-              </span>
-              <p className="text-sm text-gray-500">{error}</p>
-            </div>
-          )}
-
-          {!loading && !error && notifications.length === 0 && (
+          {!isLoading && list.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center px-4">
               <span
                 className="material-icons text-gray-200 mb-2"
@@ -199,9 +151,9 @@ export default function NotificationModal({ onClose, onCountChange }) {
             </div>
           )}
 
-          {!loading && !error && notifications.length > 0 && (
+          {!isLoading && list.length > 0 && (
             <ul>
-              {notifications.map((notif) => {
+              {list.map((notif) => {
                 const { icon, color } =
                   TYPE_ICON[notif.type] ?? TYPE_ICON.default;
                 const isUnread = !notif.is_read;
