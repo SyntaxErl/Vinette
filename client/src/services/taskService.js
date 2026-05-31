@@ -32,9 +32,9 @@ export const bulkAction = (taskIds, action, extra = {}) =>
 export const getDashboardStats = () =>
   api.get('/tasks/dashboard/stats')
 
-// Analytics stats
-export const getAnalytics = () =>
-  api.get('/tasks/analytics/stats')
+// Analytics stats — `days` = selected date-range window length
+export const getAnalytics = (days = 30) =>
+  api.get('/tasks/analytics/stats', { params: { days } })
 
 // ── Subtasks ────────────────────────────────────────────────────────────────────
 export const getSubtasks = (taskId) =>

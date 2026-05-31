@@ -499,16 +499,25 @@ const getAnalytics = async (req, res) => {
   const userId = req.user.userId;
   const owner = [userId, userId];
 
+  // Selected window length in days (from the navbar date-range picker).
+  // Sanitised to a safe integer so it can be inlined into INTERVAL clauses.
+  let days = parseInt(req.query.days, 10);
+  if (!Number.isFinite(days) || days <= 0) days = 30;
+  days = Math.min(days, 366);
+  const prev = days * 2; // start of the "previous period" comparison window
+
   try {
-    // ── Totals ────────────────────────────────────────────────────────────
+    // Everything is scoped to the selected window (tasks created within it, and
+    // completions that happened within it) so the date-range picker actually
+    // changes the numbers.
+
+    // ── Totals (created in window) ─────────────────────────────────────────
     const [[{ total }]] = await db.query(
-      "SELECT COUNT(*) total FROM tasks WHERE (user_id = ? OR assigned_to = ?)",
+      `SELECT COUNT(*) total FROM tasks
+       WHERE (user_id = ? OR assigned_to = ?) AND created_at >= DATE_SUB(NOW(), INTERVAL ${days} DAY)`,
       owner,
     );
-    const [[{ completed }]] = await db.query(
-      "SELECT COUNT(*) completed FROM tasks WHERE (user_id = ? OR assigned_to = ?) AND status = 'done'",
-      owner,
-    );
+    // Overdue is a "right now" state, intentionally not window-scoped.
     const [[{ overdue }]] = await db.query(
       `SELECT COUNT(*) overdue FROM tasks
        WHERE (user_id = ? OR assigned_to = ?)
@@ -516,15 +525,17 @@ const getAnalytics = async (req, res) => {
       owner,
     );
 
-    const completionRate = total ? Math.round((completed / total) * 100) : 0;
-
-    // ── Distributions ─────────────────────────────────────────────────────
+    // ── Distributions (created in window) ──────────────────────────────────
     const [byPriority] = await db.query(
-      "SELECT priority, COUNT(*) count FROM tasks WHERE (user_id = ? OR assigned_to = ?) GROUP BY priority",
+      `SELECT priority, COUNT(*) count FROM tasks
+       WHERE (user_id = ? OR assigned_to = ?) AND created_at >= DATE_SUB(NOW(), INTERVAL ${days} DAY)
+       GROUP BY priority`,
       owner,
     );
     const [byCategory] = await db.query(
-      "SELECT category, COUNT(*) count FROM tasks WHERE (user_id = ? OR assigned_to = ?) GROUP BY category",
+      `SELECT category, COUNT(*) count FROM tasks
+       WHERE (user_id = ? OR assigned_to = ?) AND created_at >= DATE_SUB(NOW(), INTERVAL ${days} DAY)
+       GROUP BY category`,
       owner,
     );
 
@@ -537,83 +548,107 @@ const getAnalytics = async (req, res) => {
       GROUP BY a.task_id`;
     const doneParams = [...owner, DONE_ACTION];
 
-    // ── Completed: last 30 days vs the 30 before that ─────────────────────
-    const [[{ c30 }]] = await db.query(
-      `SELECT COUNT(*) c30 FROM (${doneEvents}) d
-       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+    // ── Completed: this window vs the equal window before it ───────────────
+    const [[{ cCur }]] = await db.query(
+      `SELECT COUNT(*) cCur FROM (${doneEvents}) d
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL ${days} DAY)`,
       doneParams,
     );
-    const [[{ cPrev30 }]] = await db.query(
-      `SELECT COUNT(*) cPrev30 FROM (${doneEvents}) d
-       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 60 DAY)
-       AND d.doneAt < DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+    const [[{ cPrev }]] = await db.query(
+      `SELECT COUNT(*) cPrev FROM (${doneEvents}) d
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL ${prev} DAY)
+       AND d.doneAt < DATE_SUB(NOW(), INTERVAL ${days} DAY)`,
       doneParams,
     );
+
+    const completed = cCur;
+    const completionRate = total ? Math.min(100, Math.round((completed / total) * 100)) : 0;
 
     // ── Average completion time (days), created_at → first doneAt ─────────
     const [[{ avgDays }]] = await db.query(
       `SELECT ROUND(AVG(TIMESTAMPDIFF(HOUR, t.created_at, d.doneAt)) / 24, 1) avgDays
        FROM (${doneEvents}) d JOIN tasks t ON t.id = d.task_id
-       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL ${days} DAY)`,
       doneParams,
     );
     const [[{ avgDaysPrev }]] = await db.query(
       `SELECT ROUND(AVG(TIMESTAMPDIFF(HOUR, t.created_at, d.doneAt)) / 24, 1) avgDaysPrev
        FROM (${doneEvents}) d JOIN tasks t ON t.id = d.task_id
-       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 60 DAY)
-       AND d.doneAt < DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL ${prev} DAY)
+       AND d.doneAt < DATE_SUB(NOW(), INTERVAL ${days} DAY)`,
       doneParams,
     );
 
-    // ── Weekly buckets (last 5 rolling 7-day windows) ─────────────────────
-    // wago 0 = this week (last 7 days), 1 = the week before, … up to 4.
-    const [doneWeeks] = await db.query(
-      `SELECT FLOOR(DATEDIFF(CURDATE(), DATE(d.doneAt)) / 7) wago, COUNT(*) completed
+    // ── Completion trend (adaptive: daily for short ranges, else weekly) ───
+    const daily = days <= 10;
+    const bucketDays = daily ? 1 : 7;
+    const nBuckets = Math.ceil(days / bucketDays);
+    const spanDays = nBuckets * bucketDays - 1; // covers all buckets
+
+    const [doneBuckets] = await db.query(
+      `SELECT FLOOR(DATEDIFF(CURDATE(), DATE(d.doneAt)) / ${bucketDays}) bi, COUNT(*) completed
        FROM (${doneEvents}) d
-       WHERE d.doneAt >= DATE_SUB(CURDATE(), INTERVAL 34 DAY)
-       GROUP BY wago`,
+       WHERE d.doneAt >= DATE_SUB(CURDATE(), INTERVAL ${spanDays} DAY)
+       GROUP BY bi`,
       doneParams,
     );
-    const [createdWeeks] = await db.query(
-      `SELECT FLOOR(DATEDIFF(CURDATE(), DATE(created_at)) / 7) wago, COUNT(*) created
+    const [createdBuckets] = await db.query(
+      `SELECT FLOOR(DATEDIFF(CURDATE(), DATE(created_at)) / ${bucketDays}) bi, COUNT(*) created
        FROM tasks
-       WHERE (user_id = ? OR assigned_to = ?)
-       AND created_at >= DATE_SUB(CURDATE(), INTERVAL 34 DAY)
-       GROUP BY wago`,
+       WHERE (user_id = ? OR assigned_to = ?) AND created_at >= DATE_SUB(CURDATE(), INTERVAL ${spanDays} DAY)
+       GROUP BY bi`,
       owner,
     );
 
-    const doneByWago = Object.fromEntries(doneWeeks.map((r) => [r.wago, r.completed]));
-    const createdByWago = Object.fromEntries(createdWeeks.map((r) => [r.wago, r.created]));
+    const doneByBi = Object.fromEntries(doneBuckets.map((r) => [r.bi, r.completed]));
+    const createdByBi = Object.fromEntries(createdBuckets.map((r) => [r.bi, r.created]));
 
     const today = new Date();
     const fmt = (d) =>
       d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    // Build 5 points, oldest → newest, so the line reads left-to-right.
+    // Build buckets oldest → newest so the line reads left-to-right.
     const completionTrend = [];
-    for (let wago = 4; wago >= 0; wago--) {
-      const end = new Date(today);
-      end.setDate(end.getDate() - wago * 7);
-      const start = new Date(end);
-      start.setDate(start.getDate() - 6);
-      const c = doneByWago[wago] || 0;
-      const cr = createdByWago[wago] || 0;
+    for (let bi = nBuckets - 1; bi >= 0; bi--) {
+      const c = doneByBi[bi] || 0;
+      const cr = createdByBi[bi] || 0;
+      let label;
+      if (daily) {
+        const day = new Date(today);
+        day.setDate(day.getDate() - bi);
+        label = fmt(day);
+      } else {
+        const end = new Date(today);
+        end.setDate(end.getDate() - bi * 7);
+        const start = new Date(end);
+        start.setDate(start.getDate() - 6);
+        label = `${fmt(start)} - ${fmt(end)}`;
+      }
       completionTrend.push({
-        label: `${fmt(start)} - ${fmt(end)}`,
+        label,
         completed: c,
         created: cr,
-        // "That week's throughput" — completed vs created, capped at 100%.
+        // Throughput for the bucket — completed vs created, capped at 100%.
         rate: cr ? Math.min(100, Math.round((c / cr) * 100)) : 0,
       });
     }
 
-    const thisWeekCompleted = doneByWago[0] || 0;
-    const lastWeekCompleted = doneByWago[1] || 0;
+    // ── Weekly performance — fixed 7-day windows, independent of the range ─
+    const [[{ wThis }]] = await db.query(
+      `SELECT COUNT(*) wThis FROM (${doneEvents}) d
+       WHERE d.doneAt >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)`,
+      doneParams,
+    );
+    const [[{ wLast }]] = await db.query(
+      `SELECT COUNT(*) wLast FROM (${doneEvents}) d
+       WHERE d.doneAt >= DATE_SUB(CURDATE(), INTERVAL 13 DAY)
+       AND d.doneAt < DATE_SUB(CURDATE(), INTERVAL 6 DAY)`,
+      doneParams,
+    );
 
-    // ── Most productive weekday (by completions, last 30 days) ────────────
+    // ── Most productive weekday (by completions, in window) ────────────────
     const [[bestRow]] = await db.query(
       `SELECT DAYNAME(d.doneAt) day, COUNT(*) c FROM (${doneEvents}) d
-       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+       WHERE d.doneAt >= DATE_SUB(NOW(), INTERVAL ${days} DAY)
        GROUP BY DAYNAME(d.doneAt), DAYOFWEEK(d.doneAt)
        ORDER BY c DESC LIMIT 1`,
       doneParams,
@@ -622,20 +657,21 @@ const getAnalytics = async (req, res) => {
     // ── Productivity score (0–100), transparent blend ─────────────────────
     //   60% how much you finish · 25% staying on time · 15% recent throughput
     const onTimeRate = total ? (1 - overdue / total) * 100 : 100;
-    const activityRate = Math.min(100, (c30 / 30) * 100); // ~1 completion/day target
+    const activityRate = Math.min(100, (cCur / days) * 100); // ~1 completion/day target
     const productivityScore = Math.round(
       completionRate * 0.6 + onTimeRate * 0.25 + activityRate * 0.15,
     );
 
     res.json({
       success: true,
+      range: { days, label: `last ${days} days` },
       summary: {
         total,
         completed,
         overdue,
         completionRate,
-        completedThis30: c30,
-        completedPrev30: cPrev30,
+        completedThisPeriod: cCur,
+        completedPrevPeriod: cPrev,
         avgCompletionDays: avgDays, // null when nothing completed in window
         avgCompletionDaysPrev: avgDaysPrev,
         productivityScore,
@@ -644,8 +680,8 @@ const getAnalytics = async (req, res) => {
       byPriority,
       byCategory,
       weeklyPerformance: {
-        thisWeek: thisWeekCompleted,
-        lastWeek: lastWeekCompleted,
+        thisWeek: wThis,
+        lastWeek: wLast,
       },
       bestDay: bestRow?.day || null,
     });

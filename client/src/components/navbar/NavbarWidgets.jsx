@@ -230,17 +230,68 @@ export const SearchBar = ({ placeholder }) => {
 };
 
 // ─── Analytics Date Range ─────────────────────────────────────────────────────
+// Wired to taskStore.analyticsRange — picking a preset refetches the Analytics
+// page for that window (see taskStore.fetchAnalytics).
+
+const RANGE_OPTIONS = [
+  { days: 7, label: "Last 7 days" },
+  { days: 30, label: "Last 30 days" },
+  { days: 90, label: "Last 90 days" },
+];
 
 export const AnalyticsDateRange = () => {
+  const analyticsRange = useTaskStore((s) => s.analyticsRange);
+  const setAnalyticsRange = useTaskStore((s) => s.setAnalyticsRange);
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const onClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  const current =
+    RANGE_OPTIONS.find((o) => o.days === analyticsRange) || RANGE_OPTIONS[1];
   const end = new Date();
   const start = new Date();
-  start.setDate(end.getDate() - 30);
+  start.setDate(end.getDate() - current.days);
   const fmt = (d) => d.toLocaleDateString("default", { month: "short", day: "numeric" });
+
   return (
-    <div className="flex items-center gap-1 border border-gray-200 rounded-xl px-3 py-2 bg-white min-w-0">
-      <span className="material-icons text-gray-400 flex-shrink-0" style={{ fontSize: "16px" }}>calendar_today</span>
-      <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">{fmt(start)} – {fmt(end)}</span>
-      <span className="material-icons text-gray-400 flex-shrink-0" style={{ fontSize: "16px" }}>keyboard_arrow_down</span>
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((s) => !s)}
+        className="flex items-center gap-1 border border-gray-200 rounded-xl px-3 py-2 bg-white hover:bg-gray-50 transition min-w-0"
+      >
+        <span className="material-icons text-gray-400 flex-shrink-0" style={{ fontSize: "16px" }}>calendar_today</span>
+        <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">{fmt(start)} – {fmt(end)}</span>
+        <span className="material-icons text-gray-400 flex-shrink-0" style={{ fontSize: "16px" }}>keyboard_arrow_down</span>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-50">
+          {RANGE_OPTIONS.map((opt) => (
+            <button
+              key={opt.days}
+              onClick={() => {
+                setAnalyticsRange(opt.days);
+                setOpen(false);
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-50 ${
+                opt.days === analyticsRange ? "text-purple-600 font-medium" : "text-gray-700"
+              }`}
+            >
+              {opt.label}
+              {opt.days === analyticsRange && (
+                <span className="material-icons" style={{ fontSize: "16px" }}>check</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

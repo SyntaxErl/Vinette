@@ -43,31 +43,32 @@ export const formatDuration = (days) => {
 
 // Build the bottom "Insights & Trends" cards from the analytics payload.
 export const deriveInsights = (data) => {
-  const { summary, byCategory = [], bestDay } = data;
+  const { summary, byCategory = [], bestDay, range } = data;
+  const periodLabel = range?.label || "previous period";
   const insights = [];
 
-  // 1. Completion trend (this 30d vs prev 30d)
-  const delta = summary.completedThis30 - summary.completedPrev30;
+  // 1. Completion trend (this period vs the equal one before it)
+  const delta = summary.completedThisPeriod - summary.completedPrevPeriod;
   if (delta > 0) {
     insights.push({
       icon: "trending_up",
       tone: "green",
       title: "Great progress!",
-      text: `You completed ${delta} more ${delta === 1 ? "task" : "tasks"} than the previous 30 days.`,
+      text: `You completed ${delta} more ${delta === 1 ? "task" : "tasks"} than the ${periodLabel} before.`,
     });
   } else if (delta < 0) {
     insights.push({
       icon: "trending_down",
       tone: "red",
       title: "Slowing down",
-      text: `You completed ${Math.abs(delta)} fewer ${Math.abs(delta) === 1 ? "task" : "tasks"} than the previous 30 days.`,
+      text: `You completed ${Math.abs(delta)} fewer ${Math.abs(delta) === 1 ? "task" : "tasks"} than the ${periodLabel} before.`,
     });
   } else {
     insights.push({
       icon: "trending_flat",
       tone: "purple",
       title: "Steady pace",
-      text: "Your output matched the previous 30 days. Consistency pays off.",
+      text: "Your output matched the previous period. Consistency pays off.",
     });
   }
 

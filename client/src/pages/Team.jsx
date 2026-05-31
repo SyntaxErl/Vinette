@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import useTeamStore from '@/store/teamStore'
 import usePresenceStore from '@/store/presenceStore'
-import { getTeamMembers, removeMember, updateMemberRole } from '@/services/teamService'
+import { removeMember, updateMemberRole } from '@/services/teamService'
 import { errMsg } from '@/components/taskDetail/utils'
 import TeamStats from '@/components/team/TeamStats'
 import TeamFilters from '@/components/team/TeamFilters'
@@ -17,32 +17,25 @@ export default function Team() {
   const teamVersion = useTeamStore((s) => s.teamVersion)
   const incrementTeamVersion = useTeamStore((s) => s.incrementTeamVersion)
   const openInviteModal = useTeamStore((s) => s.openInviteModal)
-  const setCanManage = useTeamStore((s) => s.setCanManage)
+  const fetchTeam = useTeamStore((s) => s.fetchTeam)
+  const teamData = useTeamStore((s) => s.teamData)
+  const teamLoading = useTeamStore((s) => s.teamLoading)
   const presence = usePresenceStore((s) => s.statuses)
 
-  const [data, setData] = useState({ members: [], pending: [], stats: null, viewerIsOwner: true })
-  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
   const [page, setPage] = useState(1)
   const [selectedKey, setSelectedKey] = useState(null)
 
+  // Cache hit on revisit: fetchTeam skips the call unless a mutation bumped
+  // teamVersion since the cache was filled (see teamStore).
   useEffect(() => {
-    let active = true
-    setLoading(true)
-    getTeamMembers()
-      .then((res) => {
-        if (!active) return
-        const viewerIsOwner = res.data.viewerIsOwner !== false
-        setData({ members: res.data.members || [], pending: res.data.pending || [], stats: res.data.stats, viewerIsOwner })
-        setCanManage(viewerIsOwner)
-      })
-      .catch((err) => { if (active) toast.error(errMsg(err, 'Could not load your team')) })
-      .finally(() => { if (active) setLoading(false) })
-    return () => { active = false; setCanManage(true) }
-  }, [teamVersion, setCanManage])
+    fetchTeam().catch((err) => toast.error(errMsg(err, 'Could not load your team')))
+  }, [fetchTeam, teamVersion])
 
+  const data = teamData || { members: [], pending: [], stats: null, viewerIsOwner: true }
+  const loading = teamLoading && teamData === null
   const canManage = data.viewerIsOwner !== false
 
   // Overlay live presence onto the server-seeded status.

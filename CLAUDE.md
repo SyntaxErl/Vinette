@@ -178,7 +178,7 @@ Vinette/
 | POST | `/tasks` | Yes | Create task (also logs "created this task" to activity_log) |
 | PATCH | `/tasks/bulk` | Yes | Bulk action: `delete`, `done`, or `priority` |
 | GET | `/tasks/dashboard/stats` | Yes | Dashboard aggregates |
-| GET | `/tasks/analytics/stats` | Yes | Analytics aggregates (summary, completion trend, priority/category, weekly performance, best day) |
+| GET | `/tasks/analytics/stats` | Yes | Analytics aggregates (summary, completion trend, priority/category, weekly performance, best day) — `?days=N` scopes the window to the selected date range |
 | GET | `/tasks/:id` | Yes | Get single task by ID |
 | PUT | `/tasks/:id` | Yes | Update task (diffs & logs field changes to activity_log) |
 | DELETE | `/tasks/:id` | Yes | Delete task |
@@ -248,9 +248,9 @@ tab-visibility detection. `online` = ≥1 live socket, `away` = client-emitted i
   - `taskVersion` — integer counter; `MyTasks` **and** `BoardView` watch it and re-fetch when incremented. Call `incrementTaskVersion()` after **any** task mutation (create, edit, delete, bulk, **and Kanban drag**) — it is the single cross-view invalidation signal.
   - `boardCache` / `tasksCache` / `calendarCache` — last fetched result for `BoardView` / `MyTasks` / `Calendar`, tagged `{ key, version }` (`key` = JSON of filter/sort/page params, `version` = `taskVersion` at fetch time). The page seeds its state from the cache on mount and **skips the network call** when both still match (same filters AND no mutation since) — same idea as `dashboardStats`. Any `incrementTaskVersion()` implicitly invalidates them (version mismatch); no explicit clear needed. Read imperatively via `useTaskStore.getState()` so the cache never becomes a hook dep / refetch trigger. `calendarCache` fetches every task once (`limit: 200`, RBC slices by month client-side), so its `key` is the constant `"calendar"` — only a task mutation invalidates it.
   - `isNewTaskModalOpen` / `selectedTaskId` — modal visibility state. `newTaskDefaults` — optional field prefills passed to `openNewTaskModal(defaults)` (Calendar passes the clicked day's `due_date`); guarded to a plain object so callers wiring the action straight to `onClick` don't leak a click event in.
-- **teamStore** — `isInviteModalOpen` + `open/closeInviteModal` (the global `InviteMemberModal` in `MainLayout`, opened by the navbar button or the Team page button), and `teamVersion` + `incrementTeamVersion()` — the Team page watches it and refetches after any mutation (invite/remove/role), mirroring `taskVersion`.
+- **teamStore** — `isInviteModalOpen` + `open/closeInviteModal` (the global `InviteMemberModal` in `MainLayout`, opened by the navbar button or the Team page button), `canManage` (gates invite/manage UI; set by `fetchTeam` from `viewerIsOwner`), and `teamVersion` + `incrementTeamVersion()` — the Team page watches it and refetches after any mutation (invite/remove/role), mirroring `taskVersion`. **Directory cache:** `fetchTeam(force?)` caches the `{ members, pending, stats, viewerIsOwner }` response tagged with `teamCacheVersion` (= `teamVersion` at fetch time). A revisit with no mutation since is a cache hit (no network call, but `canManage` is still synced); any `incrementTeamVersion()` invalidates it. Cleared on logout via `reset()`. Live presence still overlays on top, so dots stay fresh; only roster membership is cached (a newly-joined member appears after a mutation or full reload).
 - **presenceStore** — `statuses` map keyed by `userId` (`online`/`away`/`offline`). Fed by `usePresenceSocket` from Socket.IO events (`presence:snapshot`, `presence:update`). The Team page overlays it onto the server-seeded status so dots update live. Reset is handled by re-snapshot on reconnect.
-- **notificationStore** — `unreadCount` (the single source of truth for the navbar bell **and** sidebar badge). Seeded + incremented by `usePresenceSocket`'s sibling hook `useNotificationSocket` (listens for `notification:new`); updated by `NotificationModal` / the Notifications page on mark-read/clear. On a `type:'task'` notification the hook also bumps `taskVersion` + clears dashboard stats so the recipient's Board/MyTasks/Calendar/Dashboard refetch live (no reload).
+- **notificationStore** — owns both the `unreadCount` (single source of truth for the navbar bell **and** sidebar badge) **and** a cached `notifications` list (shared by `NotificationModal` and the Notifications page). `fetchNotifications(force?)` fetches once and caches (`null` = never loaded); reopening the modal or revisiting the page is a cache hit (no network call). `useNotificationSocket` seeds the count on auth and, on `notification:new`, calls `addNotification(notif)` which prepends to the cached list (if loaded) and bumps the count — so the cache stays fresh with no invalidation counter. `markRead` / `markAllRead` / `clearAll` update the cache optimistically then persist, and recompute `unreadCount` from the list. On a `type:'task'` notification the hook also bumps `taskVersion` + clears dashboard stats so the recipient's Board/MyTasks/Calendar/Dashboard refetch live (no reload). Cleared on logout via `reset()`.
 
 ---
 
@@ -276,6 +276,61 @@ Built feature by feature. Update this list whenever a feature ships.
 ---
 
 ## Session Log
+
+### 2026-05-31 — Notification + Team directory caching
+
+**Done:**
+- **notificationStore is now the cache.** Moved the notification list off per-component
+  `useState` into the store: `notifications` (cached, `null` = unloaded) + `notificationsLoading` +
+  `fetchNotifications(force?)` (skips the call on cache hit). `addNotification` (socket),
+  `markRead` / `markAllRead` / `clearAll` mutate the cache optimistically then persist, and recompute
+  `unreadCount` from the list. `NotificationModal` **and** the Notifications page now both read the same
+  cache — reopening the bell / revisiting the page is a cache hit (no refetch). The socket prepends new
+  items so the cache stays fresh without an invalidation counter.
+  - `useNotificationSocket` switched from `incrementUnread` to `addNotification(notif)` (count + list).
+  - Kept `NotificationModal`'s original markup + `onClose` prop contract (Navbar mounts it conditionally);
+    only the data layer changed. Dropped the now-unused `onCountChange` wiring (store is the source of truth).
+- **teamStore caches the directory.** Added `fetchTeam(force?)` caching the
+  `{ members, pending, stats, viewerIsOwner }` response, tagged with `teamCacheVersion` (= `teamVersion`
+  at fetch time). The Team page now reads `teamData` / `teamLoading` from the store; revisiting with no
+  mutation is a cache hit (still syncs `canManage`). Any `incrementTeamVersion()` (invite/remove/role)
+  invalidates it. `canManage` moved into the store (set by `fetchTeam`); the page no longer manages it.
+  Live presence still overlays on top, so only roster membership is cached.
+- Both stores added to the logout `reset()` chain (`authStore.clearUserState` now also resets `teamStore`).
+
+**Verify next session (needs MySQL + both servers):** open the bell → list loads; reopen → no refetch;
+new socket notification prepends + badge bumps; mark-read/clear reflect in both the modal and the page.
+Team: visit → loads; revisit → cache hit (no network); invite/remove/role → refetches; logout/login →
+fresh (no previous user's roster).
+
+**Lint/build:** ESLint clean on the changed files; client production build passes.
+
+### 2026-05-29 — Analytics date range + Export Report (made functional)
+
+**Done:**
+- **Date-range picker works.** `AnalyticsDateRange` (navbar) is now a dropdown (Last 7 / 30 / 90 days)
+  bound to `taskStore.analyticsRange` (+ `setAnalyticsRange`). `getAnalytics(days)` passes `?days=N`;
+  `fetchAnalytics` keys its cache on `{ version, range }` so changing the range (or any task mutation)
+  refetches, and the Analytics page effect now also depends on `analyticsRange`. The picker shows the
+  live date span for the selection.
+- **Backend is range-aware.** `getAnalytics` reads `?days` (sanitised int, clamped ≤366) and scopes
+  everything to that window: totals + distributions = tasks **created** in the window; completed / avg
+  time / best day = done-events in the window; the period-vs-previous deltas compare equal back-to-back
+  windows. Completion-trend granularity is **adaptive** — daily buckets for ranges ≤10 days, weekly
+  otherwise. `weeklyPerformance` stays fixed 7-day windows (independent of range). Completion rate is
+  capped at 100%. Response now includes `range: { days, label }`; summary fields renamed
+  `completedThis30/Prev30` → `completedThisPeriod/PrevPeriod`.
+- **Export Report works.** `ExportReportButton` builds a CSV from the cached analytics payload
+  (`components/analytics/exportReport.js`) and downloads `taskflow-analytics-<date>.csv` (summary,
+  completion trend, priority/category, weekly performance). Toasts on success / if data isn't loaded yet.
+- Summary card labels + insight text now reflect the selected range (e.g. "vs last 7 days").
+
+**Verify next session (needs MySQL + both servers):** switch the range → numbers + trend update
+(daily points for 7d, weekly for 30/90d); cache hit on revisit with same range; Export downloads a CSV
+that matches the on-screen numbers.
+
+**Next task:** User Profile & Settings — next unchecked item in Feature Progress
+(`client/src/pages/Profile.jsx`: avatar, theme, notification preferences).
 
 ### 2026-05-29 — Analytics page
 
@@ -307,8 +362,8 @@ Built feature by feature. Update this list whenever a feature ships.
   `taskStore`. Uses the **taskVersion-tag** pattern (like `boardCache`/`tasksCache`) so any task mutation
   implicitly invalidates it — no manual clear needed across all the mutation sites. Added to `reset()`.
   Service: `getAnalytics()` in `taskService.js`. Page watches `taskVersion` to refetch.
-- Navbar already wired `AnalyticsDateRange` + `ExportReportButton` for `/analytics` — both are still
-  decorative (static last-30-days label / no-op export); left as-is, out of scope.
+- Navbar already wired `AnalyticsDateRange` + `ExportReportButton` for `/analytics` — decorative when
+  first built; **made functional in the follow-up entry above.**
 
 **Verify next session (needs MySQL + both servers + manual test — NOT runnable in the sandbox):**
 - Page loads with summary cards, charts, weekly performance, insights. Numbers sane vs the DB.

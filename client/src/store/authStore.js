@@ -3,6 +3,7 @@ import { disconnectSocket } from "../api/socket";
 import useTaskStore from "./taskStore";
 import useNotificationStore from "./notificationStore";
 import usePresenceStore from "./presenceStore";
+import useTeamStore from "./teamStore";
 
 // Wipe all per-user, in-memory store state on logout so the next account to
 // log in (without a full page reload) never shows the previous user's cached
@@ -11,6 +12,7 @@ const clearUserState = () => {
   useTaskStore.getState().reset();
   useNotificationStore.getState().reset();
   usePresenceStore.getState().reset();
+  useTeamStore.getState().reset();
 };
 
 const useAuthStore = create((set) => ({
