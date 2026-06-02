@@ -13,7 +13,7 @@ export default function StatusDot({ status, showLabel = true }) {
         className="w-2 h-2 rounded-full flex-shrink-0"
         style={{ backgroundColor: meta.color, boxShadow: status === 'online' ? `0 0 0 3px ${meta.color}22` : 'none' }}
       />
-      {showLabel && <span className="text-sm text-gray-600">{meta.label}</span>}
+      {showLabel && <span className="text-sm text-gray-600 dark:text-gray-300">{meta.label}</span>}
     </span>
   )
 }

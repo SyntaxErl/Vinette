@@ -12,7 +12,7 @@ export default function WeeklyPerformance({ weeklyPerformance }) {
     <ChartCard title="Weekly Performance" subtitle="Tasks completed this week vs last">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs text-gray-400 font-medium">This Week</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">This Week</p>
           <p className="text-3xl font-bold mt-1" style={{ color: isUp ? "#16a34a" : "#ef4444" }}>
             {thisWeek}
           </p>
@@ -23,26 +23,28 @@ export default function WeeklyPerformance({ weeklyPerformance }) {
             <span className="text-xs font-semibold" style={{ color: isUp ? "#22c55e" : "#ef4444" }}>
               {changePct !== null ? `${changePct}%` : diff >= 0 ? `+${diff}` : diff}
             </span>
-            <span className="text-xs text-gray-400">vs last week</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">vs last week</span>
           </div>
         </div>
 
-        <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: isUp ? "#f0fdf4" : "#fef2f2" }}>
+        <div
+          className={`w-14 h-14 rounded-full flex items-center justify-center ${isUp ? "bg-green-50 dark:bg-green-500/15" : "bg-red-50 dark:bg-red-500/15"}`}
+        >
           <span className="material-icons" style={{ fontSize: "26px", color: isUp ? "#22c55e" : "#ef4444" }}>
             {isUp ? "trending_up" : "trending_down"}
           </span>
         </div>
 
         <div className="text-right">
-          <p className="text-xs text-gray-400 font-medium">Last Week</p>
-          <p className="text-3xl font-bold text-gray-700 mt-1">{lastWeek}</p>
-          <p className="text-xs text-gray-400 mt-1">completed</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Last Week</p>
+          <p className="text-3xl font-bold text-gray-700 dark:text-gray-300 mt-1">{lastWeek}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">completed</p>
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 flex items-center gap-2">
+      <div className="mt-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-4 py-3 flex items-center gap-2">
         <span className="material-icons text-amber-500" style={{ fontSize: "18px" }}>emoji_events</span>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-gray-600 dark:text-gray-300">
           {thisWeek === 0 && lastWeek === 0
             ? "Complete a task to start tracking your weekly performance."
             : isUp

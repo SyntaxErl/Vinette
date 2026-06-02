@@ -16,11 +16,11 @@ export default function TaskTable({
   onStatusChange, onPriorityChange, onDelete,
 }) {
   return (
-    <div className="hidden min-[1400px]:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="hidden min-[1400px]:block bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
 
       {/* Header */}
       <div
-        className="grid items-center px-5 py-3 border-b border-gray-100 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide gap-3"
+        className="grid items-center px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide gap-3"
         style={{ gridTemplateColumns: COL }}
       >
         <div>
@@ -73,7 +73,7 @@ export default function TaskTable({
       )}
 
       {/* Pagination */}
-      <div className="border-t border-gray-100">
+      <div className="border-t border-gray-100 dark:border-gray-800">
         <Pagination page={page} setPage={setPage} total={total} totalPages={totalPages} />
       </div>
     </div>

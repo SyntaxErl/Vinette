@@ -15,7 +15,7 @@ export default function MemberAvatar({ name, status, size = 40 }) {
       <Avatar name={name || '?'} size={size} />
       {status && (
         <span
-          className="absolute rounded-full border-2 border-white"
+          className="absolute rounded-full border-2 border-white dark:border-gray-900"
           style={{ width: dotSize, height: dotSize, backgroundColor: DOT[status] || DOT.offline, right: -1, bottom: -1 }}
         />
       )}

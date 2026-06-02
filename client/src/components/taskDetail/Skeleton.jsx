@@ -1,7 +1,7 @@
 export default function TaskDetailSkeleton({ onClose }) {
-  const p = 'bg-gray-200 rounded-lg animate-pulse'
+  const p = 'bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse'
   const metaRow = (
-    <div className="flex items-start gap-3 py-2.5 px-3 border-b border-gray-50 last:border-0">
+    <div className="flex items-start gap-3 py-2.5 px-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
       <div className={`w-7 h-7 rounded-lg flex-shrink-0 ${p}`} />
       <div className="flex-1 space-y-1.5 py-0.5">
         <div className={`h-2.5 w-16 ${p}`} />
@@ -54,11 +54,11 @@ export default function TaskDetailSkeleton({ onClose }) {
     <div className="space-y-6">
       <div>
         <div className={`h-2.5 w-16 mb-3 ${p}`} />
-        <div className="rounded-2xl border border-gray-100 overflow-hidden bg-white">
+        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900">
           {[...Array(6)].map((_, i) => <div key={i}>{metaRow}</div>)}
         </div>
       </div>
-      <div className="border-t border-gray-200" />
+      <div className="border-t border-gray-200 dark:border-gray-700" />
       <div>
         <div className={`h-2.5 w-16 mb-3 ${p}`} />
         <div className="space-y-4">
@@ -72,7 +72,7 @@ export default function TaskDetailSkeleton({ onClose }) {
     <>
       <div className={`h-1 flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl ${p}`} />
 
-      <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
+      <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
         <div className="flex items-start gap-3">
           <div className="flex-1 min-w-0 space-y-3">
             <div className={`h-6 w-2/3 ${p}`} />
@@ -85,12 +85,12 @@ export default function TaskDetailSkeleton({ onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-100 transition flex-shrink-0 mt-0.5"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition flex-shrink-0 mt-0.5"
           >
             <span className="material-icons" style={{ fontSize: 20 }}>close</span>
           </button>
         </div>
-        <div className="flex lg:hidden gap-1 mt-3 bg-gray-50 p-1 rounded-xl">
+        <div className="flex lg:hidden gap-1 mt-3 bg-gray-50 dark:bg-gray-800 p-1 rounded-xl">
           {[...Array(3)].map((_, i) => <div key={i} className={`flex-1 h-8 rounded-lg ${p}`} />)}
         </div>
       </div>
@@ -100,7 +100,7 @@ export default function TaskDetailSkeleton({ onClose }) {
         <div className="hidden lg:flex flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto px-6 py-5 min-w-0">{leftPane}</div>
           <div
-            className="overflow-y-auto px-5 py-5 flex-shrink-0 border-l border-gray-100 bg-gray-50/40"
+            className="overflow-y-auto px-5 py-5 flex-shrink-0 border-l border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-800/60"
             style={{ width: 288 }}
           >{rightPane}</div>
         </div>

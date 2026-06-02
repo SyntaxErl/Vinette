@@ -81,7 +81,7 @@ export default function SummaryCards({ summary, completionTrend, rangeLabel = "l
           label: vsLabel,
         }}
         visual={
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-100">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-100 dark:bg-green-500/20">
             <span className="material-icons text-green-500 text-[22px]">check_circle</span>
           </div>
         }
@@ -109,7 +109,7 @@ export default function SummaryCards({ summary, completionTrend, rangeLabel = "l
         trend={avgTrend}
         hint={avgTrend ? undefined : "Time from created to done"}
         visual={
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100 dark:bg-blue-500/20">
             <span className="material-icons text-blue-500 text-[22px]">schedule</span>
           </div>
         }

@@ -52,37 +52,37 @@ export default function InviteMemberModal() {
       style={{ backgroundColor: 'rgba(15,15,35,0.45)', backdropFilter: 'blur(3px)' }}
       onClick={(e) => e.target === e.currentTarget && closeInviteModal()}
     >
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
         {/* Header */}
-        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Invite to your team</h2>
-            <p className="text-sm text-gray-400 mt-0.5">Share this link — anyone who opens it can join.</p>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Invite to your team</h2>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Share this link — anyone who opens it can join.</p>
           </div>
-          <button onClick={closeInviteModal} className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100">
+          <button onClick={closeInviteModal} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
             <span className="material-icons" style={{ fontSize: '20px' }}>close</span>
           </button>
         </div>
 
         {/* Body */}
         <div className="px-6 py-5 space-y-4">
-          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-purple-50 border border-purple-100">
-            <span className="material-icons text-purple-500" style={{ fontSize: '20px' }}>link</span>
-            <p className="text-sm text-purple-700">
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-purple-50 dark:bg-purple-500/15 border border-purple-100 dark:border-purple-500/30">
+            <span className="material-icons text-purple-500 dark:text-purple-400" style={{ fontSize: '20px' }}>link</span>
+            <p className="text-sm text-purple-700 dark:text-purple-300">
               Send this link to anyone you want on your team. When they open it, they'll create an account
               (or log in) and join automatically.
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Invite link</label>
-            <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 bg-gray-50">
-              <span className="material-icons text-gray-400 flex-shrink-0" style={{ fontSize: '18px' }}>link</span>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Invite link</label>
+            <div className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 bg-gray-50 dark:bg-gray-800">
+              <span className="material-icons text-gray-400 dark:text-gray-500 flex-shrink-0" style={{ fontSize: '18px' }}>link</span>
               <input
                 readOnly
                 value={loading ? 'Generating link…' : link}
                 onFocus={(e) => e.target.select()}
-                className="flex-1 text-sm text-gray-600 bg-transparent outline-none truncate"
+                className="flex-1 text-sm text-gray-600 dark:text-gray-300 bg-transparent outline-none truncate"
               />
               <button
                 onClick={copy}
@@ -99,7 +99,7 @@ export default function InviteMemberModal() {
           <button
             onClick={regenerate}
             disabled={loading}
-            className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition disabled:opacity-50"
+            className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition disabled:opacity-50"
           >
             <span className="material-icons" style={{ fontSize: '14px' }}>autorenew</span>
             Generate a new link (disables the current one)
@@ -107,7 +107,7 @@ export default function InviteMemberModal() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end px-6 py-4 border-t border-gray-100 bg-gray-50">
+        <div className="flex items-center justify-end px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60">
           <button
             onClick={closeInviteModal}
             className="px-5 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90"

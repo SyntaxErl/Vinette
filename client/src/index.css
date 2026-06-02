@@ -244,3 +244,81 @@
   min-height: 320px;
   padding: 40px 24px;
 }
+
+/* ── dark mode overrides ── */
+/* Applied only when .dark is on <html>; the light rules above are untouched. */
+
+.dark .tf-calendar .rbc-month-view,
+.dark .tf-calendar .rbc-agenda-view {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.dark .tf-calendar .rbc-month-header {
+  background: #1f2937;
+}
+
+.dark .tf-calendar .rbc-header {
+  color: #9ca3af;
+  border-bottom-color: #1f2937;
+}
+
+.dark .tf-calendar .rbc-header + .rbc-header {
+  border-left-color: #1f2937;
+}
+
+.dark .tf-calendar .rbc-month-row + .rbc-month-row {
+  border-top-color: #1f2937;
+}
+
+.dark .tf-calendar .rbc-day-bg + .rbc-day-bg {
+  border-left-color: #1f2937;
+}
+
+.dark .tf-calendar .rbc-off-range-bg {
+  background: #0d1117;
+}
+
+.dark .tf-calendar .rbc-off-range {
+  color: #4b5563;
+}
+
+.dark .tf-calendar .rbc-date-cell {
+  color: #9ca3af;
+}
+
+.dark .tf-calendar .rbc-today {
+  background: rgba(91, 79, 207, 0.15);
+}
+
+/* today's date number pill — keep brand colors (no override needed, intentionally left) */
+
+.dark .tf-calendar .rbc-show-more {
+  color: #a78bfa;
+}
+
+.dark .tf-calendar .rbc-overlay {
+  background: #111827;
+  border-color: #1f2937;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.dark .tf-calendar .rbc-overlay-header {
+  border-bottom-color: #1f2937;
+  color: #e5e7eb;
+}
+
+/* Agenda table */
+.dark .tf-calendar .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+  color: #9ca3af;
+  border-bottom-color: #1f2937;
+}
+
+.dark .tf-calendar .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+  color: #d1d5db;
+  border-top-color: #1f2937;
+}
+
+.dark .tf-calendar .rbc-agenda-view table.rbc-agenda-table tbody > tr > td + td {
+  border-left-color: #1f2937;
+}

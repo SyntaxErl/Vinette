@@ -46,10 +46,10 @@ export default function MyTasks() {
 
           {/* Select All bar */}
           {t.tasks.length > 0 && !t.loading && (
-            <div className="bg-white rounded-2xl border border-gray-100 px-4 py-2.5 flex items-center gap-3">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 px-4 py-2.5 flex items-center gap-3">
               <input type="checkbox" checked={t.allSelected} onChange={t.toggleAll}
                 className="w-4 h-4 rounded accent-purple-600 cursor-pointer" />
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-300">
                 {t.allSelected ? 'Deselect all' : `Select all ${t.tasks.length} tasks`}
               </span>
               {t.someSelected && (
@@ -62,11 +62,11 @@ export default function MyTasks() {
 
           {/* Cards grid */}
           {t.loading ? (
-            <div className="bg-white rounded-2xl border border-gray-100">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
               <LoadingState />
             </div>
           ) : t.tasks.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
               <EmptyState />
             </div>
           ) : (
@@ -90,7 +90,7 @@ export default function MyTasks() {
           )}
 
           {/* Card Pagination */}
-          <div className="bg-white rounded-2xl border border-gray-100">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
             <Pagination
               compact
               page={t.page}

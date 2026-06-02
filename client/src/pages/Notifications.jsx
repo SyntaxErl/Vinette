@@ -39,7 +39,7 @@ export default function Notifications() {
       <div className="max-w-3xl mx-auto w-full space-y-4 px-1 sm:px-2 py-2 animate-fadeInUp">
         {/* Toolbar */}
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {unread > 0 ? `${unread} unread notification${unread > 1 ? 's' : ''}` : 'You’re all caught up'}
           </p>
           <div className="flex items-center gap-2">
@@ -49,23 +49,23 @@ export default function Notifications() {
               </button>
             )}
             {list.length > 0 && (
-              <button onClick={clearAll} className="text-xs font-medium text-gray-400 hover:text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">
+              <button onClick={clearAll} className="text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition">
                 Clear all
               </button>
             )}
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <span className="material-icons animate-spin text-purple-400" style={{ fontSize: '32px' }}>autorenew</span>
+              <span className="material-icons animate-spin text-purple-400 dark:text-purple-500" style={{ fontSize: '32px' }}>autorenew</span>
             </div>
           ) : list.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <span className="material-icons text-gray-200 mb-3" style={{ fontSize: '48px' }}>notifications_off</span>
-              <p className="text-sm font-medium text-gray-400">No notifications yet</p>
-              <p className="text-xs text-gray-300 mt-1">You’ll see task assignments, comments and updates here.</p>
+              <span className="material-icons text-gray-200 dark:text-gray-700 mb-3" style={{ fontSize: '48px' }}>notifications_off</span>
+              <p className="text-sm font-medium text-gray-400 dark:text-gray-500">No notifications yet</p>
+              <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">You’ll see task assignments, comments and updates here.</p>
             </div>
           ) : (
             <ul>
@@ -76,15 +76,15 @@ export default function Notifications() {
                   <li
                     key={n.id}
                     onClick={() => onClick(n)}
-                    className={`flex items-start gap-3 px-5 py-4 cursor-pointer transition border-b border-gray-50 last:border-0 ${isUnread ? 'bg-purple-50/40 hover:bg-purple-50' : 'hover:bg-gray-50'}`}
+                    className={`flex items-start gap-3 px-5 py-4 cursor-pointer transition border-b border-gray-50 dark:border-gray-800 last:border-0 ${isUnread ? 'bg-purple-50/40 dark:bg-purple-500/10 hover:bg-purple-50 dark:hover:bg-purple-500/15' : 'hover:bg-gray-50 dark:hover:bg-gray-800'}`}
                   >
                     <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ backgroundColor: `${color}18` }}>
                       <span className="material-icons" style={{ fontSize: '18px', color }}>{icon}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${isUnread ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'}`}>{n.title}</p>
-                      {n.message && <p className="text-xs text-gray-400 mt-0.5">{n.message}</p>}
-                      <p className="text-xs text-gray-300 mt-1">{timeAgo(n.created_at)}</p>
+                      <p className={`text-sm ${isUnread ? 'font-semibold text-gray-900 dark:text-gray-100' : 'font-medium text-gray-700 dark:text-gray-300'}`}>{n.title}</p>
+                      {n.message && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{n.message}</p>}
+                      <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">{timeAgo(n.created_at)}</p>
                     </div>
                     {isUnread && <div className="w-2 h-2 rounded-full flex-shrink-0 mt-2" style={{ backgroundColor: '#5b4fcf' }} />}
                   </li>

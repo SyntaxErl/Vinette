@@ -32,12 +32,12 @@ export function Avatar({ name, size = 28 }) {
 
 export function MetaRow({ icon, label, children }) {
   return (
-    <div className="flex items-start gap-3 py-2.5 px-3 border-b border-gray-50 last:border-0">
-      <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-        <span className="material-icons text-gray-400" style={{ fontSize: 14 }}>{icon}</span>
+    <div className="flex items-start gap-3 py-2.5 px-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
+      <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span className="material-icons text-gray-400 dark:text-gray-500" style={{ fontSize: 14 }}>{icon}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">{label}</p>
         {children}
       </div>
     </div>
@@ -48,7 +48,7 @@ export function SubtaskRow({ subtask, onToggle, onDelete }) {
   const [hov, setHov] = useState(false)
   return (
     <div
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition group"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition group"
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
     >
@@ -57,7 +57,7 @@ export function SubtaskRow({ subtask, onToggle, onDelete }) {
           {subtask.is_completed ? 'check_circle' : 'radio_button_unchecked'}
         </span>
       </button>
-      <span className={`flex-1 text-sm leading-snug min-w-0 transition-all ${subtask.is_completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+      <span className={`flex-1 text-sm leading-snug min-w-0 transition-all ${subtask.is_completed ? 'line-through text-gray-400 dark:text-gray-600' : 'text-gray-700 dark:text-gray-200'}`}>
         {subtask.title}
       </span>
       <button

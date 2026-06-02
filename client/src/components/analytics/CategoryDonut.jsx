@@ -45,8 +45,8 @@ export default function CategoryDonut({ byCategory = [] }) {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <p className="text-2xl font-bold text-gray-900 leading-none">{total}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Total</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-none">{total}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Total</p>
           </div>
         </div>
 
@@ -54,9 +54,9 @@ export default function CategoryDonut({ byCategory = [] }) {
           {data.map((item) => (
             <div key={item.category} className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.fill }} />
-              <span className="text-xs text-gray-600 flex-1 truncate">{item.name}</span>
-              <span className="text-xs text-gray-500 whitespace-nowrap">
-                <span className="font-semibold text-gray-800">{item.value}</span> ({pct(item.value, total)}%)
+              <span className="text-xs text-gray-600 dark:text-gray-300 flex-1 truncate">{item.name}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <span className="font-semibold text-gray-800 dark:text-gray-100">{item.value}</span> ({pct(item.value, total)}%)
               </span>
             </div>
           ))}
