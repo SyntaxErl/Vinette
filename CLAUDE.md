@@ -169,7 +169,10 @@ Vinette/
 |---|---|---|---|
 | POST | `/auth/register` | No | Create account |
 | POST | `/auth/login` | No | Get JWT token |
-| GET | `/auth/me` | Yes | Get current user |
+| GET | `/auth/me` | Yes | Get current user (incl. `avatar`, `bio`, `theme`) |
+| GET | `/auth/users` | Yes | List all users (assignee picker) |
+| PUT | `/auth/profile` | Yes | Update own `name` / `bio` / `theme`; returns the updated user |
+| PUT | `/auth/password` | Yes | Change password (verifies current via bcrypt) |
 
 ### Tasks (`/api/tasks`)
 | Method | Path | Auth | Description |
@@ -250,6 +253,7 @@ tab-visibility detection. `online` = ≥1 live socket, `away` = client-emitted i
   - `isNewTaskModalOpen` / `selectedTaskId` — modal visibility state. `newTaskDefaults` — optional field prefills passed to `openNewTaskModal(defaults)` (Calendar passes the clicked day's `due_date`); guarded to a plain object so callers wiring the action straight to `onClick` don't leak a click event in.
 - **teamStore** — `isInviteModalOpen` + `open/closeInviteModal` (the global `InviteMemberModal` in `MainLayout`, opened by the navbar button or the Team page button), `canManage` (gates invite/manage UI; set by `fetchTeam` from `viewerIsOwner`), and `teamVersion` + `incrementTeamVersion()` — the Team page watches it and refetches after any mutation (invite/remove/role), mirroring `taskVersion`. **Directory cache:** `fetchTeam(force?)` caches the `{ members, pending, stats, viewerIsOwner }` response tagged with `teamCacheVersion` (= `teamVersion` at fetch time). A revisit with no mutation since is a cache hit (no network call, but `canManage` is still synced); any `incrementTeamVersion()` invalidates it. Cleared on logout via `reset()`. Live presence still overlays on top, so dots stay fresh; only roster membership is cached (a newly-joined member appears after a mutation or full reload).
 - **presenceStore** — `statuses` map keyed by `userId` (`online`/`away`/`offline`). Fed by `usePresenceSocket` from Socket.IO events (`presence:snapshot`, `presence:update`). The Team page overlays it onto the server-seeded status so dots update live. Reset is handled by re-snapshot on reconnect.
+- **themeStore** — `theme` (`light`/`dark`/`system`), persisted to `localStorage` (`tf-theme`) and the server (`users.theme` via `PUT /auth/profile`). The Profile page seeds it from the loaded user. **Save-only for now** — the app is not yet restyled for dark mode (deferred to a separate pass). Cleared/re-read on logout via `reset()`.
 - **notificationStore** — owns both the `unreadCount` (single source of truth for the navbar bell **and** sidebar badge) **and** a cached `notifications` list (shared by `NotificationModal` and the Notifications page). `fetchNotifications(force?)` fetches once and caches (`null` = never loaded); reopening the modal or revisiting the page is a cache hit (no network call). `useNotificationSocket` seeds the count on auth and, on `notification:new`, calls `addNotification(notif)` which prepends to the cached list (if loaded) and bumps the count — so the cache stays fresh with no invalidation counter. `markRead` / `markAllRead` / `clearAll` update the cache optimistically then persist, and recompute `unreadCount` from the list. On a `type:'task'` notification the hook also bumps `taskVersion` + clears dashboard stats so the recipient's Board/MyTasks/Calendar/Dashboard refetch live (no reload). Cleared on logout via `reset()`.
 
 ---
@@ -270,12 +274,41 @@ Built feature by feature. Update this list whenever a feature ships.
 - [x] Calendar View (monthly grid + agenda via react-big-calendar; tasks placed by `due_date`, colored by category. The day cell is the only click target: an **empty** day → New Task Modal pre-filled with that date; a day that **has** tasks — clicked anywhere, including a task chip, or via its "+N more" → a popover **at the click point** listing that day's tasks — click a task to open its Task Detail modal, or use the "Add task" button)
 - [x] Analytics page (completion rate, priority/category charts, completion-rate-over-time, productivity score, avg completion time, weekly performance, insights & trends)
 - [x] Notifications system (real-time bell via Socket.IO; triggered on task assign/reassign, completion, and new comments)
-- [ ] User Profile & Settings (avatar, theme, notification preferences)
+- [x] User Profile & Settings (profile info edit, theme preference [save-only], change password, notification preferences [local-only UI])
 - [x] Team page (member directory + stat cards, **real-time presence via Socket.IO**, **real email invites (Resend) + token accept flow**, role management, per-member assigned-tasks/activity sidebar, Send Message via `mailto:`)
 
 ---
 
 ## Session Log
+
+### 2026-06-02 — User Profile & Settings
+
+**Done:**
+- Built `client/src/pages/Profile.jsx` (was a stub mis-named `TaskCard`) — thin page composing modular
+  sections under `client/src/components/profile/`:
+  - `profileUtils.js` — theme/notif-pref constants, local-storage helpers, date formatter (no JSX).
+  - `SettingsCard.jsx` — shared icon+title card wrapper for each section.
+  - `Toggle.jsx` — accessible on/off switch.
+  - `ProfileHeader.jsx` — gradient banner + initials `Avatar` (reused from `taskDetail/utils`) + join date.
+  - `ProfileInfoForm.jsx` — edit name + bio (email read-only), dirty-tracked Save/Cancel.
+  - `ThemeSetting.jsx` — light/dark/system picker (optimistic, reverts on failure).
+  - `NotificationPrefs.jsx` — assign/complete/comment/mention toggles.
+  - `ChangePassword.jsx` — current/new/confirm with show-toggle + validation.
+- **Backend:** `PUT /auth/profile` (name/bio/theme, validates theme enum + non-empty name) and
+  `PUT /auth/password` (bcrypt-verifies current, ≥6 char new) added to `auth.controller.js` + routes.
+  `getMe` already returned `avatar, bio, theme`. New `server/sql/profile.sql` documents the columns.
+- **Stores:** `authStore.updateUser(patch)` merges saved fields into the in-memory user. New
+  `themeStore` (localStorage `tf-theme` + server). Both wired into the logout `reset()` chain.
+- **Decisions (per user):** avatar = **initials only** (no upload infra); theme = **save preference
+  only** (no dark-mode restyle yet); notification prefs = **local-only UI** (server still sends all).
+- Navbar header for `/profile` + `/settings` cleared of the task search + New Task button (irrelevant there).
+
+**Verify next session (needs MySQL + both servers):** edit name/bio → Save → persists + navbar avatar
+initials update; pick a theme → persists across reload (UI stays light by design); change password →
+wrong current shows error, correct one succeeds; notif toggles persist in localStorage. Run
+`server/sql/profile.sql` only if the `users` table lacks `avatar`/`bio`/`theme`.
+
+**Lint/build:** ESLint clean on the new files; client production build passes; server parses (`node -c`).
 
 ### 2026-05-31 — Notification + Team directory caching
 
