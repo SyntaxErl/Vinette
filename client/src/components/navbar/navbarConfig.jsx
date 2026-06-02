@@ -76,16 +76,16 @@ export const ROUTE_CONFIG = {
   "/profile": {
     title: "My Profile",
     subtitle: "Manage your account settings and preferences",
-    middle: <SearchBar placeholder="Search tasks..." />,
-    right: <NewTaskButton />,
-    mobileRight: <NewTaskButton mobile />,
+    middle: null,
+    right: null,
+    mobileRight: null,
   },
   "/settings": {
     title: "Settings",
     subtitle: "Manage your account settings and preferences",
-    middle: <SearchBar placeholder="Search tasks..." />,
-    right: <NewTaskButton />,
-    mobileRight: <NewTaskButton mobile />,
+    middle: null,
+    right: null,
+    mobileRight: null,
   },
 };
 

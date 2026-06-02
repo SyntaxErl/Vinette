@@ -142,4 +142,82 @@ const getUsers = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe, getUsers };
+// Update the current user's profile (name, bio, theme). Email is immutable here.
+const updateProfile = async (req, res) => {
+  const userId = req.user.userId;
+  const { name, bio, theme } = req.body;
+  const ALLOWED_THEMES = ["light", "dark", "system"];
+
+  try {
+    if (name !== undefined && !String(name).trim()) {
+      return res.status(400).json({ success: false, message: "Name cannot be empty" });
+    }
+    if (theme !== undefined && !ALLOWED_THEMES.includes(theme)) {
+      return res.status(400).json({ success: false, message: "Invalid theme" });
+    }
+
+    const [[current]] = await db.query(
+      "SELECT name, bio, theme FROM users WHERE id = ?",
+      [userId],
+    );
+    if (!current) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const next = {
+      name: name !== undefined ? String(name).trim() : current.name,
+      bio: bio !== undefined ? bio : current.bio,
+      theme: theme !== undefined ? theme : current.theme,
+    };
+
+    await db.query("UPDATE users SET name = ?, bio = ?, theme = ? WHERE id = ?", [
+      next.name,
+      next.bio,
+      next.theme,
+      userId,
+    ]);
+
+    const [[user]] = await db.query(
+      "SELECT id, name, email, avatar, bio, theme, created_at FROM users WHERE id = ?",
+      [userId],
+    );
+
+    res.json({ success: true, message: "Profile updated", user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// Change the current user's password (verifies the current one first).
+const changePassword = async (req, res) => {
+  const userId = req.user.userId;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: "Both passwords are required" });
+    }
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ success: false, message: "New password must be at least 6 characters" });
+    }
+
+    const [[user]] = await db.query("SELECT password FROM users WHERE id = ?", [userId]);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Current password is incorrect" });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await db.query("UPDATE users SET password = ? WHERE id = ?", [hashed, userId]);
+
+    res.json({ success: true, message: "Password changed" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+module.exports = { register, login, getMe, getUsers, updateProfile, changePassword };
