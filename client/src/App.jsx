@@ -19,6 +19,7 @@ import api from "./api/axios";
 import { joinTeam } from "./services/teamService";
 import usePresenceSocket from "./hooks/usePresenceSocket";
 import useNotificationSocket from "./hooks/useNotificationSocket";
+import useSystemTheme from "./hooks/useSystemTheme";
 
 export default function App() {
   const { token, login, logout } = useAuthStore();
@@ -28,6 +29,8 @@ export default function App() {
   usePresenceSocket();
   // Real-time notifications (seeds + listens for the bell badge).
   useNotificationSocket();
+  // Track OS color-scheme changes while the theme preference is "system".
+  useSystemTheme();
 
   useEffect(() => {
     const restoreUser = async () => {

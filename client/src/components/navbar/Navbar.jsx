@@ -53,7 +53,7 @@ export default function Navbar({ onMenuClick }) {
   return (
     <header
       key={location.pathname}
-      className="bg-white border-b border-gray-100 shadow-sm animate-fadeIn relative z-[40]"
+      className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm animate-fadeIn relative z-[40] transition-colors"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
       {/* ── Main row ── */}
@@ -63,18 +63,18 @@ export default function Navbar({ onMenuClick }) {
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onMenuClick}
-            className="md:hidden flex-shrink-0 text-gray-500 hover:text-gray-700 p-1"
+            className="md:hidden flex-shrink-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1"
             aria-label="Open menu"
           >
             <span className="material-icons" style={{ fontSize: "24px" }}>menu</span>
           </button>
 
           <div className="min-w-0">
-            <h1 className="text-base sm:text-xl font-bold text-gray-900 truncate">
+            <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-xs sm:text-sm text-gray-400 truncate hidden sm:block">
+              <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 truncate hidden sm:block">
                 {subtitle}
               </p>
             )}
@@ -97,11 +97,11 @@ export default function Navbar({ onMenuClick }) {
 
           {/* Notification bell */}
           <button
-            className="relative p-2 rounded-xl hover:bg-gray-50 transition"
+            className="relative p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             onClick={() => setShowNotifModal((prev) => !prev)}
             aria-label="Notifications"
           >
-            <span className="material-icons text-gray-500" style={{ fontSize: "22px" }}>
+            <span className="material-icons text-gray-500 dark:text-gray-400" style={{ fontSize: "22px" }}>
               notifications
             </span>
             {notifCount > 0 && (
@@ -116,7 +116,7 @@ export default function Navbar({ onMenuClick }) {
 
           {/* Profile */}
           <button
-            className="flex items-center gap-1 p-1 rounded-xl hover:bg-gray-50 transition"
+            className="flex items-center gap-1 p-1 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             onClick={() => navigate("/profile")}
             aria-label="Go to profile"
           >

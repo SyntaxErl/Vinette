@@ -37,35 +37,35 @@ export default function ProfileInfoForm({ user }) {
     <SettingsCard icon="person" title="Profile Information" subtitle="Update your personal details">
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-gray-500 mb-1.5">Full Name</label>
+          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Full Name</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
-            className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-300 focus:ring-2 focus:ring-purple-50 transition"
+            className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:border-purple-300 dark:focus:border-purple-500 focus:ring-2 focus:ring-purple-50 dark:focus:ring-purple-500/20 transition"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-500 mb-1.5">Email</label>
-          <div className="flex items-center gap-2 w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5">
+          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Email</label>
+          <div className="flex items-center gap-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 px-3.5 py-2.5">
             <span className="material-icons text-gray-400" style={{ fontSize: '18px' }}>lock</span>
-            <span className="text-sm text-gray-500 truncate">{user?.email}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 truncate">{user?.email}</span>
           </div>
-          <p className="text-xs text-gray-400 mt-1">Email can’t be changed.</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Email can’t be changed.</p>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-500 mb-1.5">Bio</label>
+          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Bio</label>
           <textarea
             value={bio || ''}
             onChange={(e) => setBio(e.target.value)}
             rows={3}
             maxLength={280}
             placeholder="Tell your team a little about yourself…"
-            className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-300 focus:ring-2 focus:ring-purple-50 transition resize-none"
+            className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:border-purple-300 dark:focus:border-purple-500 focus:ring-2 focus:ring-purple-50 dark:focus:ring-purple-500/20 transition resize-none"
           />
-          <p className="text-xs text-gray-400 mt-1 text-right">{(bio || '').length}/280</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 text-right">{(bio || '').length}/280</p>
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-1">
@@ -73,7 +73,7 @@ export default function ProfileInfoForm({ user }) {
             <button
               onClick={handleReset}
               disabled={saving}
-              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition disabled:opacity-50"
+              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50"
             >
               Cancel
             </button>

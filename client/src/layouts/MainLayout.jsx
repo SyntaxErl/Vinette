@@ -10,11 +10,11 @@ export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden transition-colors" style={{ fontFamily: 'Inter, sans-serif' }}>
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Navbar onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 text-gray-900 dark:text-gray-100">
           <Outlet />
         </main>
       </div>

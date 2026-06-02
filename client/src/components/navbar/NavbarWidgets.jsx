@@ -102,7 +102,7 @@ export const SearchBar = ({ placeholder }) => {
   return (
     <div ref={wrapperRef} className="relative w-full max-w-md">
       {/* Input */}
-      <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2 bg-white w-full focus-within:border-purple-300 focus-within:ring-2 focus-within:ring-purple-50 transition">
+      <div className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 bg-white dark:bg-gray-800 w-full focus-within:border-purple-300 dark:focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-50 dark:focus-within:ring-purple-500/20 transition">
         <span className="material-icons text-gray-400 flex-shrink-0" style={{ fontSize: "18px" }}>search</span>
         <input
           ref={inputRef}
@@ -111,7 +111,7 @@ export const SearchBar = ({ placeholder }) => {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="flex-1 outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent min-w-0"
+          className="flex-1 outline-none text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 bg-transparent min-w-0"
         />
         {query && (
           <button onClick={handleClear} className="text-gray-400 hover:text-gray-600 transition flex-shrink-0">

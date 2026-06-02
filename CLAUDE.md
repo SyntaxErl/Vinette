@@ -253,7 +253,7 @@ tab-visibility detection. `online` = ≥1 live socket, `away` = client-emitted i
   - `isNewTaskModalOpen` / `selectedTaskId` — modal visibility state. `newTaskDefaults` — optional field prefills passed to `openNewTaskModal(defaults)` (Calendar passes the clicked day's `due_date`); guarded to a plain object so callers wiring the action straight to `onClick` don't leak a click event in.
 - **teamStore** — `isInviteModalOpen` + `open/closeInviteModal` (the global `InviteMemberModal` in `MainLayout`, opened by the navbar button or the Team page button), `canManage` (gates invite/manage UI; set by `fetchTeam` from `viewerIsOwner`), and `teamVersion` + `incrementTeamVersion()` — the Team page watches it and refetches after any mutation (invite/remove/role), mirroring `taskVersion`. **Directory cache:** `fetchTeam(force?)` caches the `{ members, pending, stats, viewerIsOwner }` response tagged with `teamCacheVersion` (= `teamVersion` at fetch time). A revisit with no mutation since is a cache hit (no network call, but `canManage` is still synced); any `incrementTeamVersion()` invalidates it. Cleared on logout via `reset()`. Live presence still overlays on top, so dots stay fresh; only roster membership is cached (a newly-joined member appears after a mutation or full reload).
 - **presenceStore** — `statuses` map keyed by `userId` (`online`/`away`/`offline`). Fed by `usePresenceSocket` from Socket.IO events (`presence:snapshot`, `presence:update`). The Team page overlays it onto the server-seeded status so dots update live. Reset is handled by re-snapshot on reconnect.
-- **themeStore** — `theme` (`light`/`dark`/`system`), persisted to `localStorage` (`tf-theme`) and the server (`users.theme` via `PUT /auth/profile`). The Profile page seeds it from the loaded user. **Save-only for now** — the app is not yet restyled for dark mode (deferred to a separate pass). Cleared/re-read on logout via `reset()`.
+- **themeStore** — `theme` (`light`/`dark`/`system`), persisted to `localStorage` (`tf-theme`) and the server (`users.theme` via `PUT /auth/profile`). `setTheme`/`applyTheme` toggle a `.dark` class on `<html>` (resolving `system` via `matchMedia`); `useSystemTheme` tracks live OS changes while on `system`. The Profile page seeds it from the loaded user. **Dark styling is shell-first** — `index.css` opts into class-based dark via `@custom-variant dark (&:where(.dark, .dark *))`; MainLayout, Sidebar, Navbar, navbar search, and the Profile/Settings cards have `dark:` variants. Inner pages (Dashboard/Board/MyTasks/Calendar/Analytics/Team) and chart/inline-hex colors are **not dark yet** (later pass). Applied on module load to avoid a flash; cleared/re-read on logout via `reset()`.
 - **notificationStore** — owns both the `unreadCount` (single source of truth for the navbar bell **and** sidebar badge) **and** a cached `notifications` list (shared by `NotificationModal` and the Notifications page). `fetchNotifications(force?)` fetches once and caches (`null` = never loaded); reopening the modal or revisiting the page is a cache hit (no network call). `useNotificationSocket` seeds the count on auth and, on `notification:new`, calls `addNotification(notif)` which prepends to the cached list (if loaded) and bumps the count — so the cache stays fresh with no invalidation counter. `markRead` / `markAllRead` / `clearAll` update the cache optimistically then persist, and recompute `unreadCount` from the list. On a `type:'task'` notification the hook also bumps `taskVersion` + clears dashboard stats so the recipient's Board/MyTasks/Calendar/Dashboard refetch live (no reload). Cleared on logout via `reset()`.
 
 ---
@@ -280,6 +280,31 @@ Built feature by feature. Update this list whenever a feature ships.
 ---
 
 ## Session Log
+
+### 2026-06-02 — Dark mode (shell-first)
+
+**Done:**
+- **Made the theme toggle actually restyle the app** (was save-only). Class-based dark mode:
+  - `index.css` opts in with `@custom-variant dark (&:where(.dark, .dark *))` — required because
+    Tailwind v4's default `dark:` follows `prefers-color-scheme`, not a class. Verified `.dark`
+    utilities compile into the production CSS.
+  - `themeStore.applyTheme(theme)` toggles `.dark` on `<html>`, resolving `system` via `matchMedia`.
+    Applied on module load (no flash). New `useSystemTheme` hook re-applies on OS scheme change while
+    on `system` (wired in `App.jsx`).
+- **Shell restyled** with `dark:` variants: `MainLayout` (bg + main text), `Sidebar` (container,
+  borders, nav items active/hover, user card), `Navbar` (header, titles, bell/profile buttons),
+  navbar `SearchBar` input, and the Profile/Settings pieces (`SettingsCard`, `ProfileHeader`,
+  `ProfileInfoForm`, `ThemeSetting`, `NotificationPrefs`, `Toggle`, `ChangePassword`).
+- **Scope (per user): shell-first.** Inner pages (Dashboard, Board, MyTasks, Calendar, Analytics, Team)
+  and chart/inline-hex colors are intentionally **not dark yet** — they'll look light-on-dark until a
+  follow-up pass. The `.tf-calendar` overrides in `index.css` are also still light-only.
+
+**Verify next session (manual):** Profile → pick Dark → sidebar/navbar/layout + Profile cards go dark
+instantly and persist across reload; pick System → follows the OS and flips live when the OS theme
+changes; Light restores. Inner page bodies stay light (known, by design).
+
+**Lint/build:** client production build passes; `.dark` variant confirmed in output CSS. Only the
+pre-existing SearchBar / App-restore effect lint warnings remain (not in scope).
 
 ### 2026-06-02 — User Profile & Settings
 

@@ -43,8 +43,8 @@ export default function Sidebar({ isOpen, onClose }) {
       <div
         className={`
     fixed md:static inset-y-0 left-0
-    flex flex-col h-[100dvh] w-64 bg-white
-    border-r border-gray-100
+    flex flex-col h-[100dvh] w-64 bg-white dark:bg-gray-900
+    border-r border-gray-100 dark:border-gray-800
     transform transition-transform duration-300 ease-in-out
     shadow-xl md:shadow-none
     z-[60] md:z-auto
@@ -53,7 +53,7 @@ export default function Sidebar({ isOpen, onClose }) {
         style={{ fontFamily: "Inter, sans-serif" }}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-2">
             <img
               src={logo}
@@ -68,7 +68,7 @@ export default function Sidebar({ isOpen, onClose }) {
           {/* Close button — mobile only */}
           <button
             onClick={onClose}
-            className="md:hidden text-gray-400 hover:text-gray-600"
+            className="md:hidden text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
             <span className="material-icons" style={{ fontSize: "22px" }}>
               close
@@ -88,8 +88,8 @@ export default function Sidebar({ isOpen, onClose }) {
                     `flex items-center gap-4 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-500
                     ${
                       isActive
-                        ? "text-purple-700 bg-purple-50"
-                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                        ? "text-purple-700 bg-purple-50 dark:text-purple-300 dark:bg-purple-500/15"
+                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
                     }`
                   }
                 >
@@ -124,8 +124,8 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         {/* User profile */}
-        <div className="border-t border-gray-100 p-4">
-          <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-all">
+        <div className="border-t border-gray-100 dark:border-gray-800 p-4">
+          <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-all">
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
               style={{ backgroundColor: "#5b4fcf" }}
@@ -134,16 +134,16 @@ export default function Sidebar({ isOpen, onClose }) {
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-800 truncate">
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
                 {user?.name || "User"}
               </p>
-              <p className="text-xs text-gray-400 truncate">
+              <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
                 {user?.email || ""}
               </p>
             </div>
 
             <span
-              className="material-icons text-gray-400 hover:text-red-500 flex-shrink-0 transition-colors cursor-pointer"
+              className="material-icons text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 flex-shrink-0 transition-colors cursor-pointer"
               style={{ fontSize: "18px" }}
               onClick={handleLogout}
               title="Logout"

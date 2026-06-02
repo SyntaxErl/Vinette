@@ -7,19 +7,19 @@ import SettingsCard from './SettingsCard'
 function PasswordField({ label, value, onChange, show, onToggle, placeholder }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-gray-500 mb-1.5">{label}</label>
+      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">{label}</label>
       <div className="relative">
         <input
           type={show ? 'text' : 'password'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 pr-10 text-sm text-gray-700 outline-none focus:border-purple-300 focus:ring-2 focus:ring-purple-50 transition"
+          className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2.5 pr-10 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:border-purple-300 dark:focus:border-purple-500 focus:ring-2 focus:ring-purple-50 dark:focus:ring-purple-500/20 transition"
         />
         <button
           type="button"
           onClick={onToggle}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
         >
           <span className="material-icons" style={{ fontSize: '18px' }}>{show ? 'visibility_off' : 'visibility'}</span>
         </button>
