@@ -36,33 +36,30 @@ export default function ThemeSetting() {
             <button
               key={opt.value}
               onClick={() => choose(opt.value)}
-              className="flex items-center gap-3 rounded-xl border p-3.5 text-left transition"
-              style={{
-                borderColor: active ? '#5b4fcf' : '#e5e7eb',
-                backgroundColor: active ? '#f5f3ff' : 'white',
-              }}
+              className={`flex items-center gap-3 rounded-xl border p-3.5 text-left transition ${
+                active
+                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/15'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+              }`}
             >
-              <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: active ? '#ede9fe' : '#f3f4f6' }}
-              >
-                <span className="material-icons" style={{ fontSize: '20px', color: active ? '#5b4fcf' : '#9ca3af' }}>
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${active ? 'bg-purple-100 dark:bg-purple-500/25' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                <span className={`material-icons ${active ? 'text-purple-600 dark:text-purple-300' : 'text-gray-400 dark:text-gray-400'}`} style={{ fontSize: '20px' }}>
                   {opt.icon}
                 </span>
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold" style={{ color: active ? '#5b4fcf' : '#374151' }}>{opt.label}</p>
-                <p className="text-xs text-gray-400">{opt.desc}</p>
+                <p className={`text-sm font-semibold ${active ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>{opt.label}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">{opt.desc}</p>
               </div>
               {active && (
-                <span className="material-icons ml-auto text-purple-600" style={{ fontSize: '18px' }}>check_circle</span>
+                <span className="material-icons ml-auto text-purple-600 dark:text-purple-300" style={{ fontSize: '18px' }}>check_circle</span>
               )}
             </button>
           )
         })}
       </div>
-      <p className="text-xs text-gray-400 mt-3">
-        Your preference is saved. A full dark theme is coming soon.
+      <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+        Your preference is saved and applied to the app shell. More pages get dark styling soon.
       </p>
     </SettingsCard>
   )

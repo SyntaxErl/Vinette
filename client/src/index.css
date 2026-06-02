@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: `dark:` variants respond to a `.dark` class on <html>
+   (toggled by themeStore), not the OS preference. Tailwind v4 needs this opt-in
+   since its default `dark:` follows prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 * {
   font-family: "Inter", sans-serif;
 }
