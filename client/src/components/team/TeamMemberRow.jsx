@@ -7,18 +7,18 @@ export default function TeamMemberRow({ member, isSelected, onSelect }) {
   return (
     <tr
       onClick={() => onSelect(member)}
-      className={`border-b border-gray-50 last:border-0 cursor-pointer transition ${isSelected ? 'bg-purple-50/60' : 'hover:bg-gray-50'}`}
+      className={`border-b border-gray-50 dark:border-gray-800 last:border-0 cursor-pointer transition ${isSelected ? 'bg-purple-50/60 dark:bg-purple-500/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'}`}
     >
       {/* Member */}
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-3 min-w-0">
           <MemberAvatar name={member.name} status={member.status} size={40} />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-800 truncate flex items-center gap-1.5">
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate flex items-center gap-1.5">
               {member.name || '—'}
-              {member.isYou && <span className="text-[10px] font-medium text-gray-400">(You)</span>}
+              {member.isYou && <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500">(You)</span>}
             </p>
-            <p className="text-xs text-gray-400 truncate">{member.email}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{member.email}</p>
           </div>
         </div>
       </td>
@@ -30,13 +30,13 @@ export default function TeamMemberRow({ member, isSelected, onSelect }) {
       <td className="px-5 py-3.5"><StatusDot status={member.status} /></td>
 
       {/* Joined */}
-      <td className="px-5 py-3.5 text-sm text-gray-500">{formatDate(member.joined_at)}</td>
+      <td className="px-5 py-3.5 text-sm text-gray-500 dark:text-gray-400">{formatDate(member.joined_at)}</td>
 
       {/* Actions */}
       <td className="px-5 py-3.5 text-right">
         <button
           onClick={(e) => { e.stopPropagation(); onSelect(member) }}
-          className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
+          className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 transition"
           aria-label="Member details"
         >
           <span className="material-icons" style={{ fontSize: '18px' }}>more_horiz</span>

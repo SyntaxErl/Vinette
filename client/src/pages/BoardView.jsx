@@ -31,6 +31,7 @@ const COLUMNS = [
     bg: "#f9fafb",
     border: "#e5e7eb",
     headerBg: "#f3f4f6",
+    headerClass: "bg-gray-100 dark:bg-gray-800",
   },
   {
     id: "in_progress",
@@ -40,6 +41,7 @@ const COLUMNS = [
     bg: "#fffbeb",
     border: "#fde68a",
     headerBg: "#fef3c7",
+    headerClass: "bg-amber-100 dark:bg-yellow-500/10",
   },
   {
     id: "done",
@@ -49,6 +51,7 @@ const COLUMNS = [
     bg: "#f0fdf4",
     border: "#bbf7d0",
     headerBg: "#dcfce7",
+    headerClass: "bg-green-100 dark:bg-green-500/10",
   },
 ];
 
@@ -71,24 +74,24 @@ function KanbanCard({ task, index }) {
           {/* Inner wrapper handles visual effects — never touch the outer transform */}
           <div
             onClick={() => openTaskDetail(task.id)}
-            className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer select-none transition-all duration-150"
+            className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 cursor-pointer select-none transition-all duration-150"
             style={{
               boxShadow: snapshot.isDragging
                 ? "0 10px 30px rgba(91,79,207,0.18)"
                 : "0 1px 4px rgba(0,0,0,0.06)",
               transform: snapshot.isDragging ? "rotate(1.5deg)" : "rotate(0deg)",
               opacity: snapshot.isDragging ? 0.95 : 1,
-              borderColor: snapshot.isDragging ? "#c4b5fd" : "#f3f4f6",
+              borderColor: snapshot.isDragging ? "#c4b5fd" : undefined,
             }}
           >
           {/* Title */}
-          <p className="text-sm font-semibold text-gray-800 leading-snug mb-1">
+          <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 leading-snug mb-1">
             {task.title}
           </p>
 
           {/* Description */}
           {task.description && (
-            <p className="text-xs text-gray-400 line-clamp-2 mb-3">
+            <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-2 mb-3">
               {task.description}
             </p>
           )}
@@ -117,14 +120,14 @@ function KanbanCard({ task, index }) {
 
           {/* Due date */}
           {task.due_date && (
-            <div className="flex items-center gap-1.5 pt-3 border-t border-gray-100">
+            <div className="flex items-center gap-1.5 pt-3 border-t border-gray-100 dark:border-gray-800">
               <span
                 className="material-icons"
                 style={{ fontSize: "13px", color: daysLeft?.color || "#9ca3af" }}
               >
                 calendar_today
               </span>
-              <span className="text-xs text-gray-500">{formatDate(task.due_date)}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(task.due_date)}</span>
               {daysLeft && (
                 <span
                   className="text-xs font-medium ml-auto"
@@ -150,8 +153,7 @@ function KanbanColumn({ column, tasks }) {
     <div className="flex flex-col flex-1 min-w-[280px] max-w-sm">
       {/* Column Header */}
       <div
-        className="flex items-center justify-between px-4 py-3 rounded-2xl mb-3"
-        style={{ backgroundColor: column.headerBg }}
+        className={`flex items-center justify-between px-4 py-3 rounded-2xl mb-3 ${column.headerClass || ""}`}
       >
         <div className="flex items-center gap-2">
           <span
@@ -160,7 +162,7 @@ function KanbanColumn({ column, tasks }) {
           >
             {column.icon}
           </span>
-          <span className="text-sm font-bold text-gray-700">{column.label}</span>
+          <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{column.label}</span>
           <span
             className="flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold text-white"
             style={{ backgroundColor: column.color }}
@@ -170,7 +172,7 @@ function KanbanColumn({ column, tasks }) {
         </div>
         <button
           onClick={openNewTaskModal}
-          className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-white/60"
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition p-1 rounded-lg hover:bg-white/60 dark:hover:bg-gray-700/60"
           title={`Add task to ${column.label}`}
         >
           <span className="material-icons" style={{ fontSize: "18px" }}>add</span>
@@ -201,7 +203,7 @@ function KanbanColumn({ column, tasks }) {
                 >
                   {column.icon}
                 </span>
-                <p className="text-xs font-medium text-gray-400">
+                <p className="text-xs font-medium text-gray-400 dark:text-gray-500">
                   No {column.label.toLowerCase()} tasks
                 </p>
               </div>
@@ -382,7 +384,7 @@ export default function BoardView() {
           const BRAND         = "#5b4fcf";
 
           return (
-            <div className="bg-gray-50 px-4 py-3 mb-4 flex items-center gap-2 flex-wrap">
+            <div className="bg-gray-50 dark:bg-gray-800/60 px-4 py-3 mb-4 flex items-center gap-2 flex-wrap">
 
               {/* Filter Button */}
               <div className="relative">
@@ -393,11 +395,11 @@ export default function BoardView() {
                     setFilterOpen((p) => !p);
                     setSortOpen(false);
                   }}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-medium transition"
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-medium transition ${hasFilter ? "dark:bg-purple-500/15 dark:text-purple-300" : "dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"}`}
                   style={{
-                    borderColor: hasFilter ? BRAND : "#e5e7eb",
-                    backgroundColor: hasFilter ? "#f5f3ff" : "white",
-                    color: hasFilter ? BRAND : "#374151",
+                    borderColor: hasFilter ? BRAND : undefined,
+                    backgroundColor: hasFilter ? "#f5f3ff" : undefined,
+                    color: hasFilter ? BRAND : undefined,
                   }}
                 >
                   <span className="material-icons" style={{ fontSize: "16px" }}>tune</span>
@@ -415,21 +417,21 @@ export default function BoardView() {
                 {filterOpen && createPortal(
                   <div
                     ref={filterRef}
-                    className="fixed z-[998] bg-white rounded-2xl border border-gray-100 shadow-2xl p-5"
+                    className="fixed z-[998] bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-2xl p-5"
                     style={{ top: filterPos.top, left: filterPos.left, width: 300, animation: "fadeInDown 0.15s ease" }}
                   >
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2.5">Category</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2.5">Category</p>
                     <div className="flex flex-wrap gap-2">
                       {CATEGORY_CHIPS.map((c) => {
                         const isActive = category === c.value;
                         return (
                           <button key={c.value}
                             onClick={() => setCategory(isActive ? "" : c.value)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition"
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition ${isActive ? "" : "dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"}`}
                             style={{
-                              backgroundColor: isActive ? c.bg : "white",
-                              color: isActive ? c.text : "#6b7280",
-                              borderColor: isActive ? c.text : "#e5e7eb",
+                              backgroundColor: isActive ? c.bg : undefined,
+                              color: isActive ? c.text : undefined,
+                              borderColor: isActive ? c.text : undefined,
                             }}>
                             {c.label}
                             {isActive && <span className="material-icons" style={{ fontSize: "12px" }}>close</span>}
@@ -438,10 +440,10 @@ export default function BoardView() {
                       })}
                     </div>
                     {hasFilter && (
-                      <div className="pt-3 mt-3 border-t border-gray-100">
+                      <div className="pt-3 mt-3 border-t border-gray-100 dark:border-gray-700">
                         <button
                           onClick={() => { setCategory(""); setFilterOpen(false); }}
-                          className="w-full py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 border border-red-100 transition">
+                          className="w-full py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 border border-red-100 dark:border-red-500/30 transition">
                           Clear filter
                         </button>
                       </div>
@@ -460,11 +462,11 @@ export default function BoardView() {
                     setSortOpen((p) => !p);
                     setFilterOpen(false);
                   }}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition bg-white"
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition bg-white dark:bg-gray-900"
                 >
                   <span className="material-icons" style={{ fontSize: "16px", color: BRAND }}>swap_vert</span>
                   <span className="hidden sm:inline">{currentSort.label}:</span>
-                  <span className="text-gray-500 hidden sm:inline">{currentSort.sub}</span>
+                  <span className="text-gray-500 dark:text-gray-400 hidden sm:inline">{currentSort.sub}</span>
                   <span className="material-icons text-gray-400" style={{ fontSize: "16px" }}>
                     {sortOpen ? "keyboard_arrow_up" : "keyboard_arrow_down"}
                   </span>
@@ -474,7 +476,7 @@ export default function BoardView() {
                 {sortOpen && createPortal(
                   <div
                     ref={sortRef}
-                    className="fixed z-[998] bg-white rounded-2xl border border-gray-100 shadow-2xl overflow-hidden w-64"
+                    className="fixed z-[998] bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-2xl overflow-hidden w-64"
                     style={{ top: sortPos.top, left: sortPos.left, animation: "fadeInDown 0.15s ease" }}
                   >
                     {SORT_OPTIONS.map((o) => {
@@ -482,15 +484,15 @@ export default function BoardView() {
                       return (
                         <button key={o.value}
                           onClick={() => { setSort(o.value); setSortOpen(false); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-left border-b border-gray-50 last:border-0"
-                          style={{ backgroundColor: isActive ? "#f5f3ff" : "white" }}>
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                            style={{ backgroundColor: isActive ? "#ede9fe" : "#f9fafb" }}>
+                          className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-left border-b border-gray-50 dark:border-gray-800 last:border-0 ${isActive ? "bg-purple-50 dark:bg-purple-500/10" : ""}`}>
+                          <div
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isActive ? "bg-purple-100 dark:bg-purple-500/15" : "bg-gray-50 dark:bg-gray-800"}`}
+                          >
                             <span className="material-icons" style={{ fontSize: "16px", color: isActive ? BRAND : "#9ca3af" }}>{o.icon}</span>
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold" style={{ color: isActive ? BRAND : "#374151" }}>{o.label}</p>
-                            <p className="text-xs text-gray-400">{o.sub}</p>
+                            <p className="text-sm font-semibold dark:text-gray-100" style={{ color: isActive ? BRAND : undefined }}>{o.label}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">{o.sub}</p>
                           </div>
                           {isActive && <span className="material-icons ml-auto" style={{ fontSize: "16px", color: BRAND }}>check</span>}
                         </button>

@@ -18,7 +18,7 @@ export default function TaskTableRow({
 
   return (
     <div
-      className={`grid items-center px-5 py-3.5 border-b border-gray-50 transition cursor-pointer gap-3 ${isSelected ? 'bg-purple-50/50' : 'hover:bg-gray-50'}`}
+      className={`grid items-center px-5 py-3.5 border-b border-gray-50 dark:border-gray-800 transition cursor-pointer gap-3 ${isSelected ? 'bg-purple-50/50 dark:bg-purple-500/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'}`}
       style={{ gridTemplateColumns: COL }}
       onClick={() => openTaskDetail(task.id)}
     >
@@ -31,8 +31,8 @@ export default function TaskTableRow({
 
       {/* Title + description */}
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-gray-800 truncate hover:text-purple-700 transition">{task.title}</p>
-        {task.description && <p className="text-xs text-gray-400 truncate mt-0.5">{task.description}</p>}
+        <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate hover:text-purple-700 dark:hover:text-purple-400 transition">{task.title}</p>
+        {task.description && <p className="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5">{task.description}</p>}
       </div>
 
       {/* Category */}
@@ -56,10 +56,10 @@ export default function TaskTableRow({
       <div>
         {task.due_date ? (
           <>
-            <p className="text-sm text-gray-700">{formatDate(task.due_date)}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{formatDate(task.due_date)}</p>
             {daysLeft && <p className="text-xs font-medium mt-0.5" style={{ color: daysLeft.color }}>{daysLeft.label}</p>}
           </>
-        ) : <p className="text-sm text-gray-300">—</p>}
+        ) : <p className="text-sm text-gray-300 dark:text-gray-600">—</p>}
       </div>
 
       {/* Status */}
@@ -72,13 +72,13 @@ export default function TaskTableRow({
 
       {/* Created On */}
       <div>
-        <p className="text-xs text-gray-400">{formatDate(task.created_at)}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">{formatDate(task.created_at)}</p>
       </div>
 
       {/* Actions */}
       <div className="flex justify-center">
         <button onClick={(e) => { e.stopPropagation(); openDropdown(e, task.id); }}
-          className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100">
+          className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
           <span className="material-icons" style={{ fontSize: '18px' }}>more_horiz</span>
         </button>
         {openDropdownId === task.id && (

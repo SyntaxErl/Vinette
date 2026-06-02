@@ -297,7 +297,7 @@ export default function TaskDetailModal() {
       onClick={(e) => { if (e.target === e.currentTarget) closeTaskDetail() }}
     >
       <div
-        className="tdm-enter w-full bg-white flex flex-col overflow-hidden rounded-t-3xl sm:rounded-2xl shadow-2xl h-[92vh] sm:h-auto sm:max-h-[90vh]"
+        className="tdm-enter w-full bg-white dark:bg-gray-900 flex flex-col overflow-hidden rounded-t-3xl sm:rounded-2xl shadow-2xl h-[92vh] sm:h-auto sm:max-h-[90vh]"
         style={{ maxWidth: 960, fontFamily: 'Inter, sans-serif' }}
       >
         {loading && <TaskDetailSkeleton onClose={closeTaskDetail} />}
@@ -345,11 +345,11 @@ export default function TaskDetailModal() {
                   <OverviewTab {...overviewProps} />
                 </div>
                 <div
-                  className="overflow-y-auto px-5 py-5 space-y-6 flex-shrink-0 border-l border-gray-100 bg-gray-50/40"
+                  className="overflow-y-auto px-5 py-5 space-y-6 flex-shrink-0 border-l border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-800/60"
                   style={{ width: 288 }}
                 >
                   <DetailsPanel {...detailsProps} />
-                  <div className="border-t border-gray-200" />
+                  <div className="border-t border-gray-200 dark:border-gray-700" />
                   <ActivityPanel activity={activity} />
                 </div>
               </div>

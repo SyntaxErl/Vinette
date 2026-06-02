@@ -60,42 +60,42 @@ function CalendarToolbar({ label, onNavigate, onView, view }) {
       <div className="flex items-center gap-2">
         <button
           onClick={() => onNavigate("TODAY")}
-          className="px-3.5 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+          className="px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
         >
           Today
         </button>
         <div className="flex items-center gap-1">
           <button
             onClick={() => onNavigate("PREV")}
-            className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition"
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             aria-label="Previous"
           >
             <span className="material-icons" style={{ fontSize: "20px" }}>chevron_left</span>
           </button>
           <button
             onClick={() => onNavigate("NEXT")}
-            className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition"
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             aria-label="Next"
           >
             <span className="material-icons" style={{ fontSize: "20px" }}>chevron_right</span>
           </button>
         </div>
-        <h2 className="text-base sm:text-lg font-bold text-gray-800 ml-1">{label}</h2>
+        <h2 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 ml-1">{label}</h2>
       </div>
 
-      <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+      <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
         {VIEWS.map((v) => {
           const active = view === v.key;
           return (
             <button
               key={v.key}
               onClick={() => onView(v.key)}
-              className="px-3.5 py-1.5 rounded-lg text-sm font-medium transition"
-              style={{
-                backgroundColor: active ? "white" : "transparent",
-                color: active ? BRAND : "#6b7280",
-                boxShadow: active ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-              }}
+              className={
+                active
+                  ? "px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-white dark:bg-gray-700 shadow-sm"
+                  : "px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+              }
+              style={active ? { color: BRAND, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" } : {}}
             >
               {v.label}
             </button>
@@ -113,15 +113,14 @@ function AgendaEmpty() {
   return (
     <div className="flex flex-col items-center justify-center text-center">
       <div
-        className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-        style={{ backgroundColor: "#f5f3ff" }}
+        className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 bg-[#f5f3ff] dark:bg-[rgba(91,79,207,0.15)]"
       >
         <span className="material-icons" style={{ fontSize: "30px", color: "#5b4fcf" }}>
           event_available
         </span>
       </div>
-      <p className="text-base font-bold text-gray-800">Nothing scheduled</p>
-      <p className="text-sm text-gray-400 mt-1 mb-4 max-w-xs">
+      <p className="text-base font-bold text-gray-800 dark:text-gray-100">Nothing scheduled</p>
+      <p className="text-sm text-gray-400 dark:text-gray-500 mt-1 mb-4 max-w-xs">
         No tasks are due in this range. Add one or jump to another month.
       </p>
       <button
@@ -318,12 +317,12 @@ export default function Calendar() {
           {CATEGORY_CHIPS.map((c) => (
             <div key={c.value} className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.text }} />
-              <span className="text-gray-500 font-medium">{cap(c.value)}</span>
+              <span className="text-gray-500 dark:text-gray-400 font-medium">{cap(c.value)}</span>
             </div>
           ))}
-          <span className="text-gray-400 ml-auto">
+          <span className="text-gray-400 dark:text-gray-500 ml-auto">
             {scheduled} scheduled
-            {undated > 0 && <span className="text-gray-300"> · {undated} without a due date</span>}
+            {undated > 0 && <span className="text-gray-300 dark:text-gray-600"> · {undated} without a due date</span>}
           </span>
         </div>
 
@@ -354,22 +353,22 @@ export default function Calendar() {
       {dayPopover && createPortal(
         <div
           ref={popoverRef}
-          className="fixed z-[999] w-[300px] bg-white rounded-2xl border border-gray-100 shadow-2xl overflow-hidden"
+          className="fixed z-[999] w-[300px] bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xl overflow-hidden"
           style={{ ...dayPopover.pos, animation: "fadeInDown 0.15s ease" }}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
               <div>
-                <p className="text-sm font-bold text-gray-800">
+                <p className="text-sm font-bold text-gray-800 dark:text-gray-100">
                   {dayjs(dayPopover.date).format("ddd, MMM D")}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   {dayPopover.tasks.length} task{dayPopover.tasks.length !== 1 ? "s" : ""} scheduled
                 </p>
               </div>
               <button
                 onClick={closeDayPopover}
-                className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                 aria-label="Close"
               >
                 <span className="material-icons" style={{ fontSize: "18px" }}>close</span>
@@ -377,7 +376,7 @@ export default function Calendar() {
             </div>
 
             {/* Task list */}
-            <div className="max-h-[260px] overflow-y-auto divide-y divide-gray-50">
+            <div className="max-h-[260px] overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800">
               {dayPopover.tasks.map((t) => {
                 const cat = getCategoryColor(t.category);
                 const st = getStatusStyle(t.status);
@@ -385,12 +384,12 @@ export default function Calendar() {
                   <button
                     key={t.id}
                     onClick={() => { openTaskDetail(t.id); closeDayPopover(); }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 hover:bg-gray-50 transition text-left group"
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-left group"
                   >
                     <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cat.text }} />
                     <span
                       className={`flex-1 min-w-0 text-sm truncate ${
-                        t.status === "done" ? "line-through text-gray-400" : "text-gray-700 group-hover:text-purple-700"
+                        t.status === "done" ? "line-through text-gray-400 dark:text-gray-500" : "text-gray-700 dark:text-gray-300 group-hover:text-purple-700 dark:group-hover:text-purple-400"
                       }`}
                     >
                       {t.title}
@@ -407,7 +406,7 @@ export default function Calendar() {
             </div>
 
             {/* Add task */}
-            <div className="p-2 border-t border-gray-100 bg-gray-50">
+            <div className="p-2 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
               <button
                 onClick={() => { openNewTaskOn(dayPopover.date); closeDayPopover(); }}
                 className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90"

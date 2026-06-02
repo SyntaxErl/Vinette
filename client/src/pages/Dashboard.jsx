@@ -60,8 +60,8 @@ const isOverdue = (dueDate, status) =>
 const BarTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-gray-100 rounded-xl shadow-lg px-3 py-2">
-      <p className="text-xs font-semibold text-gray-700">{label}</p>
+    <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-lg px-3 py-2">
+      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">{label}</p>
       <p className="text-xs text-purple-600 font-bold mt-0.5">
         {payload[0].value} tasks
       </p>
@@ -72,14 +72,14 @@ const BarTooltip = ({ active, payload, label }) => {
 const PieTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-gray-100 rounded-xl shadow-lg px-3 py-2">
+    <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-lg px-3 py-2">
       <p
         className="text-xs font-semibold capitalize"
         style={{ color: payload[0].payload.fill }}
       >
         {payload[0].name}
       </p>
-      <p className="text-xs text-gray-600 mt-0.5">{payload[0].value} tasks</p>
+      <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">{payload[0].value} tasks</p>
     </div>
   );
 };
@@ -141,16 +141,16 @@ export default function Dashboard() {
     >
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 animate-fadeInUp">
-        <div className="bg-purple-50 rounded-2xl p-5 border border-purple-100 shadow-sm">
+        <div className="bg-purple-50 dark:bg-gray-900 rounded-2xl p-5 border border-purple-100 dark:border-gray-800 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-500 font-medium">Total Tasks</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{total}</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Tasks</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">{total}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                 All tasks across categories
               </p>
             </div>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-violet-100">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-violet-100 dark:bg-gray-800">
               <span className="material-icons text-violet-600 text-[22px]">
                 assignment
               </span>
@@ -158,24 +158,24 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-green-50 rounded-2xl p-5 border border-green-100 shadow-sm">
+        <div className="bg-green-50 dark:bg-gray-900 rounded-2xl p-5 border border-green-100 dark:border-gray-800 shadow-sm">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-sm text-gray-500 font-medium">Completed</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Completed</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">
                 {completed}
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                 {completionRate}% completion rate
               </p>
-              <div className="w-full bg-gray-100 rounded-full h-1.5 mt-2">
+              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mt-2">
                 <div
                   className="h-1.5 rounded-full transition-all duration-500 bg-green-500"
                   style={{ width: `${completionRate}%` }}
                 />
               </div>
             </div>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center ml-4 bg-green-100">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center ml-4 bg-green-100 dark:bg-gray-800">
               <span className="material-icons text-green-500 text-[22px]">
                 check_circle
               </span>
@@ -183,14 +183,14 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-yellow-50 rounded-2xl p-5 border border-yellow-100 shadow-sm">
+        <div className="bg-yellow-50 dark:bg-gray-900 rounded-2xl p-5 border border-yellow-100 dark:border-gray-800 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-500 font-medium">Pending</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{pending}</p>
-              <p className="text-xs text-gray-400 mt-1">Todo or In Progress</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Pending</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">{pending}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Todo or In Progress</p>
             </div>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-yellow-100">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-yellow-100 dark:bg-gray-800">
               <span className="material-icons text-yellow-500 text-[22px]">
                 schedule
               </span>
@@ -198,14 +198,14 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-red-50 rounded-2xl p-5 border border-red-100 shadow-sm">
+        <div className="bg-red-50 dark:bg-gray-900 rounded-2xl p-5 border border-red-100 dark:border-gray-800 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-500 font-medium">Overdue</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{overdue}</p>
-              <p className="text-xs text-gray-400 mt-1">Tasks past due date</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Overdue</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">{overdue}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Tasks past due date</p>
             </div>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-red-100">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-red-100 dark:bg-gray-800">
               <span className="material-icons text-red-500 text-[22px]">
                 warning
               </span>
@@ -217,14 +217,14 @@ export default function Dashboard() {
       {/* ── Main Grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         {/* Recent Tasks — row 1, left 2/3 */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-fadeInUp">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 gap-2 flex-wrap">
-            <h2 className="font-bold text-gray-900">Recent Tasks</h2>
+        <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden animate-fadeInUp">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 gap-2 flex-wrap">
+            <h2 className="font-bold text-gray-900 dark:text-gray-100">Recent Tasks</h2>
             <div className="flex items-center gap-2 flex-wrap">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 outline-none bg-white"
+                className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 text-gray-600 dark:text-gray-300 outline-none bg-white dark:bg-gray-800"
               >
                 <option value="">All Status</option>
                 <option value="todo">Todo</option>
@@ -234,7 +234,7 @@ export default function Dashboard() {
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 outline-none bg-white"
+                className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 text-gray-600 dark:text-gray-300 outline-none bg-white dark:bg-gray-800"
               >
                 <option value="">All Priority</option>
                 <option value="high">High</option>
@@ -254,23 +254,23 @@ export default function Dashboard() {
           {filteredTasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <span
-                className="material-icons text-gray-200 mb-2"
+                className="material-icons text-gray-200 dark:text-gray-700 mb-2"
                 style={{ fontSize: "40px" }}
               >
                 assignment
               </span>
-              <p className="text-sm font-medium text-gray-400">No tasks yet</p>
-              <p className="text-xs text-gray-300 mt-1">
+              <p className="text-sm font-medium text-gray-400 dark:text-gray-500">No tasks yet</p>
+              <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">
                 Create your first task to get started
               </p>
             </div>
           ) : (
             <>
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-gray-50 dark:divide-gray-800">
                 {filteredTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="grid items-center px-5 py-3 hover:bg-gray-50 transition gap-3
+                    className="grid items-center px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition gap-3
                       [grid-template-columns:12px_1fr_90px]
                       sm:[grid-template-columns:12px_1fr_120px_90px]
                       lg:[grid-template-columns:12px_1fr_90px_80px_130px_100px]"
@@ -282,7 +282,7 @@ export default function Dashboard() {
                       }}
                     />
                     <div className="flex flex-col min-w-0">
-                      <p className="text-sm text-gray-700 font-medium truncate">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 font-medium truncate">
                         {task.title}
                       </p>
                       <div className="flex items-center gap-1.5 mt-0.5 lg:hidden">
@@ -354,7 +354,7 @@ export default function Dashboard() {
                           </span>
                         </>
                       ) : (
-                        <span className="text-xs text-gray-300">—</span>
+                        <span className="text-xs text-gray-300 dark:text-gray-600">—</span>
                       )}
                     </div>
                     <div className="flex justify-end lg:justify-center">
@@ -371,7 +371,7 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-              <div className="px-5 py-3 border-t border-gray-100">
+              <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-800">
                 <button
                   onClick={() => navigate("/tasks")}
                   className="text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all"
@@ -388,21 +388,21 @@ export default function Dashboard() {
         </div>
 
         {/* Donut Chart — row 1, right 1/3 */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 animate-fadeInUp">
-          <h2 className="font-bold text-gray-900 mb-1">Tasks by Category</h2>
-          <p className="text-xs text-gray-400 mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 animate-fadeInUp">
+          <h2 className="font-bold text-gray-900 dark:text-gray-100 mb-1">Tasks by Category</h2>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
             Distribution across all categories
           </p>
 
           {categoryData.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-center">
               <span
-                className="material-icons text-gray-200 mb-2"
+                className="material-icons text-gray-200 dark:text-gray-700 mb-2"
                 style={{ fontSize: "36px" }}
               >
                 donut_large
               </span>
-              <p className="text-sm text-gray-400">No data yet</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500">No data yet</p>
             </div>
           ) : (
             /* FIX: flex-col on mobile, flex-row on sm+ so chart + legend never get squeezed */
@@ -432,10 +432,10 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <p className="text-2xl font-bold text-gray-900 leading-none">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-none">
                     {total}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">Total</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Total</p>
                 </div>
               </div>
 
@@ -446,11 +446,11 @@ export default function Dashboard() {
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: item.fill }}
                     />
-                    <span className="text-xs text-gray-600 capitalize flex-1 truncate">
+                    <span className="text-xs text-gray-600 dark:text-gray-300 capitalize flex-1 truncate">
                       {item.name}
                     </span>
-                    <span className="text-xs text-gray-500 flex-shrink-0 whitespace-nowrap">
-                      <span className="font-semibold text-gray-800">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">
+                      <span className="font-semibold text-gray-800 dark:text-gray-100">
                         {item.value}
                       </span>{" "}
                       ({total > 0 ? Math.round((item.value / total) * 100) : 0}
@@ -462,7 +462,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="border-t border-gray-100 mt-4 pt-3">
+          <div className="border-t border-gray-100 dark:border-gray-800 mt-4 pt-3">
             <button
               onClick={() => navigate("/analytics")}
               className="text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all"
@@ -477,25 +477,25 @@ export default function Dashboard() {
         </div>
 
         {/* Weekly Activity — row 2, spans all 3 columns */}
-        <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 animate-fadeInUp">
+        <div className="lg:col-span-3 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 animate-fadeInUp">
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Bar Chart — flex-[2] ≈ 2/3 width */}
             <div className="flex-[2] min-w-0">
               <div className="mb-4">
-                <h2 className="font-bold text-gray-900">Weekly Activity</h2>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <h2 className="font-bold text-gray-900 dark:text-gray-100">Weekly Activity</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                   Tasks created in the last 7 days
                 </p>
               </div>
               {weeklyData.every((d) => d.tasks === 0) ? (
                 <div className="flex flex-col items-center justify-center h-40 text-center">
                   <span
-                    className="material-icons text-gray-200 mb-2"
+                    className="material-icons text-gray-200 dark:text-gray-700 mb-2"
                     style={{ fontSize: "36px" }}
                   >
                     bar_chart
                   </span>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-gray-400 dark:text-gray-500">
                     No activity in the last 7 days
                   </p>
                 </div>
@@ -534,51 +534,50 @@ export default function Dashboard() {
             </div>
 
             {/* Stats Panel — flex-[1] ≈ 1/3 width */}
-            <div className="flex-[1] lg:border-l lg:border-gray-100 lg:pl-5 flex flex-col gap-4">
+            <div className="flex-[1] lg:border-l lg:border-gray-100 lg:dark:border-gray-800 lg:pl-5 flex flex-col gap-4">
               <div className="grid grid-cols-3 gap-2">
-                <div className="border border-gray-100 rounded-xl p-3 bg-gray-50">
-                  <p className="text-xs text-gray-400 font-medium leading-tight">
+                <div className="border border-gray-100 dark:border-gray-800 rounded-xl p-3 bg-gray-50 dark:bg-gray-800/60">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-medium leading-tight">
                     This Week
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">
                     {thisWeek}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5 leading-tight">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 leading-tight">
                     Tasks Completed
                   </p>
                 </div>
-                <div className="border border-gray-100 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 font-medium leading-tight">
+                <div className="border border-gray-100 dark:border-gray-800 rounded-xl p-3">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-medium leading-tight">
                     Best Day
                   </p>
                   {best.tasks > 0 ? (
                     <>
-                      <p className="text-lg font-bold text-gray-900 mt-1 leading-tight">
+                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100 mt-1 leading-tight">
                         {best.day}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                         {best.tasks} tasks
                       </p>
                     </>
                   ) : (
-                    <p className="text-sm text-gray-400 mt-1">—</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">—</p>
                   )}
                 </div>
-                <div className="border border-gray-100 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 font-medium leading-tight">
+                <div className="border border-gray-100 dark:border-gray-800 rounded-xl p-3">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-medium leading-tight">
                     Avg. per Day
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">
                     {Math.round(thisWeek / 7)}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">Tasks</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Tasks</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <div
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg"
-                  style={{ backgroundColor: isUp ? "#f0fdf4" : "#fef2f2" }}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg ${isUp ? "bg-green-50 dark:bg-green-500/15" : "bg-red-50 dark:bg-red-500/15"}`}
                 >
                   <span
                     className="material-icons"
@@ -596,12 +595,12 @@ export default function Dashboard() {
                     {pct !== null ? `${pct}%` : "—"}
                   </span>
                 </div>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   vs last week ({lastWeek} tasks)
                 </p>
               </div>
 
-              <div className="border-t border-gray-100 pt-3">
+              <div className="border-t border-gray-100 dark:border-gray-800 pt-3">
                 <button
                   onClick={() => navigate("/analytics")}
                   className="text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all"

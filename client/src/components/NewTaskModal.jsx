@@ -145,9 +145,9 @@ export default function NewTaskModal() {
     }
   }
 
-  const inputCls = "w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition bg-white"
-  const labelCls = "block text-sm font-semibold text-gray-700 mb-1.5"
-  const selectCls = "w-full appearance-none border border-gray-200 rounded-xl pl-9 pr-8 py-2.5 text-sm text-gray-700 bg-white outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition cursor-pointer"
+  const inputCls = "w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:placeholder-gray-500"
+  const labelCls = "block text-sm font-semibold text-gray-700 mb-1.5 dark:text-gray-300"
+  const selectCls = "w-full appearance-none border border-gray-200 rounded-xl pl-9 pr-8 py-2.5 text-sm text-gray-700 bg-white outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition cursor-pointer dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
 
   const selectedUser = users.find((u) => String(u.id) === String(form.assigned_to))
 
@@ -158,18 +158,18 @@ export default function NewTaskModal() {
       onClick={(e) => e.target === e.currentTarget && closeNewTaskModal()}
     >
       <div
-        className="w-full bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="w-full bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden dark:bg-gray-900"
         style={{ fontFamily: 'Inter, sans-serif', maxHeight: '92vh', maxWidth: '780px' }}
       >
         {/* ── Header ── */}
-        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">New Task</h2>
-            <p className="text-sm text-gray-400 mt-0.5">Create a task and stay organized.</p>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">New Task</h2>
+            <p className="text-sm text-gray-400 mt-0.5 dark:text-gray-500">Create a task and stay organized.</p>
           </div>
           <button
             onClick={closeNewTaskModal}
-            className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100 mt-0.5"
+            className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100 mt-0.5 dark:hover:bg-gray-800 dark:hover:text-gray-300"
           >
             <span className="material-icons" style={{ fontSize: '20px' }}>close</span>
           </button>
@@ -178,13 +178,13 @@ export default function NewTaskModal() {
         {/* ── Body ── */}
         <div className="flex-1 overflow-y-auto">
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x divide-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x divide-gray-100 dark:divide-gray-800">
 
               {/* ── Left Column ── */}
               <div className="px-6 py-5 space-y-5">
 
                 {error && (
-                  <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-2">
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-2 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400">
                     <span className="material-icons" style={{ fontSize: '16px' }}>error_outline</span>
                     {error}
                   </div>
@@ -209,14 +209,14 @@ export default function NewTaskModal() {
                 {/* Description */}
                 <div>
                   <label className={labelCls}>Description</label>
-                  <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-50 transition">
+                  <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-50 transition dark:border-gray-700">
                     <textarea
                       name="description"
                       value={form.description}
                       onChange={handleChange}
                       placeholder="Add more details about this task..."
                       rows={4}
-                      className="w-full px-3.5 pt-2.5 pb-1 text-sm text-gray-700 placeholder-gray-400 outline-none resize-none bg-white"
+                      className="w-full px-3.5 pt-2.5 pb-1 text-sm text-gray-700 placeholder-gray-400 outline-none resize-none bg-white dark:bg-gray-800 dark:text-gray-200 dark:placeholder-gray-500"
                     />
                   </div>
                 </div>
@@ -234,10 +234,10 @@ export default function NewTaskModal() {
                           onClick={() => setForm((prev) => ({ ...prev, priority: p.value }))}
                         >
                           <div
-                            className="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition"
+                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${!isSelected ? 'bg-white dark:bg-gray-800' : ''}`}
                             style={{
                               borderColor: isSelected ? p.color : '#d1d5db',
-                              backgroundColor: isSelected ? p.color : 'white',
+                              backgroundColor: isSelected ? p.color : undefined,
                             }}
                           >
                             {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -277,7 +277,7 @@ export default function NewTaskModal() {
                       <span className="material-icons absolute left-3 top-2.5 text-gray-400 pointer-events-none" style={{ fontSize: '16px' }}>calendar_today</span>
                       <input
                         type="date" name="due_date" value={form.due_date} onChange={handleChange}
-                        className="w-full border border-gray-200 rounded-xl pl-9 pr-2 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition"
+                        className="w-full border border-gray-200 rounded-xl pl-9 pr-2 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                       />
                     </div>
                   </div>
@@ -287,7 +287,7 @@ export default function NewTaskModal() {
                       <span className="material-icons absolute left-3 top-2.5 text-gray-400 pointer-events-none" style={{ fontSize: '16px' }}>schedule</span>
                       <input
                         type="time" name="due_time" value={form.due_time} onChange={handleChange}
-                        className="w-full border border-gray-200 rounded-xl pl-9 pr-2 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition"
+                        className="w-full border border-gray-200 rounded-xl pl-9 pr-2 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                       />
                     </div>
                   </div>
@@ -325,7 +325,7 @@ export default function NewTaskModal() {
                     <span className="material-icons absolute right-2.5 top-2.5 text-gray-400 pointer-events-none" style={{ fontSize: '16px' }}>keyboard_arrow_down</span>
                   </div>
                   {selectedUser && (
-                    <p className="text-xs text-gray-400 mt-1 ml-1">{selectedUser.email}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 ml-1">{selectedUser.email}</p>
                   )}
                 </div>
 
@@ -333,7 +333,7 @@ export default function NewTaskModal() {
                 <div>
                   <label className={labelCls}>Tags</label>
                   <div
-                    className="flex flex-wrap gap-1.5 border border-gray-200 rounded-xl px-3 py-2 min-h-[42px] focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-50 transition cursor-text bg-white"
+                    className="flex flex-wrap gap-1.5 border border-gray-200 rounded-xl px-3 py-2 min-h-[42px] focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-50 transition cursor-text bg-white dark:bg-gray-800 dark:border-gray-700"
                     onClick={() => tagInputRef.current?.focus()}
                   >
                     {form.tags.map((tag) => (
@@ -361,7 +361,7 @@ export default function NewTaskModal() {
                       onKeyDown={handleTagKeyDown}
                       onBlur={addTag}
                       placeholder={form.tags.length === 0 ? 'Add tags — press Enter' : ''}
-                      className="flex-1 min-w-[100px] text-sm text-gray-700 placeholder-gray-400 outline-none bg-transparent py-0.5"
+                      className="flex-1 min-w-[100px] text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none bg-transparent py-0.5"
                     />
                   </div>
                 </div>
@@ -388,14 +388,14 @@ export default function NewTaskModal() {
                       <span className="material-icons absolute left-3 top-2.5 text-gray-400 pointer-events-none" style={{ fontSize: '16px' }}>notifications_none</span>
                       <input
                         type="date" name="reminder_date" value={form.reminder_date} onChange={handleChange}
-                        className="w-full border border-gray-200 rounded-xl pl-9 pr-2 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition"
+                        className="w-full border border-gray-200 rounded-xl pl-9 pr-2 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                       />
                     </div>
                     <div className="relative">
                       <span className="material-icons absolute left-3 top-2.5 text-gray-400 pointer-events-none" style={{ fontSize: '16px' }}>schedule</span>
                       <input
                         type="time" name="reminder_time" value={form.reminder_time} onChange={handleChange}
-                        className="w-full border border-gray-200 rounded-xl pl-9 pr-2 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition"
+                        className="w-full border border-gray-200 rounded-xl pl-9 pr-2 py-2.5 text-sm text-gray-700 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                       />
                     </div>
                   </div>
@@ -413,7 +413,7 @@ export default function NewTaskModal() {
         </div>
 
         {/* ── Footer ── */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/60">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -422,7 +422,7 @@ export default function NewTaskModal() {
               onChange={handleChange}
               className="w-4 h-4 rounded border-gray-300 accent-purple-600 cursor-pointer"
             />
-            <span className="text-sm text-gray-600">Add another task</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">Add another task</span>
           </label>
 
           <div className="flex items-center gap-3">
@@ -430,7 +430,7 @@ export default function NewTaskModal() {
               type="button"
               onClick={closeNewTaskModal}
               disabled={loading}
-              className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-100 transition disabled:opacity-50"
+              className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-100 transition disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Cancel
             </button>

@@ -62,7 +62,7 @@ export default function CompletionTrendChart({ trend = [] }) {
               dataKey="rate"
               position="top"
               formatter={(v) => `${v}%`}
-              style={{ fontSize: 11, fill: "#6b7280", fontWeight: 600 }}
+              style={{ fontSize: 11, fill: "#9ca3af", fontWeight: 600 }}
             />
           </Area>
         </AreaChart>

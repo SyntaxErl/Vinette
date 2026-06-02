@@ -253,7 +253,7 @@ tab-visibility detection. `online` = ≥1 live socket, `away` = client-emitted i
   - `isNewTaskModalOpen` / `selectedTaskId` — modal visibility state. `newTaskDefaults` — optional field prefills passed to `openNewTaskModal(defaults)` (Calendar passes the clicked day's `due_date`); guarded to a plain object so callers wiring the action straight to `onClick` don't leak a click event in.
 - **teamStore** — `isInviteModalOpen` + `open/closeInviteModal` (the global `InviteMemberModal` in `MainLayout`, opened by the navbar button or the Team page button), `canManage` (gates invite/manage UI; set by `fetchTeam` from `viewerIsOwner`), and `teamVersion` + `incrementTeamVersion()` — the Team page watches it and refetches after any mutation (invite/remove/role), mirroring `taskVersion`. **Directory cache:** `fetchTeam(force?)` caches the `{ members, pending, stats, viewerIsOwner }` response tagged with `teamCacheVersion` (= `teamVersion` at fetch time). A revisit with no mutation since is a cache hit (no network call, but `canManage` is still synced); any `incrementTeamVersion()` invalidates it. Cleared on logout via `reset()`. Live presence still overlays on top, so dots stay fresh; only roster membership is cached (a newly-joined member appears after a mutation or full reload).
 - **presenceStore** — `statuses` map keyed by `userId` (`online`/`away`/`offline`). Fed by `usePresenceSocket` from Socket.IO events (`presence:snapshot`, `presence:update`). The Team page overlays it onto the server-seeded status so dots update live. Reset is handled by re-snapshot on reconnect.
-- **themeStore** — `theme` (`light`/`dark`/`system`), persisted to `localStorage` (`tf-theme`) and the server (`users.theme` via `PUT /auth/profile`). `setTheme`/`applyTheme` toggle a `.dark` class on `<html>` (resolving `system` via `matchMedia`); `useSystemTheme` tracks live OS changes while on `system`. The Profile page seeds it from the loaded user. **Dark styling is shell-first** — `index.css` opts into class-based dark via `@custom-variant dark (&:where(.dark, .dark *))`; MainLayout, Sidebar, Navbar, navbar search, and the Profile/Settings cards have `dark:` variants. Inner pages (Dashboard/Board/MyTasks/Calendar/Analytics/Team) and chart/inline-hex colors are **not dark yet** (later pass). Applied on module load to avoid a flash; cleared/re-read on logout via `reset()`.
+- **themeStore** — `theme` (`light`/`dark`/`system`), persisted to `localStorage` (`tf-theme`) and the server (`users.theme` via `PUT /auth/profile`). `setTheme`/`applyTheme` toggle a `.dark` class on `<html>` (resolving `system` via `matchMedia`); `useSystemTheme` tracks live OS changes while on `system`. The Profile page seeds it from the loaded user. **Dark mode is class-based** — `index.css` opts in via `@custom-variant dark (&:where(.dark, .dark *))`. Coverage is now **app-wide**: shell (MainLayout, Sidebar, Navbar, search) **plus** all inner pages (Dashboard, Board, MyTasks, Calendar incl. the `.tf-calendar` RBC overrides, Analytics, Team), the Profile/Settings cards, and the global modals (NewTask, TaskDetail + `taskDetail/*`, Notification, Invite). **Convention:** card surface `dark:bg-gray-900`, nested fills `dark:bg-gray-800`, borders `dark:border-gray-800`/`-700`, headings `dark:text-gray-100`, body `dark:text-gray-300`, muted `dark:text-gray-400/500`, hovers `dark:hover:bg-gray-800`, pill badges `dark:bg-<hue>-500/15 dark:text-<hue>-300`. **Known light-only remainders:** recharts internals (grid stroke, cursor fills, axis ticks) and a few inline-hex pill colors sourced from shared helpers (`taskOptions.js`, `taskHelpers.js`) — they read acceptably on dark but aren't theme-aware (would need JS-level theming). Applied on module load to avoid a flash; cleared/re-read on logout via `reset()`.
 - **notificationStore** — owns both the `unreadCount` (single source of truth for the navbar bell **and** sidebar badge) **and** a cached `notifications` list (shared by `NotificationModal` and the Notifications page). `fetchNotifications(force?)` fetches once and caches (`null` = never loaded); reopening the modal or revisiting the page is a cache hit (no network call). `useNotificationSocket` seeds the count on auth and, on `notification:new`, calls `addNotification(notif)` which prepends to the cached list (if loaded) and bumps the count — so the cache stays fresh with no invalidation counter. `markRead` / `markAllRead` / `clearAll` update the cache optimistically then persist, and recompute `unreadCount` from the list. On a `type:'task'` notification the hook also bumps `taskVersion` + clears dashboard stats so the recipient's Board/MyTasks/Calendar/Dashboard refetch live (no reload). Cleared on logout via `reset()`.
 
 ---
@@ -280,6 +280,36 @@ Built feature by feature. Update this list whenever a feature ships.
 ---
 
 ## Session Log
+
+### 2026-06-02 — Dark mode (full app pass)
+
+**Done:**
+- Extended dark mode from the shell to **every inner page + modal** so the whole app
+  is dark, not just the sidebar/navbar/Profile. Files touched (48): Dashboard, Board (+ all
+  `components/tasks/*`), MyTasks, Calendar (+ `.tf-calendar` CSS overrides in `index.css`),
+  Analytics (+ `components/analytics/*`), Team (+ `components/team/*`), the global modals
+  (`NewTaskModal`, `TaskDetailModal` + `components/taskDetail/*`, `NotificationModal`,
+  `InviteMemberModal`), the Notifications page, and all the `*Skeleton` loaders.
+- **Convention** (append-only `dark:` variants, light theme untouched): surfaces
+  `bg-white→dark:bg-gray-900`, nested `bg-gray-50/100→dark:bg-gray-800`, borders
+  `→dark:border-gray-800/700`, headings `→dark:text-gray-100`, body `→dark:text-gray-300`,
+  muted `→dark:text-gray-400/500`, hovers `→dark:hover:bg-gray-800`, pills
+  `→dark:bg-<hue>-500/15 dark:text-<hue>-300`. RBC calendar grid got a parallel `.dark .tf-calendar`
+  override block (surfaces #111827, borders #1f2937, today tint rgba(91,79,207,.15)).
+- A few inline-`style` hex tints were converted to classes so they could carry dark variants
+  (RoleBadge, TeamStats icon wells, Board column headers — the latter map to exact Tailwind
+  palette values, so light is pixel-identical).
+- **Known light-only remainders:** recharts internals (CartesianGrid stroke, Tooltip cursor
+  fills, axis tick fills) and pill colors sourced from shared helpers (`taskOptions.js`,
+  `taskHelpers.js`) — readable on dark but not theme-aware; would need JS-level theming.
+
+**Verify next session (manual):** toggle Dark on Profile → walk every page (Dashboard, Board,
+MyTasks, Calendar month+agenda, Analytics, Team, Notifications) and open the modals (New Task,
+Task Detail, Notifications bell, Invite) — all surfaces/text should be dark & legible. Light mode
+should look unchanged.
+
+**Lint/build:** client production build passes. (Two smart-quote chars introduced by an agent in
+`Notifications.jsx`/`MemberSidebar.jsx` were fixed before building.)
 
 ### 2026-06-02 — Dark mode (shell-first)
 

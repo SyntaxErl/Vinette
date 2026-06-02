@@ -70,16 +70,16 @@ export default function NotificationModal({ onClose }) {
       {/* Modal panel */}
       <div
         ref={modalRef}
-        className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-sm flex flex-col"
+        className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-sm flex flex-col dark:bg-gray-900 dark:border-gray-800"
         style={{
           maxHeight: "calc(100vh - 80px)",
           fontFamily: "Inter, sans-serif",
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold text-gray-900">Notifications</h2>
+            <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Notifications</h2>
             {unreadCount > 0 && (
               <span
                 className="text-xs font-bold text-white px-1.5 py-0.5 rounded-full"
@@ -101,14 +101,14 @@ export default function NotificationModal({ onClose }) {
             {list.length > 0 && (
               <button
                 onClick={clearAll}
-                className="text-xs text-gray-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 transition font-medium"
+                className="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition font-medium"
               >
                 Clear all
               </button>
             )}
             <button
               onClick={onClose}
-              className="p-1 rounded-lg hover:bg-gray-100 transition ml-1"
+              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition ml-1"
               aria-label="Close"
             >
               <span
@@ -126,7 +126,7 @@ export default function NotificationModal({ onClose }) {
           {isLoading && (
             <div className="flex items-center justify-center py-12">
               <span
-                className="material-icons text-gray-300 animate-spin"
+                className="material-icons text-gray-300 dark:text-gray-600 animate-spin"
                 style={{ fontSize: "28px" }}
               >
                 autorenew
@@ -137,15 +137,15 @@ export default function NotificationModal({ onClose }) {
           {!isLoading && list.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center px-4">
               <span
-                className="material-icons text-gray-200 mb-2"
+                className="material-icons text-gray-200 dark:text-gray-700 mb-2"
                 style={{ fontSize: "40px" }}
               >
                 notifications_off
               </span>
-              <p className="text-sm font-medium text-gray-400">
+              <p className="text-sm font-medium text-gray-400 dark:text-gray-500">
                 You're all caught up!
               </p>
-              <p className="text-xs text-gray-300 mt-1">
+              <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">
                 No notifications yet.
               </p>
             </div>
@@ -161,8 +161,8 @@ export default function NotificationModal({ onClose }) {
                   <li
                     key={notif.id}
                     onClick={() => handleNotifClick(notif)}
-                    className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition border-b border-gray-50 last:border-0
-                      ${isUnread ? "bg-purple-50/40 hover:bg-purple-50" : "hover:bg-gray-50"}`}
+                    className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition border-b border-gray-50 dark:border-gray-800 last:border-0
+                      ${isUnread ? "bg-purple-50/40 dark:bg-purple-500/10 hover:bg-purple-50 dark:hover:bg-purple-500/15" : "hover:bg-gray-50 dark:hover:bg-gray-800"}`}
                   >
                     {/* Type icon */}
                     <div
@@ -180,16 +180,16 @@ export default function NotificationModal({ onClose }) {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`text-sm truncate ${isUnread ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}
+                        className={`text-sm truncate ${isUnread ? "font-semibold text-gray-900 dark:text-gray-100" : "font-medium text-gray-700 dark:text-gray-300"}`}
                       >
                         {notif.title}
                       </p>
                       {notif.message && (
-                        <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 line-clamp-2">
                           {notif.message}
                         </p>
                       )}
-                      <p className="text-xs text-gray-300 mt-1">
+                      <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">
                         {timeAgo(notif.created_at)}
                       </p>
                     </div>
@@ -209,7 +209,7 @@ export default function NotificationModal({ onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-100 px-4 py-3">
+        <div className="border-t border-gray-100 dark:border-gray-800 px-4 py-3 dark:bg-gray-900">
           <button
             onClick={() => {
               navigate("/notifications");

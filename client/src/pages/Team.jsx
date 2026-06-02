@@ -95,7 +95,7 @@ export default function Team() {
         <TeamStats stats={data.stats} />
 
         {/* Filter bar + invite (invite also lives in the navbar) */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-3.5 flex flex-col lg:flex-row lg:items-center gap-3">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-3.5 flex flex-col lg:flex-row lg:items-center gap-3">
           <div className="flex-1">
             <TeamFilters
               search={search} setSearch={setSearch}
@@ -116,14 +116,14 @@ export default function Team() {
         </div>
 
         {loading ? (
-          <div className="bg-white rounded-2xl border border-gray-100 flex items-center justify-center py-20">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-center py-20">
             <span className="material-icons animate-spin text-purple-400" style={{ fontSize: '32px' }}>autorenew</span>
           </div>
         ) : totalShown === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 flex flex-col items-center justify-center py-16 text-center">
-            <span className="material-icons text-gray-200 mb-3" style={{ fontSize: '48px' }}>group_off</span>
-            <p className="text-sm font-medium text-gray-400">No members found</p>
-            <p className="text-xs text-gray-300 mt-1">Try adjusting your filters or invite someone</p>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center py-16 text-center">
+            <span className="material-icons text-gray-200 dark:text-gray-700 mb-3" style={{ fontSize: '48px' }}>group_off</span>
+            <p className="text-sm font-medium text-gray-400 dark:text-gray-500">No members found</p>
+            <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">Try adjusting your filters or invite someone</p>
           </div>
         ) : (
           <>
@@ -152,8 +152,8 @@ export default function Team() {
             </div>
 
             {/* Footer / pagination */}
-            <div className="bg-white rounded-2xl border border-gray-100 flex items-center justify-between px-5 py-3">
-              <p className="text-sm text-gray-500">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-between px-5 py-3">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Showing {filteredMembers.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1} to {Math.min(safePage * PAGE_SIZE, filteredMembers.length)} of {totalShown} members
               </p>
               {totalPages > 1 && (
@@ -161,7 +161,7 @@ export default function Team() {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={safePage === 1}
-                    className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
                   >
                     <span className="material-icons" style={{ fontSize: '16px' }}>chevron_left</span>
                   </button>
@@ -172,7 +172,7 @@ export default function Team() {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={safePage === totalPages}
-                    className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
                   >
                     <span className="material-icons" style={{ fontSize: '16px' }}>chevron_right</span>
                   </button>

@@ -48,24 +48,24 @@ export default function MemberSidebar({ member, canManage = true, onClose, onRem
       <div className="fixed inset-0 z-[55] bg-black/20 xl:hidden" onClick={onClose} />
 
       <aside
-        className="fixed top-0 right-0 z-[60] h-screen w-full max-w-[380px] bg-white border-l border-gray-100 shadow-2xl flex flex-col"
+        className="fixed top-0 right-0 z-[60] h-screen w-full max-w-[380px] bg-white dark:bg-gray-900 border-l border-gray-100 dark:border-gray-800 shadow-2xl flex flex-col"
         style={{ animation: 'fadeIn 0.2s ease' }}
       >
         {/* Header */}
-        <div className="px-5 pt-5 pb-4 border-b border-gray-100">
+        <div className="px-5 pt-5 pb-4 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3 min-w-0">
               <Avatar name={member.name || member.email} size={52} />
               <div className="min-w-0">
-                <p className="text-base font-bold text-gray-900 truncate">{member.name || member.email}</p>
-                <p className="text-xs text-gray-400 truncate">{member.email}</p>
+                <p className="text-base font-bold text-gray-900 dark:text-gray-100 truncate">{member.name || member.email}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{member.email}</p>
                 <div className="mt-1.5 flex items-center gap-2">
                   <RoleBadge role={member.role} />
                   <StatusDot status={member.status} />
                 </div>
               </div>
             </div>
-            <button onClick={onClose} className="p-1 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition flex-shrink-0">
+            <button onClick={onClose} className="p-1 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 transition flex-shrink-0">
               <span className="material-icons" style={{ fontSize: '20px' }}>close</span>
             </button>
           </div>
@@ -107,18 +107,18 @@ export default function MemberSidebar({ member, canManage = true, onClose, onRem
 
         {/* Quick actions (real members only) */}
         {!member.isPending && (
-          <div className="px-5 py-4 border-t border-gray-100 space-y-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Quick Actions</p>
+          <div className="px-5 py-4 border-t border-gray-100 dark:border-gray-800 space-y-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Quick Actions</p>
             <a
               href={`mailto:${member.email}`}
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             >
               <span className="material-icons" style={{ fontSize: '18px' }}>mail_outline</span>
               Send Message
             </a>
             <button
               onClick={() => toast('Member profiles are coming soon')}
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             >
               <span className="material-icons" style={{ fontSize: '18px' }}>badge</span>
               View Profile
@@ -126,7 +126,7 @@ export default function MemberSidebar({ member, canManage = true, onClose, onRem
             {!member.isOwner && canManage && (
               <button
                 onClick={() => onRemove(member)}
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-500 hover:bg-red-50 transition"
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-red-200 dark:border-red-800/60 text-sm font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition"
               >
                 <span className="material-icons" style={{ fontSize: '18px' }}>person_remove</span>
                 Remove from Team
@@ -141,13 +141,13 @@ export default function MemberSidebar({ member, canManage = true, onClose, onRem
 
 function InfoRow({ icon, label, children }) {
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-gray-50 last:border-0">
-      <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-        <span className="material-icons text-gray-400" style={{ fontSize: 14 }}>{icon}</span>
+    <div className="flex items-start gap-3 py-2.5 border-b border-gray-50 dark:border-gray-800/60 last:border-0">
+      <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span className="material-icons text-gray-400 dark:text-gray-500" style={{ fontSize: 14 }}>{icon}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">{label}</p>
-        <div className="text-sm text-gray-700">{children}</div>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-0.5">{label}</p>
+        <div className="text-sm text-gray-700 dark:text-gray-300">{children}</div>
       </div>
     </div>
   )
@@ -164,10 +164,10 @@ function OverviewBody({ member, taskCount, onOpenTasks }) {
       )}
       <button
         onClick={onOpenTasks}
-        className="w-full mt-4 flex items-center justify-between px-4 py-3 rounded-xl bg-purple-50 hover:bg-purple-100 transition"
+        className="w-full mt-4 flex items-center justify-between px-4 py-3 rounded-xl bg-purple-50 dark:bg-purple-500/15 hover:bg-purple-100 dark:hover:bg-purple-500/25 transition"
       >
-        <span className="text-sm font-medium text-gray-700">Tasks Assigned</span>
-        <span className="text-sm font-bold text-purple-600">{taskCount ?? '—'}</span>
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tasks Assigned</span>
+        <span className="text-sm font-bold text-purple-600 dark:text-purple-400">{taskCount ?? '—'}</span>
       </button>
     </div>
   )
@@ -181,13 +181,13 @@ function TasksBody({ tasks, loaded, onOpenTask }) {
   }
   if (tasks.length === 0) {
     return <div className="flex flex-col items-center justify-center py-12 text-center">
-      <span className="material-icons text-gray-200 mb-2" style={{ fontSize: '40px' }}>assignment_ind</span>
-      <p className="text-sm text-gray-400">No tasks assigned</p>
+      <span className="material-icons text-gray-200 dark:text-gray-700 mb-2" style={{ fontSize: '40px' }}>assignment_ind</span>
+      <p className="text-sm text-gray-400 dark:text-gray-500">No tasks assigned</p>
     </div>
   }
   return (
     <div>
-      <p className="text-sm font-semibold text-gray-700 mb-3">Tasks Assigned ({tasks.length})</p>
+      <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Tasks Assigned ({tasks.length})</p>
       <div className="space-y-2">
         {tasks.map((task) => {
           const cat = getCategoryColor(task.category)
@@ -196,10 +196,10 @@ function TasksBody({ tasks, loaded, onOpenTask }) {
             <button
               key={task.id}
               onClick={() => onOpenTask(task.id)}
-              className="w-full text-left rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition px-3.5 py-3"
+              className="w-full text-left rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-sm transition px-3.5 py-3"
             >
               <div className="flex items-start justify-between gap-2">
-                <p className={`text-sm font-medium leading-snug ${task.status === 'done' ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                <p className={`text-sm font-medium leading-snug ${task.status === 'done' ? 'line-through text-gray-400 dark:text-gray-600' : 'text-gray-800 dark:text-gray-200'}`}>
                   {task.title}
                 </p>
                 {task.priority && task.priority !== 'none' && (
@@ -212,7 +212,7 @@ function TasksBody({ tasks, loaded, onOpenTask }) {
                 <span className="text-[11px] px-2 py-0.5 rounded-md font-medium" style={{ backgroundColor: cat.bg, color: cat.text }}>
                   {task.category || 'others'}
                 </span>
-                {task.due_date && <span className="text-xs text-gray-400">{formatDate(task.due_date)}</span>}
+                {task.due_date && <span className="text-xs text-gray-400 dark:text-gray-500">{formatDate(task.due_date)}</span>}
               </div>
             </button>
           )
@@ -230,22 +230,22 @@ function ActivityBody({ activity, loading }) {
   }
   if (activity.length === 0) {
     return <div className="flex flex-col items-center justify-center py-12 text-center">
-      <span className="material-icons text-gray-200 mb-2" style={{ fontSize: '40px' }}>history</span>
-      <p className="text-sm text-gray-400">No recent activity</p>
+      <span className="material-icons text-gray-200 dark:text-gray-700 mb-2" style={{ fontSize: '40px' }}>history</span>
+      <p className="text-sm text-gray-400 dark:text-gray-500">No recent activity</p>
     </div>
   }
   return (
     <div className="space-y-3">
       {activity.map((a) => (
         <div key={a.id} className="flex gap-3">
-          <div className="w-7 h-7 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <span className="material-icons text-purple-400" style={{ fontSize: 14 }}>bolt</span>
+          <div className="w-7 h-7 rounded-full bg-purple-50 dark:bg-purple-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="material-icons text-purple-400 dark:text-purple-300" style={{ fontSize: 14 }}>bolt</span>
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-gray-700 leading-snug">
-              {a.action} {a.task_title && <span className="text-gray-400">on “{a.task_title}”</span>}
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-snug">
+              {a.action} {a.task_title && <span className="text-gray-400 dark:text-gray-500">on “{a.task_title}”</span>}
             </p>
-            <p className="text-xs text-gray-400 mt-0.5">{timeAgo(a.created_at)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{timeAgo(a.created_at)}</p>
           </div>
         </div>
       ))}
@@ -256,37 +256,36 @@ function ActivityBody({ activity, loading }) {
 function SettingsBody({ member, onRoleChange, onRemove }) {
   if (member.isOwner) {
     return <div className="flex flex-col items-center justify-center py-12 text-center">
-      <span className="material-icons text-gray-200 mb-2" style={{ fontSize: '40px' }}>lock_person</span>
-      <p className="text-sm text-gray-400">This is your own account.</p>
+      <span className="material-icons text-gray-200 dark:text-gray-700 mb-2" style={{ fontSize: '40px' }}>lock_person</span>
+      <p className="text-sm text-gray-400 dark:text-gray-500">This is your own account.</p>
     </div>
   }
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-2">Role</p>
+        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Role</p>
         <div className="flex gap-2">
           {['admin', 'member'].map((r) => (
             <button
               key={r}
               onClick={() => onRoleChange(member.rowId, r)}
-              className="flex-1 py-2 rounded-xl text-sm font-medium border transition capitalize"
-              style={{
-                backgroundColor: member.role === r ? '#ede9fe' : 'white',
-                color: member.role === r ? '#5b4fcf' : '#6b7280',
-                borderColor: member.role === r ? '#c4b5fd' : '#e5e7eb',
-              }}
+              className={`flex-1 py-2 rounded-xl text-sm font-medium border transition capitalize ${
+                member.role === r
+                  ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-500/50'
+                  : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+              }`}
             >
               {r}
             </button>
           ))}
         </div>
       </div>
-      <div className="pt-2 border-t border-gray-100">
-        <p className="text-sm font-semibold text-gray-700 mb-1">Danger zone</p>
-        <p className="text-xs text-gray-400 mb-2">Remove this member from your team.</p>
+      <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
+        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Danger zone</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">Remove this member from your team.</p>
         <button
           onClick={() => onRemove(member)}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-500 hover:bg-red-50 transition"
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-red-200 dark:border-red-800/60 text-sm font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition"
         >
           <span className="material-icons" style={{ fontSize: '18px' }}>person_remove</span>
           Remove from Team
@@ -299,11 +298,11 @@ function SettingsBody({ member, onRoleChange, onRemove }) {
 function PendingBody({ member, canManage = true, onResend, resending, onRemove }) {
   return (
     <div>
-      <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 flex items-start gap-2.5">
-        <span className="material-icons text-amber-500" style={{ fontSize: '18px' }}>schedule</span>
+      <div className="rounded-xl bg-amber-50 dark:bg-amber-500/15 border border-amber-100 dark:border-amber-500/30 px-4 py-3 flex items-start gap-2.5">
+        <span className="material-icons text-amber-500 dark:text-amber-400" style={{ fontSize: '18px' }}>schedule</span>
         <div>
-          <p className="text-sm font-medium text-amber-700">Invitation pending</p>
-          <p className="text-xs text-amber-600/80 mt-0.5">Waiting for {member.email} to accept.</p>
+          <p className="text-sm font-medium text-amber-700 dark:text-amber-300">Invitation pending</p>
+          <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">Waiting for {member.email} to accept.</p>
         </div>
       </div>
       <InfoRow icon="mail_outline" label="Email">{member.email}</InfoRow>
@@ -319,7 +318,7 @@ function PendingBody({ member, canManage = true, onResend, resending, onRemove }
                   .then(() => toast.success('Invite link copied'))
                   .catch(() => toast.error('Could not copy'))
               }
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             >
               <span className="material-icons" style={{ fontSize: '18px' }}>content_copy</span>
               Copy Invite Link
@@ -336,7 +335,7 @@ function PendingBody({ member, canManage = true, onResend, resending, onRemove }
           </button>
           <button
             onClick={() => onRemove(member)}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-500 hover:bg-red-50 transition"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-red-200 dark:border-red-800/60 text-sm font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition"
           >
             <span className="material-icons" style={{ fontSize: '18px' }}>cancel</span>
             Cancel Invite

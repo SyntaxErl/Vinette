@@ -14,8 +14,8 @@ const REPEAT_OPTIONS = [
   { value: 'monthly', label: 'Monthly' },
 ]
 
-const inlineInput   = 'w-full text-sm border border-purple-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 bg-white transition'
-const inlineSelect  = 'w-full text-sm border border-purple-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-purple-400 bg-white appearance-none transition cursor-pointer'
+const inlineInput   = 'w-full text-sm border border-purple-200 dark:border-purple-500/40 rounded-lg px-2.5 py-1.5 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 bg-white dark:bg-gray-800 dark:text-gray-200 transition'
+const inlineSelect  = 'w-full text-sm border border-purple-200 dark:border-purple-500/40 rounded-lg px-2.5 py-1.5 outline-none focus:border-purple-400 bg-white dark:bg-gray-800 dark:text-gray-200 appearance-none transition cursor-pointer'
 
 export default function DetailsPanel({
   task, tags, daysLeft, isOverdue, priColor, catColor,
@@ -34,7 +34,7 @@ export default function DetailsPanel({
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Details</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Details</p>
         {!editingDetails && (
           <button
             onClick={startEditDetails}
@@ -45,7 +45,7 @@ export default function DetailsPanel({
         )}
       </div>
 
-      <div className="rounded-2xl border border-gray-100 overflow-hidden bg-white">
+      <div className="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900">
 
         {/* Due Date */}
         <MetaRow icon="calendar_today" label="Due Date">
@@ -53,7 +53,7 @@ export default function DetailsPanel({
             <input type="date" value={dueDateDraft} onChange={(e) => setDueDateDraft(e.target.value)} className={inlineInput} />
           ) : task.due_date ? (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-sm font-medium ${isOverdue ? 'text-red-500' : 'text-gray-700'}`}>
+              <span className={`text-sm font-medium ${isOverdue ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
                 {formatDate(task.due_date)}
               </span>
               {daysLeft && (
@@ -63,7 +63,7 @@ export default function DetailsPanel({
                 >{daysLeft.label}</span>
               )}
             </div>
-          ) : <span className="text-sm text-gray-400 italic">Not set</span>}
+          ) : <span className="text-sm text-gray-400 dark:text-gray-500 italic">Not set</span>}
         </MetaRow>
 
         {/* Priority */}
@@ -126,16 +126,16 @@ export default function DetailsPanel({
           ) : task.assignee_name ? (
             <div className="flex items-center gap-2">
               <Avatar name={task.assignee_name} size={20} />
-              <span className="text-sm text-gray-700 font-medium">{task.assignee_name}</span>
+              <span className="text-sm text-gray-700 dark:text-gray-200 font-medium">{task.assignee_name}</span>
             </div>
-          ) : <span className="text-sm text-gray-400 italic">Unassigned</span>}
+          ) : <span className="text-sm text-gray-400 dark:text-gray-500 italic">Unassigned</span>}
         </MetaRow>
 
         {/* Tags */}
         <MetaRow icon="label" label="Tags">
           {editingDetails ? (
             <div
-              className="flex flex-wrap gap-1 border border-purple-200 rounded-lg px-2.5 py-2 min-h-[36px] bg-white cursor-text focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-50 transition"
+              className="flex flex-wrap gap-1 border border-purple-200 dark:border-purple-500/40 rounded-lg px-2.5 py-2 min-h-[36px] bg-white dark:bg-gray-800 cursor-text focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-50 transition"
               onClick={() => tagEditRef.current?.focus()}
             >
               {tagEditArr.map((t) => (
@@ -161,7 +161,7 @@ export default function DetailsPanel({
                 }}
                 onBlur={addTagChip}
                 placeholder={tagEditArr.length === 0 ? 'Add tags…' : ''}
-                className="flex-1 min-w-[80px] text-sm outline-none bg-transparent py-0.5"
+                className="flex-1 min-w-[80px] text-sm dark:text-gray-200 dark:placeholder-gray-500 outline-none bg-transparent py-0.5"
               />
             </div>
           ) : tags.length > 0 ? (
@@ -170,7 +170,7 @@ export default function DetailsPanel({
                 <span key={t} className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ede9fe', color: '#5b4fcf' }}>{t}</span>
               ))}
             </div>
-          ) : <span className="text-sm text-gray-400 italic">None</span>}
+          ) : <span className="text-sm text-gray-400 dark:text-gray-500 italic">None</span>}
         </MetaRow>
 
         {/* Repeat */}
@@ -180,10 +180,10 @@ export default function DetailsPanel({
               {REPEAT_OPTIONS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
           ) : (
-            <span className="text-sm text-gray-700 capitalize">
+            <span className="text-sm text-gray-700 dark:text-gray-200 capitalize">
               {task.repeat && task.repeat !== 'none'
                 ? task.repeat
-                : <span className="text-gray-400 italic">Does not repeat</span>
+                : <span className="text-gray-400 dark:text-gray-500 italic">Does not repeat</span>
               }
             </span>
           )}
@@ -197,24 +197,24 @@ export default function DetailsPanel({
               <input type="time" value={reminderTimeDraft} onChange={(e) => setReminderTimeDraft(e.target.value)} className={inlineInput} />
             </div>
           ) : task.reminder_at ? (
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-gray-700 dark:text-gray-200">
               {formatDate(task.reminder_at)}
               {String(task.reminder_at).length > 10 && (
-                <span className="text-gray-400 ml-1.5">at {String(task.reminder_at).slice(11, 16)}</span>
+                <span className="text-gray-400 dark:text-gray-500 ml-1.5">at {String(task.reminder_at).slice(11, 16)}</span>
               )}
             </span>
-          ) : <span className="text-sm text-gray-400 italic">Not set</span>}
+          ) : <span className="text-sm text-gray-400 dark:text-gray-500 italic">Not set</span>}
         </MetaRow>
 
         {/* Created */}
         <MetaRow icon="schedule" label="Created">
-          <span className="text-sm text-gray-600">{formatDate(task.created_at)}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-300">{formatDate(task.created_at)}</span>
         </MetaRow>
 
         {/* Updated */}
         {task.updated_at && task.updated_at !== task.created_at && (
           <MetaRow icon="update" label="Last updated">
-            <span className="text-sm text-gray-600">{timeAgo(task.updated_at)}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">{timeAgo(task.updated_at)}</span>
           </MetaRow>
         )}
       </div>
@@ -230,7 +230,7 @@ export default function DetailsPanel({
           <button
             onClick={cancelEditDetails}
             disabled={savingDetails}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 transition"
+            className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >Cancel</button>
         </div>
       )}

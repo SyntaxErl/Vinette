@@ -53,7 +53,7 @@ export default function PriorityChart({ byPriority = [] }) {
                 {data.map((d) => (
                   <Cell key={d.priority} fill={d.fill} />
                 ))}
-                <LabelList dataKey="count" position="top" style={{ fontSize: 12, fill: "#374151", fontWeight: 700 }} />
+                <LabelList dataKey="count" position="top" style={{ fontSize: 12, fill: "#9ca3af", fontWeight: 700 }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -64,15 +64,15 @@ export default function PriorityChart({ byPriority = [] }) {
           {ORDER.filter((p) => (map[p] || 0) > 0 || p !== "none").map((p) => (
             <div key={p} className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: getPriorityColor(p) }} />
-              <span className="text-xs text-gray-600 flex-1 truncate">{PRIORITY_LABELS[p]}</span>
-              <span className="text-xs text-gray-500 whitespace-nowrap">
-                <span className="font-semibold text-gray-800">{map[p] || 0}</span> ({pct(map[p] || 0, total)}%)
+              <span className="text-xs text-gray-600 dark:text-gray-300 flex-1 truncate">{PRIORITY_LABELS[p]}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <span className="font-semibold text-gray-800 dark:text-gray-100">{map[p] || 0}</span> ({pct(map[p] || 0, total)}%)
               </span>
             </div>
           ))}
-          <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-            <span className="text-xs font-medium text-gray-500">Total</span>
-            <span className="text-sm font-bold text-gray-900">{total}</span>
+          <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3">
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Total</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{total}</span>
           </div>
         </div>
       </div>

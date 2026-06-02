@@ -16,7 +16,7 @@ export default function TaskDetailHeader({
   activeTab, setActiveTab,
 }) {
   return (
-    <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
+    <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
           {editingTitle ? (
@@ -29,12 +29,12 @@ export default function TaskDetailHeader({
                 if (e.key === 'Enter') saveTitle()
                 if (e.key === 'Escape') { setEditingTitle(false); setTitleDraft(task.title) }
               }}
-              className="w-full text-base sm:text-lg font-bold text-gray-900 border-b-2 border-purple-400 outline-none bg-transparent pb-0.5 pr-2"
+              className="w-full text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 border-b-2 border-purple-400 outline-none bg-transparent pb-0.5 pr-2"
             />
           ) : (
             <h2
               onClick={() => setEditingTitle(true)}
-              className="text-base sm:text-lg font-bold text-gray-900 cursor-text hover:text-purple-700 transition pr-2 leading-snug"
+              className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 cursor-text hover:text-purple-700 dark:hover:text-purple-400 transition pr-2 leading-snug"
               title="Click to edit"
             >{task.title}</h2>
           )}
@@ -54,12 +54,12 @@ export default function TaskDetailHeader({
                 <span className="material-icons" style={{ fontSize: 11 }}>expand_more</span>
               </button>
               {statusOpen && (
-                <div className="absolute top-full left-0 mt-1 z-30 bg-white border border-gray-100 rounded-xl shadow-2xl overflow-hidden w-44">
+                <div className="absolute top-full left-0 mt-1 z-30 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl shadow-2xl overflow-hidden w-44">
                   {STATUS_CHIPS.map((s) => (
                     <button
                       key={s.value}
                       onClick={() => changeStatus(s.value)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 text-sm text-left transition"
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm text-left transition"
                     >
                       <span className="material-icons" style={{ fontSize: 15, color: s.color }}>{s.icon}</span>
                       <span style={{ color: task.status === s.value ? s.color : '#374151', fontWeight: task.status === s.value ? 600 : 400 }}>
@@ -100,20 +100,20 @@ export default function TaskDetailHeader({
 
         <button
           onClick={closeTaskDetail}
-          className="text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-100 transition flex-shrink-0 mt-0.5"
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition flex-shrink-0 mt-0.5"
         >
           <span className="material-icons" style={{ fontSize: 20 }}>close</span>
         </button>
       </div>
 
       {/* Mobile tab bar */}
-      <div className="flex lg:hidden gap-1 mt-3 bg-gray-50 p-1 rounded-xl">
+      <div className="flex lg:hidden gap-1 mt-3 bg-gray-50 dark:bg-gray-800 p-1 rounded-xl">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-semibold transition-all ${
-              activeTab === tab.id ? 'bg-white text-purple-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              activeTab === tab.id ? 'bg-white dark:bg-gray-700 text-purple-700 dark:text-purple-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
             }`}
           >
             <span className="material-icons" style={{ fontSize: 14 }}>{tab.icon}</span>
