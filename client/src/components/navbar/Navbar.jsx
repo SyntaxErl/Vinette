@@ -5,6 +5,7 @@ import useNotificationStore from "../../store/notificationStore";
 import api from "../../api/axios";
 import { ROUTE_CONFIG, DEFAULT_CONFIG, getGreeting } from "./navbarConfig";
 import NotificationModal from "../NotificationModal";
+import { Avatar } from "@/components/taskDetail/utils";
 
 export default function Navbar({ onMenuClick }) {
   const location = useLocation();
@@ -47,8 +48,6 @@ export default function Navbar({ onMenuClick }) {
         ? `You have ${dueTodayCount} task${dueTodayCount > 1 ? "s" : ""} due today.`
         : "You have no tasks due today. 🎉"
       : config.subtitle;
-
-  const userInitial = user?.name?.charAt(0).toUpperCase() || "U";
 
   return (
     <header
@@ -120,12 +119,7 @@ export default function Navbar({ onMenuClick }) {
             onClick={() => navigate("/profile")}
             aria-label="Go to profile"
           >
-            <div
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-              style={{ backgroundColor: "#5b4fcf" }}
-            >
-              {userInitial}
-            </div>
+            <Avatar name={user?.name || user?.email} size={36} />
           </button>
         </div>
       </div>

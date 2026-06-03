@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import useNotificationStore from "../store/notificationStore";
+import { Avatar } from "@/components/taskDetail/utils";
 import logo from "../assets/images/logo.png";
 
 const navItems = [
@@ -126,12 +127,7 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* User profile */}
         <div className="border-t border-gray-100 dark:border-gray-800 p-4">
           <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-all">
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-              style={{ backgroundColor: "#5b4fcf" }}
-            >
-              {user?.name?.charAt(0).toUpperCase() || "U"}
-            </div>
+            <Avatar name={user?.name || user?.email} size={36} />
 
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
