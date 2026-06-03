@@ -24,10 +24,10 @@ export default function ProfileHeader({ user }) {
         />
       </div>
 
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6 relative z-10">
         {/* Avatar + name, centered on mobile, left-aligned from sm up */}
         <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
-          <div className="ring-4 ring-white dark:ring-gray-900 rounded-full w-fit -mt-12 shadow-md">
+          <div className="ring-4 ring-white dark:ring-gray-900 rounded-full w-fit -mt-12 shadow-md relative z-10">
             <Avatar name={user?.name || user?.email} size={88} />
           </div>
           <h1 className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100 truncate max-w-full">
