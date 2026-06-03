@@ -16,3 +16,7 @@ export const updateProfile = (data) =>
 // Change password (verifies the current one server-side)
 export const changePassword = (currentPassword, newPassword) =>
   api.put('/auth/password', { currentPassword, newPassword })
+
+// Permanently delete the current user's account (and all data they own)
+export const deleteAccount = () =>
+  api.delete('/auth/account')

@@ -220,4 +220,32 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe, getUsers, updateProfile, changePassword };
+// Permanently delete the current user's account and all data they own.
+// Tasks are removed explicitly (their subtasks/comments/activity cascade via FKs);
+// team_members and notifications cascade with the user row.
+const deleteAccount = async (req, res) => {
+  const userId = req.user.userId;
+
+  try {
+    // Remove tasks the user owns first — their children (subtasks, comments,
+    // activity_log) cascade-delete with each task.
+    await db.query("DELETE FROM tasks WHERE user_id = ?", [userId]);
+
+    // Drop the assignment link on any tasks still assigned to this user so the
+    // user row can be removed without violating the assigned_to FK.
+    await db.query("UPDATE tasks SET assigned_to = NULL WHERE assigned_to = ?", [userId]);
+
+    // Delete the user — team_members + notifications cascade with the FK.
+    const [result] = await db.query("DELETE FROM users WHERE id = ?", [userId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({ success: true, message: "Account deleted" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+module.exports = { register, login, getMe, getUsers, updateProfile, changePassword, deleteAccount };

@@ -6,6 +6,7 @@ import ProfileInfoForm from '@/components/profile/ProfileInfoForm'
 import ThemeSetting from '@/components/profile/ThemeSetting'
 import NotificationPrefs from '@/components/profile/NotificationPrefs'
 import ChangePassword from '@/components/profile/ChangePassword'
+import AccountActions from '@/components/profile/AccountActions'
 
 export default function Profile() {
   const user = useAuthStore((s) => s.user)
@@ -25,6 +26,7 @@ export default function Profile() {
         <ThemeSetting />
         <NotificationPrefs />
         <ChangePassword />
+        <AccountActions />
       </div>
     </div>
   )
