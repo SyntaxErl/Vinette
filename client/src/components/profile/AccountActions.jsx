@@ -6,6 +6,42 @@ import { deleteAccount } from '@/services/authService'
 import { errMsg } from '@/components/taskDetail/utils'
 import SettingsCard from './SettingsCard'
 
+// Simple yes/no confirmation modal (used for logout).
+function ConfirmModal({ icon, iconClass, title, message, confirmLabel, confirmClass, busy, onCancel, onConfirm }) {
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-black/40" onClick={busy ? undefined : onCancel} />
+      <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl p-6 animate-fadeInUp">
+        <div className="flex items-center gap-3">
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${iconClass}`}>
+            <span className="material-icons" style={{ fontSize: '24px' }}>{icon}</span>
+          </div>
+          <h2 className="font-bold text-gray-900 dark:text-gray-100">{title}</h2>
+        </div>
+
+        <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 leading-relaxed">{message}</p>
+
+        <div className="flex items-center justify-end gap-2 mt-5">
+          <button
+            onClick={onCancel}
+            disabled={busy}
+            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={busy}
+            className={`px-4 py-2 rounded-xl text-white text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${confirmClass}`}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Modal asking the user to type a confirmation word before deleting.
 function DeleteConfirmModal({ onCancel, onConfirm, deleting }) {
   const [text, setText] = useState('')
@@ -65,6 +101,7 @@ function DeleteConfirmModal({ onCancel, onConfirm, deleting }) {
 export default function AccountActions() {
   const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
+  const [logoutOpen, setLogoutOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -97,7 +134,7 @@ export default function AccountActions() {
             <p className="text-xs text-gray-400 dark:text-gray-500">Sign out of your account on this device</p>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={() => setLogoutOpen(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition flex-shrink-0"
           >
             <span className="material-icons" style={{ fontSize: '18px' }}>logout</span>
@@ -120,6 +157,19 @@ export default function AccountActions() {
           </button>
         </div>
       </div>
+
+      {logoutOpen && (
+        <ConfirmModal
+          icon="logout"
+          iconClass="bg-purple-50 dark:bg-purple-500/15 text-purple-600 dark:text-purple-300"
+          title="Log out"
+          message="Are you sure you want to log out of your account on this device?"
+          confirmLabel="Log out"
+          confirmClass="bg-purple-600 hover:bg-purple-700"
+          onCancel={() => setLogoutOpen(false)}
+          onConfirm={handleLogout}
+        />
+      )}
 
       {confirmOpen && (
         <DeleteConfirmModal
