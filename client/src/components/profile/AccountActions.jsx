@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import useAuthStore from '@/store/authStore'
@@ -8,7 +9,7 @@ import SettingsCard from './SettingsCard'
 
 // Simple yes/no confirmation modal (used for logout).
 function ConfirmModal({ icon, iconClass, title, message, confirmLabel, confirmClass, busy, onCancel, onConfirm }) {
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/40" onClick={busy ? undefined : onCancel} />
       <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl p-6 animate-fadeInUp">
@@ -38,7 +39,8 @@ function ConfirmModal({ icon, iconClass, title, message, confirmLabel, confirmCl
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -47,7 +49,7 @@ function DeleteConfirmModal({ onCancel, onConfirm, deleting }) {
   const [text, setText] = useState('')
   const ready = text.trim().toUpperCase() === 'DELETE' && !deleting
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/40" onClick={deleting ? undefined : onCancel} />
       <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl p-6 animate-fadeInUp">
@@ -92,7 +94,8 @@ function DeleteConfirmModal({ onCancel, onConfirm, deleting }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
